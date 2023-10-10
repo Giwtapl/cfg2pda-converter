@@ -1,0 +1,66 @@
+.header {
+    background-image: linear-gradient($color-primary-transparent, $color-primary-transparent), url(../img/bg-header.jpg);
+    background-size: cover;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    text-align: center;
+    height: calc(100vh - 6rem);
+    clip-path: polygon(0 0, 100% 0%, 100% 75%, 0% 100%);
+
+    &__title {
+        font-size: 5rem;
+        letter-spacing: 0.4rem;
+        text-transform: uppercase;
+        color: #fff;
+    }
+
+    &__btn:link,
+    &__btn:visited {
+        font-family: inherit;
+        font-size: 3rem;
+        text-transform: uppercase;
+        text-decoration: none;
+        color: $color-grey-dark;
+
+        margin-bottom: 30rem;
+        border-radius: 50px;
+        background-color: #fff;
+        padding: 2rem 3rem;
+        transition: all .2s;
+        display: inline-block;
+        position: relative;
+    }
+
+    &__btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0.5rem 0.7rem 1.5rem #000;
+
+        &::after {
+            transform: scale(1.5);
+            background-color: #fff;
+            opacity: 0;
+        }
+    }
+
+    &__btn:active {
+        transform: translateY(-1px);
+        box-shadow: 0.2rem 0.4rem 0.5rem #000;
+    }
+
+    &__btn::after {
+        content: "";
+        display: inline-block;
+        width: 100%;
+        height: 100%;
+        border-radius: 50px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        background-color: #fff;
+        z-index: -1;
+        transition: all .2s;
+    }
+}

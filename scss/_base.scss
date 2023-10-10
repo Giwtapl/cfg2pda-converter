@@ -1,0 +1,27 @@
+$color-grey-light: #aec1cc;
+$color-grey-light-2: #aaa;
+$color-grey-medium: #999;
+$color-grey-dark: #555;
+$color-primary-transparent: #3d0663b7;
+
+*,
+*::after,
+*::before {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 62.5%;
+}
+
+.body {
+    font-family: sans-serif;
+    font-weight: 400;
+    color: $color-grey-light;
+    background-color: rgb(229, 211, 241);
+
+    margin: 3rem;
+    height: 100rem;
+}

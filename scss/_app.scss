@@ -1,0 +1,10 @@
+.container {
+    height: 100rem;
+    width: 100rem;
+    background-color: orangered;
+    text-align: center;
+
+    &__header--primary {
+        color: #000;
+    }
+}
