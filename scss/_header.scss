@@ -10,7 +10,7 @@
     height: calc(100vh - 6rem);
     clip-path: polygon(0 0, 100% 0%, 100% 75%, 0% 100%);
 
-    &__title {
+    &__heading--primary {
         font-size: 5rem;
         letter-spacing: 0.4rem;
         text-transform: uppercase;

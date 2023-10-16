@@ -1,8 +1,3 @@
-#main.container {
-  height: 100rem;
-  width: 100rem;
-  background-color: orangered; }
-
 *,
 *::after,
 *::before {
@@ -31,7 +26,7 @@ html {
   text-align: center;
   height: calc(100vh - 6rem);
   clip-path: polygon(0 0, 100% 0%, 100% 75%, 0% 100%); }
-  .header__title {
+  .header__heading--primary {
     font-size: 5rem;
     letter-spacing: 0.4rem;
     text-transform: uppercase;
@@ -71,3 +66,37 @@ html {
     background-color: #fff;
     z-index: -1;
     transition: all .2s; }
+
+.container {
+  width: 100%;
+  text-align: center; }
+  .container__heading--secondary {
+    font-size: 4rem;
+    font-weight: 700px;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-bottom: 2rem;
+    background-image: linear-gradient(to right, #3c0663, #9112a4);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent; }
+  .container__user-input {
+    border-radius: 20px;
+    padding: 2rem;
+    margin: 0 auto;
+    width: 60vw;
+    height: 10rem;
+    background-color: #9112a4;
+    box-shadow: 0.5rem 0.7rem 1.5rem #000; }
+    .container__user-input__init-var {
+      font-size: 3rem;
+      color: #e5d3f1; }
+    .container__user-input__cfg-rule-input {
+      font-size: 3rem;
+      border-radius: 10px;
+      min-width: 80px;
+      text-align: center;
+      color: #555;
+      background-color: #aaa; }
+      .container__user-input__cfg-rule-input:focus {
+        background-color: #fff; }

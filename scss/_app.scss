@@ -1,10 +1,44 @@
 .container {
-    height: 100rem;
-    width: 100rem;
-    background-color: orangered;
+    width: 100%;
     text-align: center;
 
-    &__header--primary {
-        color: #000;
+    &__heading--secondary {
+        font-size: 4rem;
+        font-weight: 700px;
+        text-transform: uppercase;
+        display: inline-block;
+        margin-bottom: 2rem;
+        background-image: linear-gradient(to right, $color-primary, $color-secondary);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    &__user-input {
+        border-radius: 20px;
+        padding: 2rem;
+        margin: 0 auto;
+        width: 60vw;
+        height: 10rem;
+        background-color: $color-secondary;
+        box-shadow: 0.5rem 0.7rem 1.5rem #000;
+
+        &__init-var {
+            font-size: 3rem;
+            color: $color-pale-plink;
+        }
+
+        &__cfg-rule-input {
+            font-size: 3rem;
+            border-radius: 10px;
+            min-width: 80px;
+            text-align: center;
+            color: $color-grey-dark;
+            background-color: $color-grey-light-2;
+
+            &:focus {
+                background-color: #fff;
+            }
+        }
     }
 }

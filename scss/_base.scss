@@ -3,6 +3,11 @@ $color-grey-light-2: #aaa;
 $color-grey-medium: #999;
 $color-grey-dark: #555;
 $color-primary-transparent: #3d0663b7;
+$color-primary: #3c0663;
+$color-secondary: #9112a4;
+$color-pale-plink: rgb(229, 211, 241);
+
+
 
 *,
 *::after,
@@ -20,7 +25,7 @@ html {
     font-family: sans-serif;
     font-weight: 400;
     color: $color-grey-light;
-    background-color: rgb(229, 211, 241);
+    background-color: $color-pale-plink;
 
     margin: 3rem;
     height: 100rem;
