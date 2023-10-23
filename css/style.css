@@ -70,7 +70,7 @@ html {
 .container {
   width: 100%;
   text-align: center; }
-  .container__heading--secondary {
+  .container__heading {
     font-size: 4rem;
     font-weight: 700px;
     text-transform: uppercase;
@@ -84,19 +84,54 @@ html {
     border-radius: 20px;
     padding: 2rem;
     margin: 0 auto;
-    width: 60vw;
-    height: 10rem;
+    width: 80vw;
+    height: auto;
     background-color: #9112a4;
     box-shadow: 0.5rem 0.7rem 1.5rem #000; }
-    .container__user-input__init-var {
-      font-size: 3rem;
-      color: #e5d3f1; }
-    .container__user-input__cfg-rule-input {
-      font-size: 3rem;
-      border-radius: 10px;
-      min-width: 80px;
+
+.rule {
+  display: flex;
+  width: 100%;
+  justify-content: flex-start;
+  align-items: center;
+  column-gap: 5px; }
+  .rule .var {
+    align-self: flex-start;
+    font-size: 2.5rem;
+    color: white;
+    flex: 0 0 10%; }
+  .rule .expressions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    flex: 0 0 80%;
+    column-gap: 5px; }
+    .rule .expressions .input-text {
+      font-size: 2.5rem;
+      border-radius: 50px;
+      background-color: #999;
       text-align: center;
-      color: #555;
-      background-color: #aaa; }
-      .container__user-input__cfg-rule-input:focus {
-        background-color: #fff; }
+      border: none;
+      flex: 0 0 20%;
+      width: 75%; }
+      .rule .expressions .input-text:focus {
+        background-color: white; }
+    .rule .expressions .expr-sep {
+      font-size: 2.5rem;
+      color: white; }
+    .rule .expressions .btn {
+      border-radius: 50px;
+      border: 0;
+      justify-self: center;
+      width: 2.5rem;
+      height: 2.5rem;
+      color: white;
+      font-size: 2.5rem;
+      align-self: center;
+      cursor: pointer; }
+
+.add-rule-expression {
+  background-color: #0bbf4d; }
+
+.remove-rule-expression {
+  background-color: #db061c; }

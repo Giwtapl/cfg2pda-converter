@@ -1,13 +1,3 @@
-function isUpperCase(letter) {
-    return /^[A-Z]$/.test(letter);
-}
+import {Rule} from './entities/rule.js';
 
-const initInput = document.getElementById('init-input');
-
-initInput.addEventListener('input', () => {
-    const lastInputChar = initInput.value.slice(-1);
-    console.log(lastInputChar);
-    if (isUpperCase(lastInputChar)) {
-        console.log(`create new rule for variable ${lastInputChar}`);
-    }
-});
+const initialRule = new Rule(1);
