@@ -7,37 +7,16 @@ export class Rule {
     constructor(index, varLetter='S') {
         this.index = index;
         this.expressions = [];
+        this.varLetter = varLetter;
         this.createNew(varLetter);
-        this.expressionIndex = 0;
-    }
-
-    updateExpressionIndex() {
-        this.expressionIndex = this.expressions.length;
-    }
-
-    plusBtnHandler(event) {
-        // Create the <span> element with the class and text content
-        const spanElement = document.createElement('span');
-        spanElement.classList.add('expr-sep');
-        spanElement.textContent = ' | ';
-        event.target.parentElement.insertBefore(spanElement, event.target);
-        this.addExpression(this.expressionIndex + 1);
-        if (this.expressions.length > 1) {
-            event.target.nextElementSibling.style.display = 'block';
-        }
-    }
-
-    minusBtnHandler(event) {
-        this.expressions[this.expressionIndex - 1].remove();
-        if (this.expressions.length <= 1) {
-            event.target.nextElementSibling.style.display = 'none';
-        }
+        this.expressionIndex = 1;
     }
 
     createNew(varLetter) {
+        this.id = `rule-${this.index}`;
         // Create the main <div> with the id and class
         const ruleDiv = document.createElement('div');
-        ruleDiv.id = `rule-${this.index}`;
+        ruleDiv.id = this.id;
         ruleDiv.classList.add('rule');
 
         // Create the <span> element with the class and text content
@@ -47,7 +26,7 @@ export class Rule {
 
         // Create the main <div> with the id and class
         const expressionsDiv = document.createElement('div');
-        expressionsDiv.id = 'expression-container';
+        expressionsDiv.id = `expression-container-${this.index}`;
         expressionsDiv.classList.add('expressions');
 
         // Create the <button> element with the id, class, and text content
@@ -67,21 +46,6 @@ export class Rule {
         this.render(ruleDiv, spanElement, expressionsDiv, plusButtonElement, minusButtonElement);
     }
 
-    addExpression(exprIndex) {
-        this.expressions.push(new Expression(this.index, exprIndex));
-        this.updateExpressionIndex();
-    }
-
-    remove() {
-        if (this.index === 1) return;
-        const ruleEl = document.getElementById(`rule-${this.index}`);
-        ruleEl.remove();
-    }
-
-    removeExpression(exprIndex) {
-        this.expressions.splice(exprIndex - 1, 1);
-    }
-
     render(ruleDiv, spanElement, expressionsDiv, plusButtonElement, minusButtonElement) {
         const userInputEl = document.getElementById(this.PARENT_ID);
         userInputEl.appendChild(ruleDiv);
@@ -91,20 +55,51 @@ export class Rule {
         expressionsDiv.appendChild(minusButtonElement);
         this.addExpression(1);
     }
+
+    plusBtnHandler(event) {
+        // Create the <span> element with the class and text content
+        const spanElement = document.createElement('span');
+        spanElement.classList.add('expr-sep');
+        spanElement.textContent = ' | ';
+        event.target.parentElement.insertBefore(spanElement, event.target);
+        this.addExpression(this.expressionIndex + 1);
+        if (this.expressions.length > 1) {
+            event.target.nextElementSibling.style.display = 'block';
+        }
+    }
+
+    minusBtnHandler(event) {
+        const exprToRemove = this.expressions[this.expressionIndex - 1];
+        exprToRemove.remove();
+        this.expressions = this.expressions.filter(expr => expr.id !== exprToRemove.id);
+        if (this.expressions.length <= 1) {
+            event.target.style.display = 'none';
+        }
+    }
+
+    addExpression(exprIndex) {
+        this.expressions.push(new Expression(this.index, exprIndex));
+        this.updateExpressionIndex();
+    }
+
+    remove() {
+        if (this.index === 1) return;
+        const ruleEl = document.getElementById(`rule-${this.index}`);
+        ruleEl.remove();
+        rules = rules.filter(rule => rule.index !== this.index);
+    }
+
+    removeExpression(exprIndex) {
+        this.expressions.splice(exprIndex - 1, 1);
+    }
+
+    assignInputListener() {
+        for (const expr of this.expressions) {
+            const inputEl = document.getElementById(expr.id);
+        }
+    }
+
+    updateExpressionIndex() {
+        this.expressionIndex = this.expressions.length;
+    }
 }
-
-// function minusBtnHandler(event) {
-//     removeExpression();
-//     createPlusBtn();
-//     createMinusBtn();
-// }
-
-// function removePlusBtn(btnEl) {
-//     btnEl.removeEventListener('click', plusBtnHandler);
-//     btnEl.remove();
-// }
-
-// function removeMinusBtn(btnEl) {
-//     btnEl.removeEventListener('click', minusBtnHandler);
-//     btnEl.remove();
-// }

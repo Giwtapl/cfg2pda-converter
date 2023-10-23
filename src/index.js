@@ -1,3 +1,4 @@
 import {Rule} from './entities/rule.js';
 
-const initialRule = new Rule(1);
+window.rules = [];
+rules.push(new Rule(1));
