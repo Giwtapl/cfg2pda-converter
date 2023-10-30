@@ -18,7 +18,7 @@ function findExtraDeletedCharacter(str1, str2) {
     return longer[longer.length - 1];
 }
 
-const getCurrentRuleVarLetter = expressionEl => rules.filter(rule => rule.index === expressionEl.parent.id.split('-')[2])[0].varLetter;
+const getCurrentRuleVarLetter = expressionEl => rules.filter(rule => rule.index === +expressionEl.parentElement.id.split('-')[2])[0].varLetter;
 
 let previousInputValue = '';
 
