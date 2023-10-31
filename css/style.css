@@ -81,6 +81,8 @@ html {
     background-clip: text;
     color: transparent; }
   .container__user-input {
+    display: flex;
+    flex-direction: column;
     border-radius: 20px;
     padding: 2rem;
     margin: 0 auto;
@@ -88,6 +90,16 @@ html {
     height: auto;
     background-color: #9112a4;
     box-shadow: 0.5rem 0.7rem 1.5rem #000; }
+    .container__user-input .btn--primary {
+      order: 1;
+      align-self: flex-end;
+      border-radius: 10px;
+      font-size: 2rem;
+      padding: 1rem 2rem;
+      margin-top: 1rem;
+      color: white;
+      background-color: #1f89f4;
+      border: none; }
 
 .rule {
   display: flex;

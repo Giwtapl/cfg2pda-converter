@@ -10,6 +10,7 @@ export class Rule {
         this.varLetter = varLetter;
         this.createNew(varLetter);
         this.expressionIndex = 1;
+        this.refererExpressions = [];
     }
 
     createNew(varLetter) {
@@ -70,8 +71,13 @@ export class Rule {
 
     minusBtnHandler(event) {
         const exprToRemove = this.expressions[this.expressionIndex - 1];
+        const exprToRemoveElement = document.getElementById(exprToRemove.id);
+        exprToRemoveElement.value = '';
+        const inputEvent = new Event('input', { bubbles: true });
+        exprToRemoveElement.dispatchEvent(inputEvent);
         exprToRemove.remove();
         this.expressions = this.expressions.filter(expr => expr.id !== exprToRemove.id);
+        this.updateExpressionIndex();
         if (this.expressions.length <= 1) {
             event.target.style.display = 'none';
         }
@@ -80,6 +86,16 @@ export class Rule {
     addExpression(exprIndex) {
         this.expressions.push(new Expression(this.index, exprIndex));
         this.updateExpressionIndex();
+    }
+
+    addReferer(refererExprId) {
+        if (refererExprId) {
+            this.refererExpressions.push(refererExprId);
+        }
+    }
+
+    removeReferer(refererExprId) {
+        this.refererExpressions = this.refererExpressions.filter(refExprId => refExprId !== refererExprId);
     }
 
     remove() {

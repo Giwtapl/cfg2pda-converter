@@ -7,6 +7,7 @@ export class Expression {
     constructor(ruleIndex, exprIndex) {
         this.ruleIndex = ruleIndex;
         this.exprIndex = exprIndex;
+        this.previousInputValue = '';
         this.create();
     }
 

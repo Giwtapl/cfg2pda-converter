@@ -18,17 +18,17 @@ function findExtraDeletedCharacter(str1, str2) {
     return longer[longer.length - 1];
 }
 
-const getCurrentRuleVarLetter = expressionEl => rules.filter(rule => rule.index === +expressionEl.parentElement.id.split('-')[2])[0].varLetter;
-
-let previousInputValue = '';
+const getCurrentRule = expressionEl => rules.filter(rule => rule.index === +expressionEl.parentElement.id.split('-')[2])[0];
 
 export function inputHandler(event) {
     const inputValue = event.target.value;
     const currentChar = event.data;
+    const currentRule = getCurrentRule(event.target);
+    const currentExpression = currentRule.expressions.filter(expr => expr.id === event.target.id)[0];
 
     if (currentChar) {
         if (!isUpperCase(currentChar)) {
-            previousInputValue = inputValue;
+            currentExpression.previousInputValue = inputValue;
             return;
         }
         let matchingRule;
@@ -39,15 +39,22 @@ export function inputHandler(event) {
             }
         }
 
-        if (!matchingRule) {
-            rules.push(new Rule(rules.length + 1, currentChar));
+        if (matchingRule) {
+            matchingRule.addReferer(event.target.id)
+        } else {
+            const rule = new Rule(rules.length + 1, currentChar);
+            rule.addReferer(event.target.id);
+            rules.push(rule);
         }
     } else {
-        const deletedLetter = findExtraDeletedCharacter(previousInputValue, inputValue);
-        if (isUpperCase(deletedLetter) && getCurrentRuleVarLetter(event.target) !== deletedLetter) {
-            rules.filter(rule => rule.varLetter === deletedLetter)[0].remove();
+        const deletedLetter = findExtraDeletedCharacter(currentExpression.previousInputValue, inputValue);
+        if (isUpperCase(deletedLetter)) {
+            const rule = rules.filter(rule => rule.varLetter === deletedLetter)[0];
+            rule.removeReferer(event.target.id);
+            if (currentRule.varLetter !== deletedLetter && rule.refererExpressions.length === 0) {
+                rule.remove();
+            }
         }
     }
-
-    previousInputValue = inputValue;
+    currentExpression.previousInputValue = inputValue;
 }
