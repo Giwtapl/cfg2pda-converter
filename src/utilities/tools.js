@@ -1,60 +1,42 @@
-import {Rule} from '../entities/rule.js';
+export const isUpperCase = letter => /^[A-Z]$/.test(letter);
 
+function findStrDifference(str1, str2) {
+    let result = '';
+    const str2Set = new Set(str2);
 
-const isUpperCase = letter => /^[A-Z]$/.test(letter);
-
-function findExtraDeletedCharacter(str1, str2) {
-    // Determine the longer and shorter strings
-    const longer = str1.length > str2.length ? str1 : str2;
-    const shorter = str1.length > str2.length ? str2 : str1;
-
-    for (let i = 0; i < shorter.length; i++) {
-      if (str1[i] !== str2[i]) {
-        return longer[i];
-      }
+    for (const char of str1) {
+        if (!str2Set.has(char)) {
+            result += char;
+        }
     }
 
-    // If no extra character is found in the loop, the extra character is at the end of the longer string
-    return longer[longer.length - 1];
+    return result;
 }
 
-const getCurrentRule = expressionEl => rules.filter(rule => rule.index === +expressionEl.parentElement.id.split('-')[2])[0];
-
-export function inputHandler(event) {
+export function inputEventHandler(event) {
     const inputValue = event.target.value;
     const currentChar = event.data;
-    const currentRule = getCurrentRule(event.target);
+    const currentRule = window.inputHandler.getRuleByExpressionElement(event.target);
     const currentExpression = currentRule.expressions.filter(expr => expr.id === event.target.id)[0];
 
     if (currentChar) {
         if (!isUpperCase(currentChar)) {
-            currentExpression.previousInputValue = inputValue;
+            currentExpression.text = inputValue;
             return;
         }
-        let matchingRule;
-        for (const rule of rules) {
-            if (rule.varLetter === currentChar) {
-                matchingRule = rule;
-                break;
-            }
-        }
+        const matchingRule = window.inputHandler.getRuleByVarLetter(currentChar);
 
         if (matchingRule) {
-            matchingRule.addReferer(event.target.id)
+            matchingRule.addReferer(event.target.id);
         } else {
-            const rule = new Rule(rules.length + 1, currentChar);
-            rule.addReferer(event.target.id);
-            rules.push(rule);
+            window.inputHandler.addRule(currentChar, event.target.id);
         }
     } else {
-        const deletedLetter = findExtraDeletedCharacter(currentExpression.previousInputValue, inputValue);
-        if (isUpperCase(deletedLetter)) {
-            const rule = rules.filter(rule => rule.varLetter === deletedLetter)[0];
-            rule.removeReferer(event.target.id);
-            if (currentRule.varLetter !== deletedLetter && rule.refererExpressions.length === 0) {
-                rule.remove();
-            }
-        }
+        window.inputHandler.checkAndRemoveRule(
+            currentRule.varLetter,
+            findStrDifference(currentExpression.text, inputValue),
+            event.target
+        );
     }
-    currentExpression.previousInputValue = inputValue;
+    currentExpression.text = inputValue;
 }

@@ -4,17 +4,19 @@ import {Expression} from './expression.js';
 export class Rule {
     PARENT_ID = 'user-input';
 
-    constructor(index, varLetter='S') {
+    constructor(index, varLetter, refererExpr) {
         this.index = index;
+        this.id = `rule-${this.index}`;
         this.expressions = [];
+        this.expressionIndex = 0;
+        this.refererExpressions = [];
+        this.addReferer(refererExpr);
         this.varLetter = varLetter;
         this.createNew(varLetter);
-        this.expressionIndex = 1;
-        this.refererExpressions = [];
+        this.addExpression();
     }
 
     createNew(varLetter) {
-        this.id = `rule-${this.index}`;
         // Create the main <div> with the id and class
         const ruleDiv = document.createElement('div');
         ruleDiv.id = this.id;
@@ -54,11 +56,9 @@ export class Rule {
         ruleDiv.appendChild(expressionsDiv);
         expressionsDiv.appendChild(plusButtonElement);
         expressionsDiv.appendChild(minusButtonElement);
-        this.addExpression(1);
     }
 
     plusBtnHandler(event) {
-        // Create the <span> element with the class and text content
         const spanElement = document.createElement('span');
         spanElement.classList.add('expr-sep');
         spanElement.textContent = ' | ';
@@ -83,8 +83,8 @@ export class Rule {
         }
     }
 
-    addExpression(exprIndex) {
-        this.expressions.push(new Expression(this.index, exprIndex));
+    addExpression() {
+        this.expressions.push(new Expression(this.index,  this.expressions.length + 1));
         this.updateExpressionIndex();
     }
 
@@ -102,7 +102,6 @@ export class Rule {
         if (this.index === 1) return;
         const ruleEl = document.getElementById(`rule-${this.index}`);
         ruleEl.remove();
-        rules = rules.filter(rule => rule.index !== this.index);
     }
 
     removeExpression(exprIndex) {

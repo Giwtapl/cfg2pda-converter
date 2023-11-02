@@ -1,4 +1,4 @@
-import {inputHandler} from '../utilities/tools.js';
+import { inputEventHandler } from '../utilities/tools.js';
 
 
 export class Expression {
@@ -7,18 +7,17 @@ export class Expression {
     constructor(ruleIndex, exprIndex) {
         this.ruleIndex = ruleIndex;
         this.exprIndex = exprIndex;
-        this.previousInputValue = '';
+        this.text = '';
         this.create();
     }
 
     create() {
         this.id = `input-rule-${this.ruleIndex}-expr-${this.exprIndex}`;
-        // Create the <input> element with the type and id
         const inputElement = document.createElement('input');
         inputElement.type = 'text';
         inputElement.id = this.id;
         inputElement.classList.add('input-text');
-        inputElement.addEventListener('input', inputHandler);
+        inputElement.addEventListener('input', inputEventHandler);
 
         const expressionContainerEl = document.getElementById(`${this.PARENT_ID_TEMPLATE}-${this.ruleIndex}`);
         const rulePlusBtnEl = document.getElementById(`plus-rule-${this.ruleIndex}`);
