@@ -13,15 +13,24 @@ function findStrDifference(str1, str2) {
     return result;
 }
 
+export function isSubset(setA, setB) {
+    for (const element of setA) {
+        if (!setB.has(element)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 export function inputEventHandler(event) {
     const inputValue = event.target.value;
     const currentChar = event.data;
-    const currentRule = window.inputHandler.getRuleByExpressionElement(event.target);
-    const currentExpression = currentRule.expressions.filter(expr => expr.id === event.target.id)[0];
+    const currentRule = window.inputHandler.getRuleByProductionElement(event.target);
+    const currentProduction = currentRule.productions.filter(prod => prod.id === event.target.id)[0];
 
     if (currentChar) {
         if (!isUpperCase(currentChar)) {
-            currentExpression.text = inputValue;
+            currentProduction.text = inputValue;
             return;
         }
         const matchingRule = window.inputHandler.getRuleByVarLetter(currentChar);
@@ -34,9 +43,9 @@ export function inputEventHandler(event) {
     } else {
         window.inputHandler.checkAndRemoveRule(
             currentRule.varLetter,
-            findStrDifference(currentExpression.text, inputValue),
+            findStrDifference(currentProduction.text, inputValue),
             event.target
         );
     }
-    currentExpression.text = inputValue;
+    currentProduction.text = inputValue;
 }

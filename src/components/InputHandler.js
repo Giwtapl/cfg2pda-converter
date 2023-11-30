@@ -11,16 +11,16 @@ export class InputHandler {
         return this.rules;
     }
 
-    getRuleByExpressionElement(expressionEl) {
-        return this.rules.filter(rule => rule.index === +expressionEl.parentElement.id.split('-')[2])[0];
+    getRuleByProductionElement(productionEl) {
+        return this.rules.filter(rule => rule.index === +productionEl.parentElement.id.split('-')[2])[0];
     }
 
     getRuleByVarLetter(varLetter) {
         return this.rules.filter(rule => rule.varLetter === varLetter)[0];
     }
 
-    addRule(varLetter='S', refererExpr=null) {
-        this.rules.push(new Rule(this.rules.length + 1, varLetter, refererExpr));
+    addRule(varLetter='S', refererProd=null) {
+        this.rules.push(new Rule(this.rules.length + 1, varLetter, refererProd));
     }
 
     removeRule(ruleIndex) {
@@ -33,12 +33,12 @@ export class InputHandler {
         });
     }
 
-    checkAndRemoveRule(currentRuleVarLetter, deletedText, expressionEl) {
+    checkAndRemoveRule(currentRuleVarLetter, deletedText, productionEl) {
         deletedText.split('').forEach(char => {
             if (isUpperCase(char)) {
                 const rule = this.getRuleByVarLetter(char);
-                rule.removeReferer(expressionEl.id);
-                if (currentRuleVarLetter !== char && rule.refererExpressions.length === 0) {
+                rule.removeReferer(productionEl.id);
+                if (currentRuleVarLetter !== char && rule.refererProductions.length === 0) {
                     this.removeRule(rule.index);
                 }
             }
@@ -48,8 +48,8 @@ export class InputHandler {
     transformInputToCfg() {
         this.rules.forEach(rule => {
             this.cfg.push(`${rule.varLetter} -> `);
-            rule.expressions.forEach((expr, i, ruleExpressionsArr) => {
-                const addedPart = i === ruleExpressionsArr.length - 1 ? `${expr.text}` : `${expr.text} | `;
+            rule.productions.forEach((prod, i, ruleProductionsArr) => {
+                const addedPart = i === ruleProductionsArr.length - 1 ? `${prod.text}` : `${prod.text} | `;
                 this.cfg[this.cfg.length - 1] += addedPart;
             });
         });

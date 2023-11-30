@@ -1,19 +1,19 @@
-import {Expression} from './expression.js';
+import {Production} from './production.js';
 
 
 export class Rule {
     PARENT_ID = 'user-input';
 
-    constructor(index, varLetter, refererExpr) {
+    constructor(index, varLetter, refererProd) {
         this.index = index;
         this.id = `rule-${this.index}`;
-        this.expressions = [];
-        this.expressionIndex = 0;
-        this.refererExpressions = [];
-        this.addReferer(refererExpr);
+        this.productions = [];
+        this.productionIndex = 0;
+        this.refererProductions = [];
+        this.addReferer(refererProd);
         this.varLetter = varLetter;
         this.createNew(varLetter);
-        this.addExpression();
+        this.addProduction();
     }
 
     createNew(varLetter) {
@@ -28,74 +28,74 @@ export class Rule {
         spanElement.innerHTML = `${varLetter} &rarr; `;
 
         // Create the main <div> with the id and class
-        const expressionsDiv = document.createElement('div');
-        expressionsDiv.id = `expression-container-${this.index}`;
-        expressionsDiv.classList.add('expressions');
+        const productionsDiv = document.createElement('div');
+        productionsDiv.id = `production-container-${this.index}`;
+        productionsDiv.classList.add('productions');
 
         // Create the <button> element with the id, class, and text content
         const plusButtonElement = document.createElement('button');
         plusButtonElement.id = `plus-rule-${this.index}`;
-        plusButtonElement.classList.add('btn', 'add-rule-expression');
+        plusButtonElement.classList.add('btn', 'add-rule-production');
         plusButtonElement.textContent = '+';
         plusButtonElement.addEventListener('click', this.plusBtnHandler.bind(this));
 
         const minusButtonElement = document.createElement('button');
         minusButtonElement.id = `minus-rule-${this.index}`;
-        minusButtonElement.classList.add('btn', 'remove-rule-expression');
+        minusButtonElement.classList.add('btn', 'remove-rule-production');
         minusButtonElement.textContent = '-';
         minusButtonElement.addEventListener('click', this.minusBtnHandler.bind(this));
         minusButtonElement.style.display = 'none';
 
-        this.render(ruleDiv, spanElement, expressionsDiv, plusButtonElement, minusButtonElement);
+        this.render(ruleDiv, spanElement, productionsDiv, plusButtonElement, minusButtonElement);
     }
 
-    render(ruleDiv, spanElement, expressionsDiv, plusButtonElement, minusButtonElement) {
+    render(ruleDiv, spanElement, productionsDiv, plusButtonElement, minusButtonElement) {
         const userInputEl = document.getElementById(this.PARENT_ID);
         userInputEl.appendChild(ruleDiv);
         ruleDiv.appendChild(spanElement);
-        ruleDiv.appendChild(expressionsDiv);
-        expressionsDiv.appendChild(plusButtonElement);
-        expressionsDiv.appendChild(minusButtonElement);
+        ruleDiv.appendChild(productionsDiv);
+        productionsDiv.appendChild(plusButtonElement);
+        productionsDiv.appendChild(minusButtonElement);
     }
 
     plusBtnHandler(event) {
         const spanElement = document.createElement('span');
-        spanElement.classList.add('expr-sep');
+        spanElement.classList.add('prod-sep');
         spanElement.textContent = ' | ';
         event.target.parentElement.insertBefore(spanElement, event.target);
-        this.addExpression(this.expressionIndex + 1);
-        if (this.expressions.length > 1) {
+        this.addProduction(this.productionIndex + 1);
+        if (this.productions.length > 1) {
             event.target.nextElementSibling.style.display = 'block';
         }
     }
 
     minusBtnHandler(event) {
-        const exprToRemove = this.expressions[this.expressionIndex - 1];
-        const exprToRemoveElement = document.getElementById(exprToRemove.id);
-        exprToRemoveElement.value = '';
+        const prodToRemove = this.productions[this.productionIndex - 1];
+        const prodToRemoveElement = document.getElementById(prodToRemove.id);
+        prodToRemoveElement.value = '';
         const inputEvent = new Event('input', { bubbles: true });
-        exprToRemoveElement.dispatchEvent(inputEvent);
-        exprToRemove.remove();
-        this.expressions = this.expressions.filter(expr => expr.id !== exprToRemove.id);
-        this.updateExpressionIndex();
-        if (this.expressions.length <= 1) {
+        prodToRemoveElement.dispatchEvent(inputEvent);
+        prodToRemove.remove();
+        this.productions = this.productions.filter(prod => prod.id !== prodToRemove.id);
+        this.updateProductionIndex();
+        if (this.productions.length <= 1) {
             event.target.style.display = 'none';
         }
     }
 
-    addExpression() {
-        this.expressions.push(new Expression(this.index,  this.expressions.length + 1));
-        this.updateExpressionIndex();
+    addProduction() {
+        this.productions.push(new Production(this.index,  this.productions.length + 1));
+        this.updateProductionIndex();
     }
 
-    addReferer(refererExprId) {
-        if (refererExprId) {
-            this.refererExpressions.push(refererExprId);
+    addReferer(refererProdId) {
+        if (refererProdId) {
+            this.refererProductions.push(refererProdId);
         }
     }
 
-    removeReferer(refererExprId) {
-        this.refererExpressions = this.refererExpressions.filter(refExprId => refExprId !== refererExprId);
+    removeReferer(refererProdId) {
+        this.refererProductions = this.refererProductions.filter(refProdId => refProdId !== refererProdId);
     }
 
     remove() {
@@ -104,17 +104,17 @@ export class Rule {
         ruleEl.remove();
     }
 
-    removeExpression(exprIndex) {
-        this.expressions.splice(exprIndex - 1, 1);
+    removeProduction(prodIndex) {
+        this.productions.splice(prodIndex - 1, 1);
     }
 
     assignInputListener() {
-        for (const expr of this.expressions) {
-            const inputEl = document.getElementById(expr.id);
+        for (const prod of this.productions) {
+            const inputEl = document.getElementById(prod.id);
         }
     }
 
-    updateExpressionIndex() {
-        this.expressionIndex = this.expressions.length;
+    updateProductionIndex() {
+        this.productionIndex = this.productions.length;
     }
 }

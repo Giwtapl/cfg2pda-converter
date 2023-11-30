@@ -54,7 +54,7 @@
         flex: 0 0 10%;
     }
 
-    & .expressions {
+    & .productions {
         display: flex;
         flex-wrap: wrap;
         align-items: flex-start;
@@ -76,7 +76,7 @@
             }
         }
 
-        & .expr-sep {
+        & .prod-sep {
             font-size: $rule-font-size;
             color: white;
             margin: 0 0 1rem 0;
@@ -98,10 +98,10 @@
     }
 }
 
-.add-rule-expression {
+.add-rule-production {
     background-color: #0bbf4d;
 }
 
-.remove-rule-expression {
+.remove-rule-production {
     background-color: #db061c;
 }
