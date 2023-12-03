@@ -56,10 +56,23 @@ export class InputHandler {
     }
 
     showInputModal() {
+        this._showLoadingModal();
         this.transformInputToCfg();
+        // this.cfg.validate();
+        this._hideLoadingModal();
         console.log('Done button was clicked. You provided the following CFG:');
         console.log(this.cfg.join('\n'));
         // writeCfgToInputModal(this.cfg);
         // displayInputModal();
+    }
+
+    _showLoadingModal() {
+        const modal = document.getElementById('loading-modal');
+        modal.style.display = 'flex';
+    }
+
+    _hideLoadingModal() {
+        const modal = document.getElementById('loading-modal');
+        modal.style.display = 'none';
     }
 }
