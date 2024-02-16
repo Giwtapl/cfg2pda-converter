@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/style.css">
+    <script src="//d3js.org/d3.v5.min.js"></script>
+    <script src="https://unpkg.com/@hpcc-js/wasm@0.3.11/dist/index.min.js"></script>
+    <script src="https://unpkg.com/d3-graphviz@3.0.5/build/d3-graphviz.js"></script>
     <title>CFG2nPDA Converter</title>
 </head>
 <body class="body">
@@ -16,6 +19,7 @@
         <div class="container__user-input" id="user-input">
             <button id="btn-done" class="btn--primary">Done</button>
         </div>
+        <div id="graph"></div>
     </main>
     <footer class="footer">
         Footer

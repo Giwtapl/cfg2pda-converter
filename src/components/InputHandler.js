@@ -1,4 +1,6 @@
 import { Rule } from "../entities/rule.js";
+import { Cfg } from "../entities/cfg.js"
+import { Cfg2PdaConverter } from "./converter.js";
 import { isUpperCase } from "../utilities/tools.js";
 
 export class InputHandler {
@@ -46,13 +48,7 @@ export class InputHandler {
     }
 
     transformInputToCfg() {
-        this.rules.forEach(rule => {
-            this.cfg.push(`${rule.varLetter} -> `);
-            rule.productions.forEach((prod, i, ruleProductionsArr) => {
-                const addedPart = i === ruleProductionsArr.length - 1 ? `${prod.text}` : `${prod.text} | `;
-                this.cfg[this.cfg.length - 1] += addedPart;
-            });
-        });
+        this.cfg = new Cfg(this.rules);
     }
 
     showInputModal() {
@@ -61,7 +57,12 @@ export class InputHandler {
         // this.cfg.validate();
         this._hideLoadingModal();
         console.log('Done button was clicked. You provided the following CFG:');
-        console.log(this.cfg.join('\n'));
+        console.log(this.cfg.toStr());
+        console.log(this.cfg.toObject());
+
+        const converter = new Cfg2PdaConverter(this.cfg);
+        const equivPda = converter.convert();
+        equivPda.render();
         // writeCfgToInputModal(this.cfg);
         // displayInputModal();
     }

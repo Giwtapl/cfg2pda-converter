@@ -2,36 +2,41 @@ import { isSubset } from "../utilities/tools.js";
 import { PdaValidationError } from "../utilities/exceptions.js";
 
 export class Pda {
-    constructor(statesSet, inputSymbolsSet, stackSymbolsSet, startState, acceptedStatesSet) {
-        this.validate(statesSet, inputSymbolsSet, stackSymbolsSet, startState, acceptedStatesSet);
-        this.statesSet = statesSet;
-        this.inputSymbolsSet = inputSymbolsSet;
-        this.stackSymbolsSet = stackSymbolsSet;
-        this.startState = startState;
-        this.acceptedStatesSet = acceptedStatesSet;
+    STATES = ['Qstart', 'Qo', 'Qloop', 'Qaccept'];
+
+    constructor(transitions) {
+        this.nPdaData = this._getNPdaDataFromTransitions(transitions);
     }
 
-    validate(statesSet, inputSymbolsSet, stackSymbolsSet, startState, acceptedStatesSet) {
-        const sets = [stateSet, inputSymbolsSet, stackSymbolsSet, acceptedStatesSet];
-        if (!sets.every(set => set instanceof Set)) {
-            throw new PdaValidationError(
-                `All of the arguments: ${sets} should be of type Set.\n` +
-                `Provided value types:\n` +
-                `stateSet: ${typeof stateSet}\n` +
-                `inputSymbolsSet: ${typeof inputSymbolsSet}\n` +
-                `stackSymbolsSet: ${typeof stackSymbolsSet}\n` +
-                `acceptedStatesSet: ${typeof acceptedStatesSet}`
-            );
-        }
-
-        if (!isSubset(acceptedStatesSet, statesSet)) {
-            throw new PdaValidationError(`Provided accepted states: ${acceptedStatesSet} are not a subset of the provided total states: ${statesSet}`)
-        }
-
-        if (!statesSet.has(startState)) {
-            console.log(`Provided starting state: ${startState} is not in the provided statesSet: ${statesSet}`);
-        }
+    render() {
+        d3.select('#graph').graphviz().renderDot(
+            `digraph {
+                ${this.nPdaData.nodes.map(node => `${node.id} [label=${node.label}];`).join('\n')}
+                ${this.nPdaData.links.map(link => `${link.source} -> "${link.target}" [label="${link.label}"];`).join('\n')}
+            }`
+        );
     }
 
-    display() {}
+    _getNPdaDataFromTransitions(transitions) {
+        const nPdaData = {
+            nodes: [],
+            links: []
+        };
+        this.STATES.forEach(state => {
+            nPdaData.nodes.push({ id: state, label: `<Q<SUB>${state.split('Q')[1]}</SUB>>` });
+        });
+        transitions.forEach(transition => {
+            const { source: transSource, target: transTarget, label: transLabel } = transition;
+            if (Array.isArray(transLabel)) {
+                nPdaData.links.push(
+                    { source: transSource, target: transTarget, label: transLabel.join('\n') }
+                )
+            } else {
+                nPdaData.links.push(
+                    { source: transSource, target: transTarget, label: transLabel }
+                )
+            }
+        });
+        return nPdaData;
+    }
 }
