@@ -51,11 +51,30 @@ export class InputHandler {
         this.cfg = new Cfg(this.rules);
     }
 
-    showInputModal() {
-        this._showLoadingModal();
+    doneBtnHandler(event) {
+        const currentProductions = Array.from(document.getElementsByClassName('input-text'));
+        if (this.isCfgEmpty(currentProductions)) {
+            alert('No CFG has been provided yet.\nPlease input the CFG rules and then press the "Done" button.');
+            return;
+        }
+        const emptyRules = this.checkForEmptyRules();
+        if (emptyRules.length) {
+            alert(
+                `The rules with the following starting variables: (${this.getVarLettersOfEmptyRulesInString(emptyRules)}) do not contain any non empty productions.\n` +
+                'Please fill in at least one production for each rule and then press the "Done" button.'
+            );
+            return;
+        }
+        this.showLoadingModal();
+
+        this.enableButtons();
+        this.destroyPlusMinusRuleButtons();
+        this.destroyEmptyProductions();
+        this.disableProductionsInput();
+        this.hideDoneButton(event.target);
         this.transformInputToCfg();
-        // this.cfg.validate();
-        this._hideLoadingModal();
+
+        this.hideLoadingModal();
         console.log('Done button was clicked. You provided the following CFG:');
         console.log(this.cfg.toStr());
         console.log(this.cfg.toObject());
@@ -63,16 +82,70 @@ export class InputHandler {
         const converter = new Cfg2PdaConverter(this.cfg);
         const equivPda = converter.convert();
         equivPda.render();
-        // writeCfgToInputModal(this.cfg);
-        // displayInputModal();
     }
 
-    _showLoadingModal() {
+    isCfgEmpty(currentProductions) {
+        return currentProductions.length === 1 && currentProductions[0].value === '';
+    }
+
+    checkForEmptyRules() {
+        return this.rules.filter(rule => {
+            const productionsNum = rule.productions.length;
+            let emptyProductions = 0;
+            rule.productions.forEach(production => {
+                if (production.text === '') {
+                    emptyProductions++;
+                }
+            });
+            return productionsNum === emptyProductions;
+        });
+    }
+
+    getVarLettersOfEmptyRulesInString(emptyRules) {
+        return emptyRules.map(rule => rule.varLetter).join(', ');
+    }
+
+    enableButtons() {
+        Array.from(document.getElementsByClassName('btn--primary')).forEach(buttonEl => {
+            buttonEl.disabled = false;
+        });
+    }
+
+    destroyPlusMinusRuleButtons() {
+        for (let sign of ['add', 'remove']) {
+            Array.from(document.getElementsByClassName(`${sign}-rule-production`)).forEach(buttonEl => {
+                buttonEl.remove();
+            });
+        }
+    }
+
+    destroyEmptyProductions() {
+        this.rules.forEach(rule => {
+            rule.productions.forEach(production => {
+                if (production.text === '') {
+                    production.remove();
+                }
+            });
+        });
+    }
+
+    disableProductionsInput() {
+        Array.from(document.getElementsByClassName('input-text')).forEach(productionInputEl => {
+            productionInputEl.disabled = true;
+        });
+    }
+
+    hideDoneButton(doneBtnEl) {
+        doneBtnEl.style.display = 'none'
+    }
+
+
+    showLoadingModal() {
         const modal = document.getElementById('loading-modal');
         modal.style.display = 'flex';
     }
 
-    _hideLoadingModal() {
+    hideLoadingModal() {
         const modal = document.getElementById('loading-modal');
         modal.style.display = 'none';
     }

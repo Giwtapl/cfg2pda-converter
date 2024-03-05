@@ -36,13 +36,11 @@ export class Rule {
         const plusButtonElement = document.createElement('button');
         plusButtonElement.id = `plus-rule-${this.index}`;
         plusButtonElement.classList.add('btn', 'add-rule-production');
-        plusButtonElement.textContent = '+';
         plusButtonElement.addEventListener('click', this.plusBtnHandler.bind(this));
 
         const minusButtonElement = document.createElement('button');
         minusButtonElement.id = `minus-rule-${this.index}`;
         minusButtonElement.classList.add('btn', 'remove-rule-production');
-        minusButtonElement.textContent = '-';
         minusButtonElement.addEventListener('click', this.minusBtnHandler.bind(this));
         minusButtonElement.style.display = 'none';
 

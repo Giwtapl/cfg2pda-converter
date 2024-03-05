@@ -26,8 +26,7 @@ export class Production {
 
     remove() {
         const productionEl = document.getElementById(`input-rule-${this.ruleIndex}-prod-${this.prodIndex}`);
-        const productionSeparatorElements = document.getElementsByClassName('prod-sep')
-        const adjacentProdSepEl = productionSeparatorElements[productionSeparatorElements.length - 1];
+        const adjacentProdSepEl = productionEl.previousElementSibling;
         adjacentProdSepEl.remove();
         productionEl.remove();
     }
