@@ -21,11 +21,36 @@
                 <button id="btn-done" class="btn--primary">Done</button>
                 <button id="btn-testcfg" class="btn--primary" disabled>Test CFG</button>
                 <button id="btn-convert" class="btn--primary" disabled>Convert to nPDA</button>
-                <button id="btn-abort" class="btn--primary">Abort</button>
+                <button id="btn-restart" class="btn--primary btn--red">Restart</button>
             </div>
             <div class="rules" id="user-input"></div>
         </div>
-        <div id="graph"></div>
+
+        <div class="test-container">
+            <h2 class="container__heading">Please give your input and press Enter</h2>
+            <div class="cfg-test ">
+                <!-- <h4>Please give your input and press Enter</h4> -->
+                <input type="text" class="test-word">
+                <table id="derivationTable">
+                    <!-- Table rows will be dynamically added here -->
+                </table>
+                <div class="result">Result: <span></span></div>
+                <button class="btn--primary btn--red">Close</button>
+            </div>
+
+
+            <div class="pda-test ">
+                <h4>Please give your input and press Enter:</h4>
+                <input type="text" class="test-word">
+                <div id="graph"></div>
+                <div class="result">Result</div>
+                <div class="buttons-container">
+                    <button id="btn-testpda" class="btn--primary">Test PDA</button>
+                    <button id="btn-download" class="btn--primary" disabled>Download as .png</button>
+                    <button id="btn-close" class="btn--primary" disabled>Close</button>
+                </div>
+            </div>
+        </div>
     </main>
     <footer class="footer">
         Footer

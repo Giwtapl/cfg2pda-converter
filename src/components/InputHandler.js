@@ -69,7 +69,7 @@ export class InputHandler {
 
         this.enableButtons();
         this.destroyPlusMinusRuleButtons();
-        this.destroyEmptyProductions();
+        this.handleEmptyProductions();
         this.disableProductionsInput();
         this.hideDoneButton(event.target);
         this.transformInputToCfg();
@@ -78,6 +78,13 @@ export class InputHandler {
         console.log('Done button was clicked. You provided the following CFG:');
         console.log(this.cfg.toStr());
         console.log(this.cfg.toObject());
+        for (let i = 0; i < 14; i++) {
+            try {
+                console.log(`Word of length ${i}:`, this.cfg.wordGenerator.generateWord(i));
+            } catch(err) {
+                console.log(`The provided CFG does not recognize any words of length ${i}.`)
+            }
+        }
 
         const converter = new Cfg2PdaConverter(this.cfg);
         const equivPda = converter.convert();
@@ -119,11 +126,11 @@ export class InputHandler {
         }
     }
 
-    destroyEmptyProductions() {
+    handleEmptyProductions() {
         this.rules.forEach(rule => {
             rule.productions.forEach(production => {
                 if (production.text === '') {
-                    production.remove();
+                    document.getElementById(production.id).value = window.EMPTY_STRING;
                 }
             });
         });

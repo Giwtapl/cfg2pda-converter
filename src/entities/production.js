@@ -7,7 +7,7 @@ export class Production {
     constructor(ruleIndex, prodIndex) {
         this.ruleIndex = ruleIndex;
         this.prodIndex = prodIndex;
-        this.text = '';
+        this.text = window.EMPTY_STRING;
         this.create();
     }
 
@@ -16,6 +16,7 @@ export class Production {
         const inputElement = document.createElement('input');
         inputElement.type = 'text';
         inputElement.id = this.id;
+        inputElement.placeholder = window.EMPTY_STRING;
         inputElement.classList.add('input-text');
         inputElement.addEventListener('input', inputEventHandler);
 

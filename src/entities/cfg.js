@@ -1,6 +1,27 @@
+import { CfgWordGenerator } from '../components/CfgWordGenerator.js';
+
 export class Cfg {
     constructor(rules) {
         this.rules = rules;
+        this.cfgObj = this.toObject();
+        this.vars = Object.keys(this.cfgObj);
+        this.terminals = this.getTerminals()
+        this.wordGenerator = new CfgWordGenerator(this);
+    }
+
+    getTerminals() {
+        const terminals = [];
+        this.rules.forEach(rule => {
+            rule.productions.forEach(production => {
+                for(const char of production.text) {
+                    if (!this.vars.includes(char) && !terminals.includes(char) && char !== window.EMPTY_STRING) {
+                        terminals.push(char);
+                    }
+                }
+            });
+        });
+
+        return terminals;
     }
 
     toObject() {
@@ -36,5 +57,5 @@ export class Cfg {
         return Array.from(terminalSymbols);
     }
 
-    display() {}
+    display() { }
 }

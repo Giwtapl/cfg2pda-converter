@@ -19,7 +19,7 @@
         flex-direction: column-reverse;
         border-radius: 20px;
         padding: 2rem;
-        margin: 0 auto;
+        margin: 0 auto 2rem auto;
         width: 80vw;
         height: auto;
         background-color: $color-secondary;
@@ -33,29 +33,78 @@
         & .buttons-container {
             display: flex;
             justify-content: end;
+        }
+    }
 
-            & .btn--primary {
-                order: 1;
-                align-self: flex-end;
-                border-radius: 10px;
-                font-size: 2rem;
-                padding: 1rem 2rem;
-                margin-top: 1rem;
-                margin-right: 1rem;
+    .hidden {
+        display: none;
+    }
+
+    .cfg-test {
+        // margin-top: 20px;
+        margin: 2rem auto;
+        background-color: orangered;
+        display: flex;
+        flex-direction: column;
+        border-radius: 20px;
+        padding: 2rem;
+        width: 80vw;
+        height: auto;
+        // background-color: $color-secondary;
+        box-shadow: 0.5rem 0.7rem 1.5rem #000;
+
+        & input {
+            font-size: $rule-font-size;
+            border-radius: 50px;
+            background-color: $color-grey-medium;
+            text-align: center;
+            border: none;
+            flex: 0 0 60%;
+            width: 30%;
+            margin: 0 0 1rem 0;
+
+            &:focus {
+                background-color: white;
+            }
+
+            &:disabled {
+                background-color: $color-secondary;
                 color: white;
-                border: none;
-            }
-
-            & .btn--primary:last-child {
-                margin-right: 0;
-            }
-
-            & .btn--primary:disabled {
-                opacity: 0.5; /* Adjust the opacity to your preference */
-                cursor: not-allowed;
-                /* You can also add other styles like changing the background color or text color */
             }
         }
+    }
+
+    #derivationTable {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    #derivationTable th, #derivationTable td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+}
+
+.btn--primary {
+    order: 1;
+    align-self: flex-end;
+    border-radius: 10px;
+    font-size: 2rem;
+    padding: 1rem 2rem;
+    margin-top: 1rem;
+    margin-right: 1rem;
+    color: white;
+    border: none;
+
+    &:last-child {
+        margin-right: 0;
+    }
+
+    &:disabled {
+        opacity: 0.5; /* Adjust the opacity to your preference */
+        cursor: not-allowed;
+        /* You can also add other styles like changing the background color or text color */
     }
 }
 
@@ -68,7 +117,7 @@
 #btn-convert {
     background-color: #0bbf4d;
 }
-#btn-abort {
+.btn--red {
     background-color: #db061c;
 }
 
@@ -169,6 +218,14 @@
     &::after {
         transform: rotate(90deg);
     }
+}
+
+.success {
+    background-color: #d0e9c6;
+}
+
+.failure {
+    background-color: #ebcccc;
 }
 
 .modal {

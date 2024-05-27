@@ -42,6 +42,7 @@ export class Cfg2PdaConverter {
         this.cfg.getTerminalSymbols().forEach(termSym => {
             qLoopLabelsList.push(`${termSym}, ${termSym} ${this.ARROW} ${this.NULL_STRING}`);
         });
-        return qLoopLabelsList;
+
+        return [...new Set(qLoopLabelsList)];
     }
 }
