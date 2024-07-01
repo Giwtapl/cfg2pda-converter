@@ -11,6 +11,7 @@ export class Pda {
     render() {
         d3.select('#graph').graphviz().renderDot(
             `digraph {
+                rankdir=LR;
                 ${this.nPdaData.nodes.map(node => `${node.id} [label=${node.label}];`).join('\n')}
                 ${this.nPdaData.links.map(link => `${link.source} -> "${link.target}" [label="${link.label}"];`).join('\n')}
             }`

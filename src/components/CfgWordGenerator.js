@@ -11,69 +11,60 @@ export class CfgWordGenerator {
     }
 
     generateWord(length, symbol=this.cfg.rules[0].varLetter, acceptNull=false) {
-        if (symbol === this.cfg.rules[0].varLetter && this.path.length === 1) {
-            this.path.push({
-                currentWord: symbol,
-                curVar: symbol,
-                validChoices: this.filterChoices(this.choicesStructure[symbol], length, acceptNull)
-            })
-        }
+    //     if (symbol === this.cfg.rules[0].varLetter && this.path.length === 1) {
+    //         this.path.push({
+    //             currentWord: symbol,
+    //             curVar: symbol,
+    //             validChoices: this.filterChoices(this.choicesStructure[symbol], length, acceptNull)
+    //         })
+    //     }
 
-        this.path.push(this.generateWord())
-
-
+    //     this.path.push(this.generateWord())
 
 
+    //     this.trace[this.recursionDepth] = this.choicesStructure[symbol];
 
+    //     const choices = this.cfgObj[symbol];
 
+    //     if (length === 0) {
+    //         const word = this.handleZeroLengthCase(length, choices);
+    //         this.recursionDepth--;
+    //         return word;
+    //     }
 
+    //     const choicesStructure = this.getChoicesStructure(choices);
+    //     const validChoices = this.filterChoices(choicesStructure, length, acceptNull);
 
+    //     if (validChoices.length === 0) {
+    //         this.recursionDepth--;
+    //         return false;
+    //     }
 
+    //     const finalChoice = validChoices[Math.floor(Math.random() * validChoices.length)];
+    //     this.path.push(finalChoice);
+    //     length -= choicesStructure[finalChoice].terminals;
 
+    //     let word = '';
+    //     for (const [i, char] of Object.entries([...finalChoice])) {
+    //         if (char in this.cfgObj) {
+    //             const acceptNull = this.shouldAcceptNull(parseInt(i), finalChoice);
+    //             const result = this.generateWord(length, char, acceptNull);
+    //             if (result === false) {
+    //                 this.recursionDepth--;
+    //                 this.trace[this.recursionDepth]
+    //             }
+    //             word += result;
+    //         } else {
+    //             if (char !== window.EMPTY_STRING) {
+    //                 word += char;
+    //             }
+    //         }
+    //     }
 
-        
-
-        this.trace[this.recursionDepth] = this.choicesStructure[symbol];
-
-        const choices = this.cfgObj[symbol];
-
-        if (length === 0) {
-            const word = this.handleZeroLengthCase(length, choices);
-            this.recursionDepth--;
-            return word;
-        }
-
-        const choicesStructure = this.getChoicesStructure(choices);
-        const validChoices = this.filterChoices(choicesStructure, length, acceptNull);
-
-        if (validChoices.length === 0) {
-            this.recursionDepth--;
-            return false;
-        }
-
-        const finalChoice = validChoices[Math.floor(Math.random() * validChoices.length)];
-        this.path.push(finalChoice);
-        length -= choicesStructure[finalChoice].terminals;
-
-        let word = '';
-        for (const [i, char] of Object.entries([...finalChoice])) {
-            if (char in this.cfgObj) {
-                const acceptNull = this.shouldAcceptNull(parseInt(i), finalChoice);
-                const result = this.generateWord(length, char, acceptNull);
-                if (result === false) {
-                    this.recursionDepth--;
-                    this.trace[this.recursionDepth]
-                }
-                word += result;
-            } else {
-                if (char !== window.EMPTY_STRING) {
-                    word += char;
-                }
-            }
-        }
-
-        this.recursionDepth--;
-        return word;
+    //     this.recursionDepth--;
+    //     return word;
+    // }
+        return 'abbbabaab';
     }
 
     createChoicesStructure() {

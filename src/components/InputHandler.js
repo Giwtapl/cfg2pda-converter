@@ -67,6 +67,7 @@ export class InputHandler {
         }
         this.showLoadingModal();
 
+        document.querySelector('.test-wrapper').classList.toggle('hidden');
         this.enableButtons();
         this.destroyPlusMinusRuleButtons();
         this.handleEmptyProductions();
