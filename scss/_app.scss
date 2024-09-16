@@ -102,6 +102,16 @@
     }
 }
 
+.instruction {
+    font-size: $rule-font-size;
+}
+
+.wordInput {
+    font-size: 2rem;
+    min-width: 200px;
+    max-width: 300px;
+}
+
 .hidden {
     display: none;
 }
@@ -116,6 +126,30 @@
     margin-right: 1rem;
     color: white;
     border: none;
+
+    &:last-child {
+        margin-right: 0;
+    }
+
+    &:disabled {
+        opacity: 0.5; /* Adjust the opacity to your preference */
+        cursor: not-allowed;
+        /* You can also add other styles like changing the background color or text color */
+    }
+}
+
+.btn--secondary {
+    order: 1;
+    align-self: flex-end;
+    border-radius: 10px;
+    font-size: 2rem;
+    color: white;
+    border: none;
+
+    background-color: #1f89f4;
+    margin-top: 0;
+    margin-right: 0;
+    padding: 0.1rem 2rem;
 
     &:last-child {
         margin-right: 0;

@@ -16,19 +16,24 @@ abortBtnEl.addEventListener('click', () => {
 });
 
 // Get modal element
-var modal = document.getElementById('modal');
+const modal = document.getElementById('modal');
 
 // Get the button that opens the modal
-var btn = document.getElementById('generateButton');
+const generateWordBtn = document.getElementById('generateWordButton');
 
 // Get the <span> element that closes the modal
-var span = document.getElementsByClassName('close')[0];
+const span = document.getElementsByClassName('close')[0];
 
 // Get the generate word button inside the modal
-var generateWordBtn = document.getElementById('generateWordButton');
+const generateBtn = document.getElementById('generateButton');
 
-// When the user clicks the button, open the modal 
-btn.onclick = function() {
+// Get the TestCFG button
+const testCfgBtn = document.getElementById('btn-testcfg');
+
+const generatedWordInputEl = document.getElementById('cfgWordInput');
+
+// When the user clicks the button, open the modal
+generateWordBtn.onclick = function() {
     modal.style.display = 'block';
 }
 
@@ -45,7 +50,7 @@ window.onclick = function(event) {
 }
 
 // When the user clicks the generate button inside the modal
-generateWordBtn.onclick = function() {
+generateBtn.onclick = function() {
     const length = parseInt(document.getElementById('wordLength').value);
     if (isNaN(length) || length < 1) {
         alert('Please enter a valid length');
@@ -53,8 +58,9 @@ generateWordBtn.onclick = function() {
     }
 
     const generatedWord = generateRandomWord(length);
-    document.getElementById('wordInput').value = generatedWord;
+    generatedWordInputEl.value = generatedWord;
     modal.style.display = 'none';
+    testCfgBtn.removeAttribute("disabled");
 }
 
 function generateRandomWord(length) {
@@ -67,60 +73,83 @@ function generateRandomWord(length) {
     return word;
 }
 
-const productions = [
-    ['S', 'AB'],
-    ['A', 'a'],
-    ['B', 'b']
-];
-const startSymbol = 'S';
-const word = 'ab';
-
-const stepsTable = document.getElementById('steps-table').getElementsByTagName('tbody')[0];
-const resultDiv = document.getElementById('result');
-
-function addStep(stepNumber, production, remainingString) {
-    const row = stepsTable.insertRow();
-    row.insertCell(0).innerText = stepNumber;
-    row.insertCell(1).innerText = production;
-    row.insertCell(2).innerText = remainingString;
+testCfgBtn.onclick = function() {
+    const word = generatedWordInputEl.value;
+    const startSymbol = "S";
+    const steps = [];
+    const result = canGenerate(window.inputHandler.cfg.cfgObj, startSymbol, word, steps);
+    console.log(`The word '${word}' is ${result ? "accepted" : "rejected"} by the CFG.`);
+    displaySteps(steps);
 }
 
-function recognize(cfg, start, input) {
-    let steps = [];
-    let queue = [[start, input, 0]];
+function canStillGenerateRemainingWord(cfg, currentGeneratedWord, remainingWord) {
+    // Calculate the number of variables in the currentGeneratedWord that can produce ε
+    const currentGeneratedWordVariablesWithEpsilon = currentGeneratedWord.split('').filter(s => cfg[s] && cfg[s].includes('ε'));
+    return currentGeneratedWord.length - currentGeneratedWordVariablesWithEpsilon.length <= remainingWord.length;
+}
 
-    while (queue.length > 0) {
-        let [current, remaining, stepNumber] = queue.shift();
+function canGenerate(cfg, startSymbol, word, steps) {
+    function parse(currentGeneratedWord, remainingWord) {
+        // If currentGeneratedWord is longer than remaining word, this path is a dead end
+        if (!canStillGenerateRemainingWord(cfg, currentGeneratedWord, remainingWord)) {
+            return null;
+        }
 
-        if (remaining === "") {
-            steps.push([stepNumber, current, remaining]);
-            steps.forEach(([stepNumber, production, remainingString]) => {
-                addStep(stepNumber, production, remainingString);
-            });
-            document.body.classList.add('success');
-            resultDiv.innerText = "SUCCESS";
+        // If both are empty, we have matched the word
+        if (currentGeneratedWord === "" && remainingWord === "") {
             return true;
         }
 
-        for (let production of cfg) {
-            if (current.startsWith(production[0])) {
-                let newString = current.replace(production[0], production[1]);
-                steps.push([stepNumber, `${production[0]} -> ${production[1]}`, remaining]);
-                queue.push([newString, remaining.slice(production[1].length), stepNumber + 1]);
+        // If the currentGeneratedWord is empty but remainingWord is not, return null (dead end)
+        if (currentGeneratedWord === "") {
+            return null;
+        }
+
+        const [head, ...tail] = currentGeneratedWord;
+
+        // If it's a non-terminal, try all productions
+        if (cfg[head]) {
+            for (const production of cfg[head]) {
+                let newCurrentGeneratedWord = (production === "ε" ? "" : production) + tail.join("");
+                steps.push([`${head} → ${production}`, currentGeneratedWord, newCurrentGeneratedWord]);
+
+                const result = parse(newCurrentGeneratedWord, remainingWord);
+                if (result) {
+                    return result; // Stop if this path leads to a solution
+                } else {
+                    // If this production fails, remove the step and try the next production
+                    steps.pop();
+                    newCurrentGeneratedWord = currentGeneratedWord;
+                }
             }
         }
+        // If it's a terminal, check if it matches the first char of remainingWord
+        else if (remainingWord[0] === head) {
+            const newCurrentGeneratedWord = tail.join("");
+            steps.push([head, currentGeneratedWord, newCurrentGeneratedWord]);
+            return parse(newCurrentGeneratedWord, remainingWord.slice(1));
+        }
+
+        // If no productions or matches worked, return null to indicate failure
+        return null;
     }
 
-    steps.forEach(([stepNumber, production, remainingString]) => {
-        addStep(stepNumber, production, remainingString);
-    });
-    document.body.classList.add('failure');
-    resultDiv.innerText = "FAILURE";
-    return false;
+    return parse(startSymbol, word);
 }
 
-if (recognize(productions, startSymbol, word)) {
-    stepsTable.classList.add('success');
-} else {
-    stepsTable.classList.add('failure');
+function displaySteps(steps) {
+    const tableBody = document.getElementById("parsingSteps");
+    tableBody.innerHTML = "";
+
+    steps.forEach(step => {
+        const row = document.createElement("tr");
+
+        step.forEach(cellText => {
+            const cell = document.createElement("td");
+            cell.textContent = cellText;
+            row.appendChild(cell);
+        });
+
+        tableBody.appendChild(row);
+    });
 }

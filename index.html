@@ -19,23 +19,24 @@
         <div class="container__user-input">
             <div class="buttons-container">
                 <button id="btn-done" class="btn--primary">Done</button>
-                <button id="btn-testcfg" class="btn--primary" disabled>Test CFG</button>
                 <button id="btn-convert" class="btn--primary" disabled>Convert to nPDA</button>
                 <button id="btn-restart" class="btn--primary btn--red">Restart</button>
             </div>
             <div class="test-wrapper hidden">
-                <input type="text" id="wordInput" placeholder="Test CFG against a word: Enter your word or generate one" />
-                <button id="generateButton">Generate Word</button>
+                <p class="instruction">Test CFG against a word: Enter your word or generate one:</p>
+                <input type="text" id="cfgWordInput" class="wordInput"/>
+                <button id="generateWordButton" class="btn--secondary">Generate Word</button>
+                <button id="btn-testcfg" class="btn--secondary" disabled>Test CFG</button>
                 <div id="result"></div>
-                <table id="steps-table" class="hidden">
+                <table>
                     <thead>
                         <tr>
-                            <th>Step</th>
-                            <th>Production</th>
-                            <th>Remaining String</th>
+                            <th>Rule</th>
+                            <th>Application</th>
+                            <th>Result</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="parsingSteps">
                     </tbody>
                 </table>
             </div>
@@ -48,15 +49,17 @@
                 <!-- <h4>Please give your input and press Enter</h4> -->
                 <div id="graph"></div>
 
-                <input type="text" id="wordInput" placeholder="Test PDA against a word: Enter your word or generate one" />
-                <button id="generateButton">Generate Word</button>
+                <p class="instruction">Test PDA against a word: Enter your word or generate one:</p>
+                <input type="text" id="pdaWordInput" class="wordInput"/>
+                <button class="btn--secondary">Generate Word</button>
 
                 <!-- Modal -->
                 <div id="modal" class="modal">
                     <div class="modal-content">
                         <span class="close">&times;</span>
-                        <input type="number" id="wordLength" placeholder="Enter word length" min="1">
-                        <button id="generateWordButton">Generate</button>
+                        <p class="instruction">Enter word length:</p>
+                        <input type="number" id="wordLength" class="wordInput" min="1">
+                        <button id="generateButton" class="btn--secondary">Generate</button>
                     </div>
                 </div>
                 <button class="btn--primary btn--red">Close</button>
