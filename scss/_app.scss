@@ -315,3 +315,50 @@
 // .failure {
 //     background-color: lightcoral;
 // }
+
+
+table#stepsTable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 3px solid #000000;
+    border-radius: 20px;
+    overflow: hidden;
+    color: black;
+
+    thead {
+        background-color: #f2f2f2;
+        tr {
+            th {
+                padding: 8px;
+                text-align: left;
+                border: 1px solid #000000;
+            }
+        }
+    }
+
+    tbody {
+        .success {
+            background-color: lightgreen;
+        }
+        .failure {
+            background-color: lightcoral;
+        }
+        tr {
+            td {
+                padding: 8px;
+                text-align: left;
+                border: 1px solid #000000;
+                .bold {
+                    font-weight: 800;
+                }
+                .colored {
+                    font-weight: 800;
+                    color: blue;
+                }
+            }
+        }
+    }
+}
+
+

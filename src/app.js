@@ -32,6 +32,15 @@ const testCfgBtn = document.getElementById('btn-testcfg');
 
 const generatedWordInputEl = document.getElementById('cfgWordInput');
 
+generatedWordInputEl.addEventListener('input', function() {
+    // Check if the input value is not empty
+    if (generatedWordInputEl.value.trim() !== "") {
+        testCfgBtn.disabled = false; // Enable the button
+    } else {
+        testCfgBtn.disabled = true; // Disable the button
+    }
+});
+
 // When the user clicks the button, open the modal
 generateWordBtn.onclick = function() {
     modal.style.display = 'block';
@@ -76,10 +85,10 @@ function generateRandomWord(length) {
 testCfgBtn.onclick = function() {
     const word = generatedWordInputEl.value;
     const startSymbol = "S";
-    const steps = [];
+    const steps = [["Start → S", "Start", "S"]];
     const result = canGenerate(window.inputHandler.cfg.cfgObj, startSymbol, word, steps);
     console.log(`The word '${word}' is ${result ? "accepted" : "rejected"} by the CFG.`);
-    displaySteps(steps);
+    displaySteps(steps, result ? 'lightgreen' : 'lightcoral');
 }
 
 function canStillGenerateRemainingWord(cfg, currentGeneratedWord, remainingWord) {
@@ -111,7 +120,19 @@ function canGenerate(cfg, startSymbol, word, steps) {
         if (cfg[head]) {
             for (const production of cfg[head]) {
                 let newCurrentGeneratedWord = (production === "ε" ? "" : production) + tail.join("");
-                steps.push([`${head} → ${production}`, currentGeneratedWord, newCurrentGeneratedWord]);
+                const previouslyDerivedWord = derivedWord;
+                derivedWord = previouslyDerivedWord.replace(head, production === "ε" ? "" : production);
+
+                // Wrap capital letters in the first element
+                const ruleFormatted = `${head} → ${production}`.replace(/[A-Z]/g, "<span class='bold'>$&</span>");
+
+                // Wrap capital letters in the second element
+                const applicationFormatted = previouslyDerivedWord.replace(head, `<span class='colored'>${head}</span>`);
+
+                // Wrap the part of the third element that matches production in the third element
+                const resultFormatted = derivedWord.replace(production, `<span class='colored'>${production}</span>`);
+
+                steps.push([ruleFormatted, applicationFormatted, resultFormatted]);
 
                 const result = parse(newCurrentGeneratedWord, remainingWord);
                 if (result) {
@@ -119,26 +140,29 @@ function canGenerate(cfg, startSymbol, word, steps) {
                 } else {
                     // If this production fails, remove the step and try the next production
                     steps.pop();
+                    derivedWord = previouslyDerivedWord;
                     newCurrentGeneratedWord = currentGeneratedWord;
                 }
             }
         }
         // If it's a terminal, check if it matches the first char of remainingWord
         else if (remainingWord[0] === head) {
-            const newCurrentGeneratedWord = tail.join("");
-            steps.push([head, currentGeneratedWord, newCurrentGeneratedWord]);
-            return parse(newCurrentGeneratedWord, remainingWord.slice(1));
+            return parse(tail.join(""), remainingWord.slice(1));
         }
 
         // If no productions or matches worked, return null to indicate failure
         return null;
     }
 
+    let derivedWord = startSymbol;
     return parse(startSymbol, word);
 }
 
-function displaySteps(steps) {
+function displaySteps(steps, tableBgColor) {
+    const stepsTable = document.getElementById("stepsTable");
+    stepsTable.classList.remove("hidden");
     const tableBody = document.getElementById("parsingSteps");
+    tableBody.style.backgroundColor = tableBgColor;
     tableBody.innerHTML = "";
 
     steps.forEach(step => {
@@ -146,7 +170,7 @@ function displaySteps(steps) {
 
         step.forEach(cellText => {
             const cell = document.createElement("td");
-            cell.textContent = cellText;
+            cell.innerHTML = cellText;
             row.appendChild(cell);
         });
 

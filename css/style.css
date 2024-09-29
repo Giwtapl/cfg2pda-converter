@@ -295,6 +295,34 @@ html {
   100% {
     transform: rotate(360deg); } }
 
+table#stepsTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 3px solid #000000;
+  border-radius: 20px;
+  overflow: hidden;
+  color: black; }
+  table#stepsTable thead {
+    background-color: #f2f2f2; }
+    table#stepsTable thead tr th {
+      padding: 8px;
+      text-align: left;
+      border: 1px solid #000000; }
+  table#stepsTable tbody .success {
+    background-color: lightgreen; }
+  table#stepsTable tbody .failure {
+    background-color: lightcoral; }
+  table#stepsTable tbody tr td {
+    padding: 8px;
+    text-align: left;
+    border: 1px solid #000000; }
+    table#stepsTable tbody tr td .bold {
+      font-weight: 800; }
+    table#stepsTable tbody tr td .colored {
+      font-weight: 800;
+      color: blue; }
+
 /* Modal styles */
 .modal {
   display: none;
