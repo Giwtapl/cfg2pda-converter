@@ -1,3 +1,4 @@
+import { Cfg2PdaConverter } from "./components/converter.js";
 import { InputHandler } from './components/InputHandler.js';
 
 window.EMPTY_STRING = 'ε';
@@ -29,6 +30,14 @@ const generateBtn = document.getElementById('generateButton');
 
 // Get the TestCFG button
 const testCfgBtn = document.getElementById('btn-testcfg');
+
+const convertBtn = document.getElementById('btn-convert');
+
+convertBtn.addEventListener('click', () => {
+    const converter = new Cfg2PdaConverter(window.inputHandler.cfg);
+    const equivPda = converter.convert();
+    equivPda.render();
+});
 
 const generatedWordInputEl = document.getElementById('cfgWordInput');
 
@@ -66,20 +75,18 @@ generateBtn.onclick = function() {
         return;
     }
 
-    const generatedWord = generateRandomWord(length);
+    const generatedWord = window.inputHandler.cfg.wordGenerator.generateWord(length);
+
+    // for (let i = 0; i <= length; i++) {
+    //     console.log(`1: Word of length ${i}: ${window.inputHandler.cfg.wordGenerator.generateWord(i)}`);
+    //     console.log(`2: Word of length ${i}: ${window.inputHandler.cfg.wordGenerator.generateWord(i)}`);
+    //     console.log(`3: Word of length ${i}: ${window.inputHandler.cfg.wordGenerator.generateWord(i)}`);
+    // }
+
+
     generatedWordInputEl.value = generatedWord;
     modal.style.display = 'none';
     testCfgBtn.removeAttribute("disabled");
-}
-
-function generateRandomWord(length) {
-    const alphabet = 'abcdefghijklmnopqrstuvwxyz';
-    let word = '';
-    for (let i = 0; i < length; i++) {
-        const randomIndex = Math.floor(Math.random() * alphabet.length);
-        word += alphabet[randomIndex];
-    }
-    return word;
 }
 
 testCfgBtn.onclick = function() {

@@ -1,164 +1,93 @@
 import { GenerateWordError } from "../utilities/exceptions.js";
 
-
 export class CfgWordGenerator {
     constructor(cfg) {
         this.cfg = cfg;
-        this.cfgObj = this.cfg.toObject();
-        this.recursionDepth = 0;
-        this.createChoicesStructure();
-        this.path = [];
+        this.cfgObj = this.cfg.cfgObj;
+        this.generatedWords = new Set(); // Use Set for unique generated words
+        this.duplicateGeneratedWords = new Set(); // Use Set for duplicate words
     }
 
-    generateWord(length, symbol=this.cfg.rules[0].varLetter, acceptNull=false) {
-    //     if (symbol === this.cfg.rules[0].varLetter && this.path.length === 1) {
-    //         this.path.push({
-    //             currentWord: symbol,
-    //             curVar: symbol,
-    //             validChoices: this.filterChoices(this.choicesStructure[symbol], length, acceptNull)
-    //         })
-    //     }
-
-    //     this.path.push(this.generateWord())
-
-
-    //     this.trace[this.recursionDepth] = this.choicesStructure[symbol];
-
-    //     const choices = this.cfgObj[symbol];
-
-    //     if (length === 0) {
-    //         const word = this.handleZeroLengthCase(length, choices);
-    //         this.recursionDepth--;
-    //         return word;
-    //     }
-
-    //     const choicesStructure = this.getChoicesStructure(choices);
-    //     const validChoices = this.filterChoices(choicesStructure, length, acceptNull);
-
-    //     if (validChoices.length === 0) {
-    //         this.recursionDepth--;
-    //         return false;
-    //     }
-
-    //     const finalChoice = validChoices[Math.floor(Math.random() * validChoices.length)];
-    //     this.path.push(finalChoice);
-    //     length -= choicesStructure[finalChoice].terminals;
-
-    //     let word = '';
-    //     for (const [i, char] of Object.entries([...finalChoice])) {
-    //         if (char in this.cfgObj) {
-    //             const acceptNull = this.shouldAcceptNull(parseInt(i), finalChoice);
-    //             const result = this.generateWord(length, char, acceptNull);
-    //             if (result === false) {
-    //                 this.recursionDepth--;
-    //                 this.trace[this.recursionDepth]
-    //             }
-    //             word += result;
-    //         } else {
-    //             if (char !== window.EMPTY_STRING) {
-    //                 word += char;
-    //             }
-    //         }
-    //     }
-
-    //     this.recursionDepth--;
-    //     return word;
-    // }
-        return 'abbbabaab';
+    canStillGenerateRemainingWord(cfg, currentGeneratedWord, targetLength) {
+        // Calculate the number of variables in the currentGeneratedWord that can produce ε
+        const currentGeneratedWordVariablesWithEpsilon = currentGeneratedWord.split('').filter(s => cfg[s] && cfg[s].includes('ε'));
+        return currentGeneratedWord.length - currentGeneratedWordVariablesWithEpsilon.length <= targetLength;
     }
 
-    createChoicesStructure() {
-        this.choicesStructure = {};
-        this.cfg.vars.forEach(variable => {
-            this.choicesStructure[variable] = [];
-            this.cfgObj[variable].forEach(choice => {
-                let terminals = 0;
-                let vars = {
-                    count: 0,
-                    names: []
-                };
-                const empty = choice === window.EMPTY_STRING;
-                for (const char of choice) {
-                    if (this.cfg.terminals.includes(char)) {
-                        terminals++;
-                    } else if (this.cfg.vars.includes(char)) {
-                        vars.count++;
-                        vars.names.push(char);
+    generateWord(targetLength) {
+        const cfg = this.cfgObj;
+
+        const generateWordRec = currentWord => {
+            if (!this.canStillGenerateRemainingWord(cfg, currentWord, targetLength)) {
+                return null;
+            }
+
+            if (isTerminal(currentWord)) {
+                // If the current word has the correct length and consists only of terminals, return it
+                if (currentWord.length === targetLength) {
+                    if (this.generatedWords.has(currentWord)) {
+                        this.duplicateGeneratedWords.add(currentWord); // Add to set of duplicates
+                    }
+                    return currentWord;
+                } else {
+                    return null;
+                }
+            }
+
+            const cfgClone = JSON.parse(JSON.stringify(cfg));
+
+            // Find the first non-terminal symbol in the word
+            for (let i = 0; i < currentWord.length; i++) {
+                if (cfg[currentWord[i]]) { // Check if it's a non-terminal (present in the CFG)
+                    const nonTerminal = currentWord[i];
+
+                    // Randomly choose one of the productions for this non-terminal
+                    const productions = cfgClone[nonTerminal];
+                    const randomIndex = Math.floor(Math.random() * productions.length);
+                    let chosenProduction = productions.splice(randomIndex, 1)[0];
+                    chosenProduction = chosenProduction === window.EMPTY_STRING ? "" : chosenProduction;
+
+                    // Replace the non-terminal with the chosen production
+                    const newWord = currentWord.slice(0, i) + chosenProduction + currentWord.slice(i + 1);
+
+                    // Recursive call to generate further
+                    const result = generateWordRec(newWord);
+
+                    // If a valid word is generated, return it
+                    if (result) {
+                        return result;
+                    } else {
+                        i = -1;
                     }
                 }
-                this.choicesStructure[variable].push({ terminals, vars, empty });
-            });
-        });
-    }
-
-    shouldAcceptNull(index, choice) {
-        let acceptNull = false;
-        for (let j = index + 1; j <= choice.length - 1; j++) {
-            if (choice[j] in this.cfgObj) {
-                acceptNull = true;
             }
-        }
-        return acceptNull;
-    }
 
-    handleZeroLengthCase(length, choices) {
-        const varLetterInFirstRuleProductions = Array.from(new Set(choices).intersection(new Set(Object.keys(this.cfgObj))));
-
-        if (choices.includes(window.EMPTY_STRING)) {
-            return window.EMPTY_STRING;
-        } else if (varLetterInFirstRuleProductions.length) {
-            return this.handleZeroLengthCase(length, this.cfgObj[varLetterInFirstRuleProductions[0]]);
-        } else {
-            throw new GenerateWordError();
-        }
-    }
-
-    getChoicesStructure(choices) {
-        const choicesStructure = {};
-        choices.forEach(choice => {
-            choicesStructure[choice] = {
-                terminals: 0,
-                vars: {
-                    count: 0,
-                    names: []
-                },
-                empty: choice === window.EMPTY_STRING
-            };
-            for (const char of choice) {
-                if (this.cfg.terminals.includes(char)) {
-                    choicesStructure[choice].terminals++;
-                } else if (this.cfg.vars.includes(char)) {
-                    choicesStructure[choice].vars.count++;
-                    choicesStructure[choice].vars.names.push(char);
-                }
-            }
-        });
-
-        return choicesStructure;
-    }
-
-    filterChoices(choicesStructure, length, acceptNull) {
-        const validChoices = [];
-        for(const [choice, info] of Object.entries(choicesStructure)) {
-            if (
-                (
-                    info.terminals < length
-                    && info.vars.count > 0
-                ) || (
-                    info.terminals === length
-                    && (
-                        info.vars.count === 0
-                        || info.vars.names.filter(varName => this.cfgObj[varName].includes(window.EMPTY_STRING)).length > 0
-                    )
-                ) || (
-                    info.empty
-                    && acceptNull
-                )
-            ) {
-                validChoices.push(choice);
-            }
+            // If no valid word is found after trying all productions, return null (backtrack)
+            return null;
         }
 
-        return validChoices;
+        // Helper function to check if a word is fully terminal
+        const isTerminal = word => !/[A-Z]/.test(word);
+
+        // Start the recursive process with the start symbol
+        const generatedWord = generateWordRec(this.cfg.rules[0].varLetter);
+
+        if (!generatedWord && this.duplicateGeneratedWords.size > 0) {
+            // Convert set to array to randomly select a duplicate word
+            const duplicatesArray = Array.from(this.duplicateGeneratedWords).filter(dWord => dWord.length === targetLength);
+            return duplicatesArray[Math.floor(Math.random() * duplicatesArray.length)];
+        } else if (generatedWord && !this.generatedWords.has(generatedWord)) {
+            this.generatedWords.add(generatedWord); // Add unique word to set
+            return generatedWord;
+        } else if (generatedWord && this.duplicateGeneratedWords.has(generatedWord)) {
+            if (this.duplicateGeneratedWords.size === 1) {
+                return generatedWord;
+            } else {
+                const duplicatesArray = Array.from(this.duplicateGeneratedWords).filter(dWord => dWord.length === targetLength);
+                const idx = duplicatesArray.indexOf(generatedWord);
+                const allDuplicatesNotCurrent = duplicatesArray.splice(idx, 1)[0];
+                return duplicatesArray[Math.floor(Math.random() * allDuplicatesNotCurrent.length)];
+            }
+        }
     }
 };
