@@ -1,7 +1,7 @@
 import { Pda } from "../entities/pda.js";
 
 export class Cfg2PdaConverter {
-    NULL_STRING = 'ε';
+    NULL_STRING = window.EMPTY_STRING;
     SPECIAL_CHAR = '$';
     STARTING_VAR = 'S';
     ARROW = '&rarr;'

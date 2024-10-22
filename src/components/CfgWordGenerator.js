@@ -1,5 +1,3 @@
-import { GenerateWordError } from "../utilities/exceptions.js";
-
 export class CfgWordGenerator {
     constructor(cfg) {
         this.cfg = cfg;

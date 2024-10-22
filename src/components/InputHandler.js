@@ -1,11 +1,34 @@
-import { Rule } from "../entities/rule.js";
 import { Cfg } from "../entities/cfg.js"
+import { Rule } from "../entities/rule.js";
+import { CfgTester } from "./cfgTester.js";
+import { Cfg2PdaConverter } from "./converter.js";
 import { isUpperCase } from "../utilities/tools.js";
+
 
 export class InputHandler {
     constructor() {
         this.rules = [];
-        this.cfg = [];
+        this.cfg = null;
+        this.setButtonEventListeners();
+    }
+
+    setButtonEventListeners() {
+        const doneBtnEl = document.getElementById("btn-done");
+        doneBtnEl.addEventListener('click', event => {
+            this.doneBtnHandler.bind(this)(event);
+        });
+
+        const abortBtnEl = document.getElementById("btn-restart");
+        abortBtnEl.addEventListener('click', () => {
+            location.reload();
+        });
+
+        const convertBtn = document.getElementById('btn-convert');
+        convertBtn.addEventListener('click', () => {
+            const converter = new Cfg2PdaConverter(window.inputHandler.cfg);
+            const equivPda = converter.convert();
+            equivPda.render();
+        });
     }
 
     getRules() {
@@ -78,6 +101,7 @@ export class InputHandler {
         console.log('Done button was clicked. You provided the following CFG:');
         console.log(this.cfg.toStr());
         console.log(this.cfg.toObject());
+        new CfgTester();
     }
 
     isCfgEmpty(currentProductions) {
@@ -134,7 +158,6 @@ export class InputHandler {
     hideDoneButton(doneBtnEl) {
         doneBtnEl.style.display = 'none'
     }
-
 
     showLoadingModal() {
         const modal = document.getElementById('loading-modal');
