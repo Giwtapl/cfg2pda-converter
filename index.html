@@ -12,21 +12,17 @@
 <body class="body">
     <header class="header">
         <h1 class="header__heading--primary">CFG2nPDA Converter</h1>
-        <a href="#main" class="header__btn">Get Started</a>
+        <a href="#cfg-area" class="header__btn">Get Started</a>
     </header>
-    <main id="main" class="container">
-        <h2 class="container__heading">Enter Your CFG</h2>
-        <div class="container__user-input">
+    <div id="cfg-area" class="outter-container">
+        <h2 class="heading--primary">Enter Your CFG</h2>
+        <div class="reversed-cols-flex-container rounded-container">
             <div class="buttons-container">
-                <button id="btn-done" class="btn--primary">Done</button>
-                <button id="btn-convert" class="btn--primary" disabled>Convert to nPDA</button>
+                <button id="btn-done" class="btn--primary btn--blue">Done</button>
+                <button id="btn-convert" class="btn--primary btn--green" disabled>Convert to PDA</button>
                 <button id="btn-restart" class="btn--primary btn--red">Restart</button>
             </div>
             <div class="test-wrapper hidden">
-                <p class="instruction">Test CFG against a word: Enter your word or generate one:</p>
-                <input type="text" id="cfgWordInput" class="wordInput"/>
-                <button id="generateWordButton" class="btn--secondary">Generate Word</button>
-                <button id="btn-testcfg" class="btn--secondary" disabled>Test CFG</button>
                 <div id="result"></div>
                 <table id="stepsTable" class="hidden">
                     <thead>
@@ -42,39 +38,59 @@
             </div>
             <div class="rules" id="user-input"></div>
         </div>
+    </div>
 
-        <div class="test-container">
-            <h2 class="container__heading">Please give your input and press Enter</h2>
-            <div class="cfg-test">
-                <!-- <h4>Please give your input and press Enter</h4> -->
-                <div id="graph"></div>
+    <div class="outter-container">
+        <h2 class="heading--primary">Shared Input Word</h2>
+        <div class="rounded-container shared-input">
+            <p class="instruction">Enter or generate a word to use for both CFG and PDA testing:</p>
+            <input type="text" id="sharedWordInput" class="input-text" />
+            <button id="generateWordButton" class="btn--secondary">Generate Word</button>
+            <button id="btn-testcfg" class="btn--secondary btn--gold" disabled>Test CFG</button>
+            <button id="btn-testpda" class="btn--secondary btn--gold" disabled>Test PDA</button>
+        </div>
+    </div>
 
-                <p class="instruction">Test PDA against a word: Enter your word or generate one:</p>
-                <input type="text" id="pdaWordInput" class="wordInput"/>
-                <button class="btn--secondary">Generate Word</button>
+    <div id="pdaArea" class="outter-container hidden">
+        <h2 class="heading--primary">Here is the equivalent PDA</h2>
+        <div class="rounded-container">
+            <!-- <h4>Please give your input and press Enter</h4> -->
+            <div id="graph"></div>
+            <div id="stack-container" class="stack-visual"></div>
+            <div id="word-container" class="word-visual"></div>
+            <button id="next-step" class="btn--secondary" style="display: none;">Next Step</button>
 
-                <!-- Modal -->
-                <div id="modal" class="modal">
-                    <div class="modal-content">
-                        <span class="close">&times;</span>
-                        <p class="instruction">Enter word length:</p>
-                        <input type="number" id="wordLength" class="wordInput" min="1">
-                        <button id="goButton" class="btn--secondary">Go</button>
-                    </div>
+            <!-- <p class="instruction">Test PDA against a word: Enter your word or generate one:</p>
+            <input type="text" id="pdaWordInput" class="input-text"/>
+            <button class="btn--secondary">Generate Word</button> -->
+
+            <!-- Modal -->
+            <div id="modal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <p class="instruction">Enter word length:</p>
+                    <input type="number" id="wordLength" class="input-text" min="1">
+                    <button id="goButton" class="btn--secondary">Go</button>
                 </div>
-                <button class="btn--primary btn--red">Close</button>
             </div>
         </div>
-    </main>
+    </div>
+
     <footer class="footer">
-        Footer
+        <div class="footer-content">
+            <p>Diploma Thesis - CFG to PDA Converter</p>
+            <p>Developed by: Ploiarhopoulou Giwta(AM: )</p>
+            <p>Computer Engineering & Informatics Department - University of Patras</p>
+            <p>Year: 2024</p>
+        </div>
     </footer>
-    <script async src="src/app.js" defer type="module"></script>
+
     <div id="loading-modal" class="modal">
         <div class="modal-content">
             <div class="loader"></div>
             <p>Loading...</p>
         </div>
     </div>
+    <script async src="src/app.js" defer type="module"></script>
 </body>
 </html>

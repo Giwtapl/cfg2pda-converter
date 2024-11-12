@@ -1,5 +1,4 @@
-import {Production} from './production.js';
-
+import { Production } from './production.js';
 
 export class Rule {
     PARENT_ID = 'user-input';
@@ -32,7 +31,7 @@ export class Rule {
         productionsDiv.id = `production-container-${this.index}`;
         productionsDiv.classList.add('productions');
 
-        // Create the <button> element with the id, class, and text content
+        // Create the <button> elements with ids, classes, and event listeners
         const plusButtonElement = document.createElement('button');
         plusButtonElement.id = `plus-rule-${this.index}`;
         plusButtonElement.classList.add('btn', 'add-rule-production');
@@ -61,20 +60,15 @@ export class Rule {
         spanElement.classList.add('prod-sep');
         spanElement.textContent = ' | ';
         event.target.parentElement.insertBefore(spanElement, event.target);
-        this.addProduction(this.productionIndex + 1);
+        this.addProduction();
         if (this.productions.length > 1) {
             event.target.nextElementSibling.style.display = 'block';
         }
     }
 
     minusBtnHandler(event) {
-        const prodToRemove = this.productions[this.productionIndex - 1];
-        const prodToRemoveElement = document.getElementById(prodToRemove.id);
-        prodToRemoveElement.value = '';
-        const inputEvent = new Event('input', { bubbles: true });
-        prodToRemoveElement.dispatchEvent(inputEvent);
-        prodToRemove.remove();
-        this.productions = this.productions.filter(prod => prod.id !== prodToRemove.id);
+        const lastProd = this.productions.pop();
+        lastProd.remove();
         this.updateProductionIndex();
         if (this.productions.length <= 1) {
             event.target.style.display = 'none';
@@ -82,7 +76,8 @@ export class Rule {
     }
 
     addProduction() {
-        this.productions.push(new Production(this.index,  this.productions.length + 1));
+        const newProd = new Production(this.index, this.productions.length + 1, this);
+        this.productions.push(newProd);
         this.updateProductionIndex();
     }
 
@@ -98,18 +93,8 @@ export class Rule {
 
     remove() {
         if (this.index === 1) return;
-        const ruleEl = document.getElementById(`rule-${this.index}`);
+        const ruleEl = document.getElementById(this.id);
         ruleEl.remove();
-    }
-
-    removeProduction(prodIndex) {
-        this.productions.splice(prodIndex - 1, 1);
-    }
-
-    assignInputListener() {
-        for (const prod of this.productions) {
-            const inputEl = document.getElementById(prod.id);
-        }
     }
 
     updateProductionIndex() {

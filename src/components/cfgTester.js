@@ -5,7 +5,7 @@ export class CfgTester {
         this.generateBtnEl = document.getElementById('generateButton');
         this.testCfgBtnEl = document.getElementById('btn-testcfg');
         this.goBtnEl = document.getElementById('goButton');
-        this.generatedWordInputEl = document.getElementById('cfgWordInput');
+        this.generatedWordInputEl = document.getElementById('sharedWordInput');
         this.modal = new WordGenerationModal();
         this.setEventListeners();
     }

@@ -24,10 +24,15 @@ export class InputHandler {
         });
 
         const convertBtn = document.getElementById('btn-convert');
-        convertBtn.addEventListener('click', () => {
+        convertBtn.addEventListener('click', (event) => {
+            const pdaArea = document.getElementById('pdaArea');
+            pdaArea.classList.toggle('hidden');
             const converter = new Cfg2PdaConverter(window.inputHandler.cfg);
             const equivPda = converter.convert();
             equivPda.render();
+            document.getElementById('btn-testpda').disabled = false;
+            pdaArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });  // start, center, end, nearest
+            event.target.style.display = 'none';
         });
     }
 
@@ -74,7 +79,7 @@ export class InputHandler {
     }
 
     doneBtnHandler(event) {
-        const currentProductions = Array.from(document.getElementsByClassName('input-text'));
+        const currentProductions = Array.from(document.getElementsByClassName('input-text--rule'));
         if (this.isCfgEmpty(currentProductions)) {
             alert('No CFG has been provided yet.\nPlease input the CFG rules and then press the "Done" button.');
             return;
@@ -150,7 +155,7 @@ export class InputHandler {
     }
 
     disableProductionsInput() {
-        Array.from(document.getElementsByClassName('input-text')).forEach(productionInputEl => {
+        Array.from(document.getElementsByClassName('input-text--rule')).forEach(productionInputEl => {
             productionInputEl.disabled = true;
         });
     }

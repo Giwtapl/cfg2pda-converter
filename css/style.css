@@ -1,3 +1,29 @@
+.footer {
+  background-color: #222;
+  border-radius: 20px 20px 0 0;
+  color: #fff;
+  padding: 20px 0;
+  text-align: center;
+  font-size: 1rem;
+  margin-top: 50px; }
+  .footer .footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px; }
+    .footer .footer-content p {
+      margin: 5px 0;
+      line-height: 1.5; }
+      .footer .footer-content p:first-of-type {
+        font-weight: bold;
+        font-size: 1.1rem; }
+  @media (max-width: 768px) {
+    .footer {
+      font-size: 0.9rem; }
+      .footer .footer-content p {
+        font-size: 0.95rem; }
+        .footer .footer-content p:first-of-type {
+          font-size: 1rem; } }
+
 *,
 *::after,
 *::before {
@@ -67,88 +93,94 @@ html {
     z-index: -1;
     transition: all .2s; }
 
-.container {
+.heading--primary {
+  font-size: 4rem;
+  font-weight: 700px;
+  text-transform: uppercase;
+  display: inline-block;
+  margin-bottom: 2rem;
+  background-image: linear-gradient(to right, #3c0663, #9112a4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent; }
+
+.outter-container {
   width: 100%;
   text-align: center; }
-  .container__heading {
-    font-size: 4rem;
-    font-weight: 700px;
-    text-transform: uppercase;
-    display: inline-block;
-    margin-bottom: 2rem;
-    background-image: linear-gradient(to right, #3c0663, #9112a4);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent; }
-  .container__user-input {
-    display: flex;
-    flex-direction: column-reverse;
-    border-radius: 20px;
-    padding: 2rem;
-    margin: 0 auto 2rem auto;
-    width: 80vw;
-    height: auto;
-    background-color: #9112a4;
-    box-shadow: 0.5rem 0.7rem 1.5rem #000; }
-    .container__user-input .rules {
-      display: flex;
-      flex-direction: column; }
-    .container__user-input .test-wrapper input {
-      font-size: 2.5rem;
-      border-radius: 50px;
-      background-color: #999;
-      text-align: center;
-      border: none;
-      flex: 0 0 10%;
-      width: 75%;
-      margin: 0 0 1rem 0; }
-      .container__user-input .test-wrapper input:focus {
-        background-color: white; }
-      .container__user-input .test-wrapper input:disabled {
-        background-color: #9112a4;
-        color: white; }
-    .container__user-input .buttons-container {
-      display: flex;
-      justify-content: end; }
-  .container .cfg-test {
-    margin: 2rem auto;
-    background-color: orangered;
-    display: flex;
-    flex-direction: column;
-    border-radius: 20px;
-    padding: 2rem;
-    width: 80vw;
-    height: auto;
-    box-shadow: 0.5rem 0.7rem 1.5rem #000; }
-    .container .cfg-test input {
-      font-size: 2.5rem;
-      border-radius: 50px;
-      background-color: #999;
-      text-align: center;
-      border: none;
-      flex: 0 0 60%;
-      width: 30%;
-      margin: 0 0 1rem 0; }
-      .container .cfg-test input:focus {
-        background-color: white; }
-      .container .cfg-test input:disabled {
-        background-color: #9112a4;
-        color: white; }
-  .container #derivationTable {
-    width: 100%;
-    border-collapse: collapse; }
-  .container #derivationTable th, .container #derivationTable td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left; }
+
+.rounded-container {
+  border-radius: 20px;
+  padding: 2rem;
+  margin: 0 auto 2rem auto;
+  width: 80vw;
+  height: auto;
+  background-color: #9112a4;
+  box-shadow: 0.5rem 0.7rem 1.5rem #000; }
+
+.reversed-cols-flex-container {
+  display: flex;
+  flex-direction: column-reverse; }
+
+.rules {
+  display: flex;
+  flex-direction: column; }
+
+.input-text {
+  font-size: 2rem;
+  border-radius: 50px;
+  background-color: #999;
+  text-align: center;
+  border: none;
+  margin: 0 0 1rem 0; }
+  .input-text--rule {
+    width: 75%;
+    flex: 0 0 10%;
+    font-size: 2.5rem; }
+    .input-text--rule:focus {
+      background-color: white; }
+    .input-text--rule:disabled {
+      background-color: #9112a4;
+      color: white; }
+
+.buttons-container {
+  display: flex;
+  justify-content: end; }
+
+.pda-container {
+  margin: 2rem auto;
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  padding: 2rem;
+  width: 80vw;
+  height: auto;
+  box-shadow: 0.5rem 0.7rem 1.5rem #000; }
+  .pda-container input {
+    font-size: 2.5rem;
+    border-radius: 50px;
+    background-color: #999;
+    text-align: center;
+    border: none;
+    flex: 0 0 60%;
+    width: 30%;
+    margin: 0 0 1rem 0; }
+    .pda-container input:focus {
+      background-color: white; }
+    .pda-container input:disabled {
+      background-color: #9112a4;
+      color: white; }
+
+#derivationTable {
+  width: 100%;
+  border-collapse: collapse; }
+
+#derivationTable th, #derivationTable td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left; }
 
 .instruction {
   font-size: 2.5rem; }
-
-.wordInput {
-  font-size: 2rem;
-  min-width: 200px;
-  max-width: 300px; }
 
 .hidden {
   display: none; }
@@ -190,13 +222,13 @@ html {
     cursor: not-allowed;
     /* You can also add other styles like changing the background color or text color */ }
 
-#btn-done {
+.btn--blue {
   background-color: #1f89f4; }
 
-#btn-testcfg {
+.btn--gold {
   background-color: #a98a03; }
 
-#btn-convert {
+.btn--green {
   background-color: #0bbf4d; }
 
 .btn--red {
@@ -214,20 +246,6 @@ html {
     align-items: flex-start;
     flex: 0 0 90%;
     column-gap: 5px; }
-    .rule .productions .input-text {
-      font-size: 2.5rem;
-      border-radius: 50px;
-      background-color: #999;
-      text-align: center;
-      border: none;
-      flex: 0 0 10%;
-      width: 75%;
-      margin: 0 0 1rem 0; }
-      .rule .productions .input-text:focus {
-        background-color: white; }
-      .rule .productions .input-text:disabled {
-        background-color: #9112a4;
-        color: white; }
     .rule .productions .prod-sep {
       font-size: 2.5rem;
       color: white;
