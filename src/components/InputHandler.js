@@ -1,4 +1,4 @@
-import { Cfg } from "../entities/cfg.js"
+import { Cfg } from "../entities/cfg.js";
 import { Rule } from "../entities/rule.js";
 import { CfgTester } from "./cfgTester.js";
 import { Cfg2PdaConverter } from "./converter.js";
@@ -9,7 +9,9 @@ export class InputHandler {
     constructor() {
         this.rules = [];
         this.cfg = null;
+        this.isDone = false;
         this.setButtonEventListeners();
+        this.setEnterKeyListener();
     }
 
     setButtonEventListeners() {
@@ -33,6 +35,45 @@ export class InputHandler {
             document.getElementById('btn-testpda').disabled = false;
             pdaArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });  // start, center, end, nearest
             event.target.style.display = 'none';
+        });
+    }
+
+    setEnterKeyListener() {
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                // Prevent default Enter key behavior
+                event.preventDefault();
+
+                // Check if there are any rules
+                if (this.rules.length > 0) {
+                    // Get the last rule
+                    const lastRule = this.rules[this.rules.length - 1];
+
+                    // Check if the last rule has any productions
+                    if (lastRule.productions.length > 0) {
+                        // Get the last production of the last rule
+                        const lastProduction = lastRule.productions[lastRule.productions.length - 1];
+
+                        // Get the input element of the last production
+                        const lastProdInputEl = document.getElementById(lastProduction.id);
+
+                        // Check if the currently focused element is the last production's input
+                        if (document.activeElement === lastProdInputEl) {
+                            // Ensure the last production's input is processed
+
+                            // Option 1: Manually update the production's text property
+                            lastProduction.text = lastProdInputEl.value;
+
+                            // Option 2: Trigger the input event to process any pending changes
+                            // const inputEvent = new Event('input', { bubbles: true });
+                            // lastProdInputEl.dispatchEvent(inputEvent);
+
+                            // Call the doneBtnHandler
+                            this.doneBtnHandler(event);
+                        }
+                    }
+                }
+            }
         });
     }
 
@@ -79,6 +120,8 @@ export class InputHandler {
     }
 
     doneBtnHandler(event) {
+        if (this.isDone) return; // Prevent multiple submissions
+        this.isDone = true;
         const currentProductions = Array.from(document.getElementsByClassName('input-text--rule'));
         if (this.isCfgEmpty(currentProductions)) {
             alert('No CFG has been provided yet.\nPlease input the CFG rules and then press the "Done" button.');

@@ -1,6 +1,7 @@
 import { Production } from './production.js';
 
 export class Rule {
+    static instances = []; // Static array to keep track of all Rule instances
     PARENT_ID = 'user-input';
 
     constructor(index, varLetter, refererProd) {
@@ -13,6 +14,7 @@ export class Rule {
         this.varLetter = varLetter;
         this.createNew(varLetter);
         this.addProduction();
+        Rule.instances.push(this);
     }
 
     createNew(varLetter) {
@@ -95,6 +97,8 @@ export class Rule {
         if (this.index === 1) return;
         const ruleEl = document.getElementById(this.id);
         ruleEl.remove();
+        // Remove this Rule instance from the static array
+        Rule.instances = Rule.instances.filter(rule => rule !== this);
     }
 
     updateProductionIndex() {
