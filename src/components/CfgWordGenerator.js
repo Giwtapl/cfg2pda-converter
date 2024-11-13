@@ -8,7 +8,7 @@ export class CfgWordGenerator {
 
     canStillGenerateRemainingWord(cfg, currentGeneratedWord, targetLength) {
         // Calculate the number of variables in the currentGeneratedWord that can produce ε
-        const currentGeneratedWordVariablesWithEpsilon = currentGeneratedWord.split('').filter(s => cfg[s] && cfg[s].includes('ε'));
+        const currentGeneratedWordVariablesWithEpsilon = currentGeneratedWord.split('').filter(s => cfg[s] && cfg[s].includes(window.EMPTY_STRING));
         return currentGeneratedWord.length - currentGeneratedWordVariablesWithEpsilon.length <= targetLength;
     }
 

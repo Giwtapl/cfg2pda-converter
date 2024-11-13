@@ -40,7 +40,7 @@
         </div>
     </div>
 
-    <div class="outter-container">
+    <div id="shared-input-handler" class="outter-container">
         <h2 class="heading--primary">Shared Input Word</h2>
         <div class="rounded-container shared-input">
             <p class="instruction">Enter or generate a word to use for both CFG and PDA testing:</p>
@@ -54,27 +54,11 @@
     <div id="pdaArea" class="outter-container hidden">
         <h2 class="heading--primary">Here is the equivalent PDA</h2>
         <div class="rounded-container">
-            <!-- <h4>Please give your input and press Enter</h4> -->
+            <div id="word-container" class="word-visual"></div>
             <div id="graph"></div>
             <div id="stack-container" class="stack-visual"></div>
-            <div id="word-container" class="word-visual"></div>
-            <button id="next-step" class="btn--secondary" style="display: none;">Next Step</button>
-            <button id="btn-testpda" class="btn--secondary btn--gold" disabled>Test PDA</button>
+            <button id="next-step" class="btn--secondary" style="display: none;">Next</button>
             <button id="download-image" class="btn--secondary">Download PDA as Image</button>
-
-            <!-- <p class="instruction">Test PDA against a word: Enter your word or generate one:</p>
-            <input type="text" id="pdaWordInput" class="input-text"/>
-            <button class="btn--secondary">Generate Word</button> -->
-
-            <!-- Modal -->
-            <div id="modal" class="modal">
-                <div class="modal-content">
-                    <span class="close">&times;</span>
-                    <p class="instruction">Enter word length:</p>
-                    <input type="number" id="wordLength" class="input-text" min="1">
-                    <button id="goButton" class="btn--secondary">Go</button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -86,6 +70,15 @@
             <p>Year: 2024</p>
         </div>
     </footer>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p class="instruction">Enter word length:</p>
+            <input type="number" id="wordLength" class="input-text" min="1">
+            <button id="goButton" class="btn--secondary">Go</button>
+        </div>
+    </div>
 
     <div id="loading-modal" class="modal">
         <div class="modal-content">

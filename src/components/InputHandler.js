@@ -1,6 +1,6 @@
 import { Cfg } from "../entities/cfg.js";
 import { Rule } from "../entities/rule.js";
-import { CfgTester } from "./cfgTester.js";
+import { SharedInputHandler } from "./sharedInputHandler.js";
 import { Cfg2PdaConverter } from "./converter.js";
 import { isUpperCase } from "../utilities/tools.js";
 
@@ -32,7 +32,6 @@ export class InputHandler {
             const converter = new Cfg2PdaConverter(window.inputHandler.cfg);
             const equivPda = converter.convert();
             equivPda.render();
-            document.getElementById('btn-testpda').disabled = false;
             event.target.style.display = 'none';
         });
     }
@@ -138,7 +137,7 @@ export class InputHandler {
         console.log('Done button was clicked. You provided the following CFG:');
         console.log(this.cfg.toStr());
         console.log(this.cfg.toObject());
-        new CfgTester();
+        new SharedInputHandler();
     }
 
     isCfgEmpty(currentProductions) {

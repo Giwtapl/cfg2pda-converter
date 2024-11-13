@@ -341,6 +341,47 @@ table#stepsTable {
       font-weight: 800;
       color: blue; }
 
+/* Stack Visualization */
+.stack-visual {
+  position: absolute;
+  left: 10px;
+  top: 100px;
+  width: 80px;
+  border: 1px solid #ccc;
+  padding: 5px;
+  background-color: #f9f9f9; }
+
+.stack-element {
+  border: 1px solid #000;
+  padding: 5px;
+  text-align: center;
+  margin-bottom: 2px;
+  background-color: #fff; }
+
+/* Word Visualization */
+.word-visual {
+  text-align: center;
+  margin-bottom: 20px; }
+
+.word-letter {
+  display: inline-block;
+  font-size: 24px;
+  margin: 0 2px; }
+
+.current-letter {
+  text-decoration: underline;
+  color: red; }
+
+/* PDA Message */
+.pda-message {
+  margin-top: 20px;
+  font-size: 18px;
+  text-align: center;
+  color: green; }
+
+#shared-input-handler {
+  display: none; }
+
 /* Modal styles */
 .modal {
   display: none;

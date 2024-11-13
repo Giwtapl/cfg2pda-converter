@@ -1,48 +1,22 @@
-import { WordGenerationModal } from "./modal.js";
-
 export class CfgTester {
-    constructor() {
-        this.generateBtnEl = document.getElementById('generateButton');
-        this.testCfgBtnEl = document.getElementById('btn-testcfg');
-        this.goBtnEl = document.getElementById('goButton');
-        this.generatedWordInputEl = document.getElementById('sharedWordInput');
-        this.modal = new WordGenerationModal();
-        this.setEventListeners();
+    constructor(generatedWordInputEl) {
+        this.generatedWordInputEl = generatedWordInputEl;
     }
 
-    setEventListeners() {
-        this.generatedWordInputEl.addEventListener('input', () => {
-            this.testCfgBtnEl.disabled = !(this.generatedWordInputEl.value.trim() !== "");
-        });
-
-        // When the user clicks the generate button inside the modal
-        this.goBtnEl.onclick = () => {
-            const length = parseInt(document.getElementById('wordLength').value);
-            if (isNaN(length) || length < 1) {
-                alert('Please enter a valid length');
-                return;
-            }
-
-            const generatedWord = window.inputHandler.cfg.wordGenerator.generateWord(length);
-
-            this.generatedWordInputEl.value = generatedWord;
-            this.modal.element.style.display = 'none';
-            this.testCfgBtnEl.removeAttribute("disabled");
-        }
-
-        this.testCfgBtnEl.onclick = () => {
-            const word = this.generatedWordInputEl.value;
-            const startSymbol = "S";
-            const steps = [["Start → S", "Start", "S"]];
-            const result = this.canGenerate(window.inputHandler.cfg.cfgObj, startSymbol, word, steps);
-            console.log(`The word '${word}' is ${result ? "accepted" : "rejected"} by the CFG.`);
-            this.displaySteps(steps, result ? 'lightgreen' : 'lightcoral');
-        }
+    testCfgBtnHandler = () => {
+        const word = this.generatedWordInputEl.value;
+        const startSymbol = "S";
+        const steps = [["Start → S", "Start", "S"]];
+        const result = this.canGenerate(window.inputHandler.cfg.cfgObj, startSymbol, word, steps);
+        console.log(`The word '${word}' is ${result ? "accepted" : "rejected"} by the CFG.`);
+        const stepsTableEl = document.getElementById("stepsTable");
+        this.displaySteps(stepsTableEl, steps, result ? 'lightgreen' : 'lightcoral');
+        stepsTableEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     canStillGenerateRemainingWord(cfg, currentGeneratedWord, remainingWord) {
         // Calculate the number of variables in the currentGeneratedWord that can produce ε
-        const currentGeneratedWordVariablesWithEpsilon = currentGeneratedWord.split('').filter(s => cfg[s] && cfg[s].includes('ε'));
+        const currentGeneratedWordVariablesWithEpsilon = currentGeneratedWord.split('').filter(s => cfg[s] && cfg[s].includes(window.EMPTY_STRING));
         return currentGeneratedWord.length - currentGeneratedWordVariablesWithEpsilon.length <= remainingWord.length;
     }
 
@@ -68,9 +42,9 @@ export class CfgTester {
             // If it's a non-terminal, try all productions
             if (cfg[head]) {
                 for (const production of cfg[head]) {
-                    let newCurrentGeneratedWord = (production === "ε" ? "" : production) + tail.join("");
+                    let newCurrentGeneratedWord = (production === window.EMPTY_STRING ? "" : production) + tail.join("");
                     const previouslyDerivedWord = derivedWord;
-                    derivedWord = previouslyDerivedWord.replace(head, production === "ε" ? "" : production);
+                    derivedWord = previouslyDerivedWord.replace(head, production === window.EMPTY_STRING ? "" : production);
 
                     // Wrap capital letters in the first element
                     const ruleFormatted = `${head} → ${production}`.replace(/[A-Z]/g, "<span class='bold'>$&</span>");
@@ -107,9 +81,8 @@ export class CfgTester {
         return parse(startSymbol, word);
     }
 
-    displaySteps(steps, tableBgColor) {
-        const stepsTable = document.getElementById("stepsTable");
-        stepsTable.classList.remove("hidden");
+    displaySteps(stepsTableEl, steps, tableBgColor) {
+        stepsTableEl.classList.remove("hidden");
         const tableBody = document.getElementById("parsingSteps");
         tableBody.style.backgroundColor = tableBgColor;
         tableBody.innerHTML = "";

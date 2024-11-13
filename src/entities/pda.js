@@ -1,29 +1,38 @@
-import { isSubset } from "../utilities/tools.js";
-import { PdaTester } from "../components/PdaTester.js";
-import { PdaValidationError } from "../utilities/exceptions.js";
+import { PdaSimulation } from "../components/PdaSimulation.js";
+
 
 export class Pda {
-    STATES = ['Qstart', 'Qo', 'Qloop', 'Qaccept'];
-
     constructor(transitions) {
+        this.transitions = transitions;
         this.nPdaData = this._getNPdaDataFromTransitions(transitions);
-        this.tester = new PdaTester(this);
+        this.pdaSimulation = null;
     }
 
     render() {
         d3.select('#graph')
             .graphviz()
+            .zoom(false) // Disable zooming
             .renderDot(
                 `digraph {
                     rankdir=LR;
-                    ${this.nPdaData.nodes.map(node => `${node.id} [id="state-${node.id}", label=${node.label}];`).join('\n')}
-                    ${this.nPdaData.links.map(link => `${link.source} -> "${link.target}" [label="${link.label}"];`).join('\n')}
+                    ${this.nPdaData.nodes.map(node => `${node.id} [id="${node.id}", label=${node.label}];`).join('\n')}
+                    ${this.nPdaData.links.map((link, index) => `${link.source} -> ${link.target} [label="${link.label}", id="edge${index}"];`).join('\n')}
                 }`
             )
             .on("end", () => {
                 const pdaArea = document.getElementById('pdaArea');
                 pdaArea.scrollIntoView({ behavior: 'smooth', block: 'start' });  // start, center, end, nearest
+                window.isPdaRendered = true;
+                const event = new Event('input', {
+                    bubbles: true,
+                    cancelable: true,
+                });
+                document.getElementById('sharedWordInput').dispatchEvent(event);
                 this.addDownloadButtonListener();
+
+                // Initialize PDA simulation after the graph is rendered
+                const pdaTransitions = this.getTransitions();
+                this.pdaSimulation = new PdaSimulation(pdaTransitions);
             });
     }
 
@@ -83,6 +92,7 @@ export class Pda {
                 alert('Graph not found.');
             }
         });
+
     }
 
     _getNPdaDataFromTransitions(transitions) {
@@ -90,32 +100,56 @@ export class Pda {
             nodes: [],
             links: []
         };
-        this.STATES.forEach(state => {
-            nPdaData.nodes.push({ id: state, label: `<Q<SUB>${state.split('Q')[1]}</SUB>>` });
-        });
+
+        // Collect all unique states from transitions
+        const statesSet = new Set();
         transitions.forEach(transition => {
-            const { source: transSource, target: transTarget, label: transLabel } = transition;
-            if (Array.isArray(transLabel)) {
+            statesSet.add(transition.source);
+            statesSet.add(transition.target);
+        });
+
+        // Create nodes for each unique state
+        statesSet.forEach(state => {
+            nPdaData.nodes.push({ id: state, label: `<Q<SUB>${state.replace('Q', '')}</SUB>>` });
+        });
+
+        // Create links from transitions
+        transitions.forEach((transition) => {
+            const { source, target, label } = transition;
+            if (Array.isArray(label)) {
                 nPdaData.links.push(
-                    { source: transSource, target: transTarget, label: transLabel.join('\n') }
-                )
+                    { source: source, target: target, label: label.join('\n') }
+                );
             } else {
                 nPdaData.links.push(
-                    { source: transSource, target: transTarget, label: transLabel }
-                )
+                    { source: source, target: target, label: label }
+                );
             }
         });
+
         return nPdaData;
     }
 
-    getNextTransition(currentState, nextChar, stackTop) {
-        return this.nPdaData.links.find(link => {
-            const [read, pop, push] = link.label.split(', ');
-            return (
-                link.source === currentState &&
-                (read === nextChar || read === 'ε') &&
-                (pop === stackTop || pop === 'ε')
-            );
+    getTransitions() {
+        const transitionsArray = [];
+        this.nPdaData.links.forEach((link, index) => {
+            // Split the label to get individual transitions if there are multiple labels
+            const labels = link.label.split('\n');
+            labels.forEach(label => {
+                // Each label is in the format "input, pop → push"
+                const [inputPop, push] = label.split('→').map(s => s.trim());
+                const [input, pop] = inputPop.split(',').map(s => s.trim());
+                const transition = {
+                    fromState: link.source,
+                    toState: link.target,
+                    input: (input === window.EMPTY_STRING || input === 'ε') ? '' : input,
+                    stackTop: (pop === window.EMPTY_STRING || pop === 'ε') ? '' : pop,
+                    stackPush: (push === window.EMPTY_STRING || push === 'ε') ? '' : push,
+                    transitionId: `edge${index}` // Ensure this matches the id in the renderDot method
+                };
+                transitionsArray.push(transition);
+            });
         });
+        return transitionsArray;
     }
 }
