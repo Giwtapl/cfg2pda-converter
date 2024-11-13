@@ -33,7 +33,6 @@ export class InputHandler {
             const equivPda = converter.convert();
             equivPda.render();
             document.getElementById('btn-testpda').disabled = false;
-            pdaArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });  // start, center, end, nearest
             event.target.style.display = 'none';
         });
     }
@@ -59,16 +58,6 @@ export class InputHandler {
 
                         // Check if the currently focused element is the last production's input
                         if (document.activeElement === lastProdInputEl) {
-                            // Ensure the last production's input is processed
-
-                            // Option 1: Manually update the production's text property
-                            lastProduction.text = lastProdInputEl.value;
-
-                            // Option 2: Trigger the input event to process any pending changes
-                            // const inputEvent = new Event('input', { bubbles: true });
-                            // lastProdInputEl.dispatchEvent(inputEvent);
-
-                            // Call the doneBtnHandler
                             this.doneBtnHandler(event);
                         }
                     }
@@ -119,7 +108,7 @@ export class InputHandler {
         this.cfg = new Cfg(this.rules);
     }
 
-    doneBtnHandler(event) {
+    doneBtnHandler() {
         if (this.isDone) return; // Prevent multiple submissions
         this.isDone = true;
         const currentProductions = Array.from(document.getElementsByClassName('input-text--rule'));
@@ -142,7 +131,7 @@ export class InputHandler {
         this.destroyPlusMinusRuleButtons();
         this.handleEmptyProductions();
         this.disableProductionsInput();
-        this.hideDoneButton(event.target);
+        this.hideDoneButton(document.getElementById('btn-done'));
         this.transformInputToCfg();
 
         this.hideLoadingModal();
@@ -190,7 +179,7 @@ export class InputHandler {
     handleEmptyProductions() {
         this.rules.forEach(rule => {
             rule.productions.forEach(production => {
-                if (production.text === '') {
+                if (production.text === window.EMPTY_STRING) {
                     document.getElementById(production.id).value = window.EMPTY_STRING;
                 }
             });
