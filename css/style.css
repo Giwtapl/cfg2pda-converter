@@ -109,6 +109,7 @@ html {
   text-align: center; }
 
 .rounded-container {
+  position: relative;
   border-radius: 20px;
   padding: 2rem;
   margin: 0 auto 2rem auto;
@@ -296,8 +297,14 @@ html {
 .success {
   background-color: #d0e9c6; }
 
+.success--text {
+  color: #407a52; }
+
 .failure {
   background-color: #ebcccc; }
+
+.failure--text {
+  color: #a94442; }
 
 .loader {
   border: 4px solid #f3f3f3;
@@ -342,6 +349,12 @@ table#stepsTable {
       color: blue; }
 
 /* Stack Visualization */
+.stack-label {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #f9f9f9; }
+
 .stack-visual {
   position: absolute;
   left: 10px;
@@ -377,7 +390,7 @@ table#stepsTable {
   margin-top: 20px;
   font-size: 18px;
   text-align: center;
-  color: green; }
+  background-color: #f9f9f9; }
 
 #shared-input-handler {
   display: none; }

@@ -9,6 +9,7 @@ export class PdaSimulation {
         this.isRejected = false;
         this.previousState = null;
         this.previousTransition = null;
+        this.step = 0; // Add a step counter to track the simulation progress
 
         // PDA transitions data
         this.pdaTransitions = pdaTransitions;
@@ -20,7 +21,11 @@ export class PdaSimulation {
         this.testPdaButton = document.getElementById('btn-testpda');
 
         // Bind event listeners
-        this.testPdaButton.addEventListener('click', () => this.startPdaTest());
+        this.testPdaButton.addEventListener('click', () => {
+            this.stackContainer.classList.remove('hidden');
+            this.wordContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            this.startPdaTest();
+        });
         this.nextStepButton.addEventListener('click', () => this.nextPdaStep());
     }
 
@@ -52,6 +57,7 @@ export class PdaSimulation {
         this.isRejected = false;
         this.previousState = null;
         this.previousTransition = null;
+        this.step = 0; // Reset the step counter
 
         // Clear previous messages and highlights
         this.resetHighlighting();
@@ -70,12 +76,12 @@ export class PdaSimulation {
         if (result === 'accepted') {
             this.isAccepted = true;
             this.highlightState(this.currentState, 'green');
-            this.displayMessage(`The PDA accepts the word '${this.inputWord}'.`);
+            this.displayMessage(`The PDA accepts the word '${this.inputWord}'.`, true);
             this.nextStepButton.style.display = 'none';
         } else if (result === 'rejected') {
             this.isRejected = true;
             this.highlightState(this.currentState, 'red');
-            this.displayMessage(`The PDA does not accept the word '${this.inputWord}'.`);
+            this.displayMessage(`The PDA does not accept the word '${this.inputWord}'.`, false);
             this.nextStepButton.style.display = 'none';
         } else {
             // Continue to next step
@@ -98,14 +104,14 @@ export class PdaSimulation {
         }
 
         if (possibleTransitions.length > 0) {
-            // For simplicity, we'll take the first valid transition
+            // For this simulation, we'll proceed step by step, so we pick the first valid transition
             const transition = possibleTransitions[0];
 
             // Update previous state and transition
             this.resetHighlighting();
 
             // Highlight current transition
-            this.highlightTransition(transition.transitionId);
+            this.highlightTransition(transition);
 
             // Update PDA state
             this.previousState = this.currentState;
@@ -116,7 +122,6 @@ export class PdaSimulation {
                 this.stack.pop();
             }
             if (transition.stackPush !== '') {
-                // For multiple symbols, push them individually
                 const symbolsToPush = transition.stackPush.split('').reverse();
                 symbolsToPush.forEach(symbol => this.stack.push(symbol));
             }
@@ -129,8 +134,11 @@ export class PdaSimulation {
             // Highlight current state
             this.highlightState(this.currentState);
 
+            // Increment the step counter
+            this.step++;
+
             // Check for acceptance
-            if (this.currentState === 'Qaccept') {
+            if (this.currentState === 'Qaccept' && this.stack.length === 0) {
                 return 'accepted';
             }
 
@@ -142,7 +150,7 @@ export class PdaSimulation {
 
     // Find valid transitions from the current state
     findTransitions(currentState, inputSymbol, stackTop) {
-        return this.pdaTransitions.filter(trans => 
+        return this.pdaTransitions.filter(trans =>
             trans.fromState === currentState &&
             (trans.input === inputSymbol || trans.input === '') &&
             (trans.stackTop === stackTop || trans.stackTop === '')
@@ -192,41 +200,54 @@ export class PdaSimulation {
     }
 
     // Highlight a state in the PDA graph
-    highlightState(stateId, color = 'lightblue') {
-        // Reset previous state
-        if (this.previousState) {
-            d3.select(`#${this.previousState}`)
-                .select('ellipse')
-                .style('fill', 'white')
-                .attr('transform', 'scale(1)');
-        }
+    highlightState(stateId, color = '#2861ff') {
+        // // Reset previous state's styles
+        // if (this.previousState) {
+        //     // Reset the fill color and scale of the previous state's ellipse
+        //     d3.select(`#${this.previousState}`)
+        //         .select('ellipse')
+        //         .style('fill', 'white');
 
-        // Highlight current state
+        //     // Reset the text color of the previous state's label
+        //     d3.select(`#${this.previousState}`)
+        //         .selectAll('text, tspan')
+        //         .style('fill', 'black');
+        // }
+
+        // Highlight current state's ellipse with new fill color and scale
         d3.select(`#${stateId}`)
             .select('ellipse')
-            .style('fill', color)
-            .attr('transform', 'scale(1.2)');
+            .style('fill', color);
 
+        // Change the text color of the current state's label
+        d3.select(`#${stateId}`)
+            .selectAll('text, tspan')
+            .style('fill', 'white'); // Or any color that contrasts with the fill
+
+        // Update the previousState tracker
         this.previousState = stateId;
     }
 
     // Highlight a transition in the PDA graph
-    highlightTransition(transitionId, color = 'lightblue') {
-        // Reset previous transition
-        if (this.previousTransition) {
-            d3.select(`#${this.previousTransition}`)
-                .select('path')
-                .style('stroke', 'black')
-                .attr('transform', 'scale(1)');
-        }
+    highlightTransition(transition, color = '#2861ff') {
+        // // Reset previous transition
+        // if (this.previousTransition) {
+        //     d3.select(`#${this.previousTransition}`)
+        //         .selectAll('path, polygon')
+        //         .style('stroke', 'black');
+        // }
 
         // Highlight current transition
-        d3.select(`#${transitionId}`)
-            .select('path')
-            .style('stroke', color)
-            .attr('transform', 'scale(1.2)');
-
-        this.previousTransition = transitionId;
+        if (transition?.transitionId) {
+            d3.select(`#${transition.transitionId}`)
+                .selectAll('path, polygon')
+                .style('stroke', color);
+            this.previousTransition = transition.transitionId;
+            if (transition.transitionId === 'edge3') {
+                this.paintQloopTransitionLabel(this.getTextContentFromLabel(transition), color);
+                this.previousLabel = transition;
+            }
+        }
     }
 
     // Reset highlighting of states and transitions
@@ -235,21 +256,40 @@ export class PdaSimulation {
         if (this.previousState) {
             d3.select(`#${this.previousState}`)
                 .select('ellipse')
-                .style('fill', 'white')
-                .attr('transform', 'scale(1)');
+                .style('fill', 'white');
+
+            d3.select(`#${this.previousState}`)
+                .selectAll('text, tspan')
+                .style('fill', 'black');
         }
 
         // Reset previous transition
         if (this.previousTransition) {
             d3.select(`#${this.previousTransition}`)
-                .select('path')
-                .style('stroke', 'black')
-                .attr('transform', 'scale(1)');
+                .selectAll('path, polygon')
+                .style('stroke', 'black');
+        }
+
+        // Reset previous label
+        if (this.previousLabel) {
+            this.paintQloopTransitionLabel(this.getTextContentFromLabel(this.previousLabel), 'black');
         }
     }
 
+    getTextContentFromLabel(label) {
+        return `${label.input || window.EMPTY_STRING}, ${label.stackTop} → ${label.stackPush}`;
+    }
+
+    paintQloopTransitionLabel(textContent, color) {
+        const labels = d3.select('#edge3').selectAll('text');
+        const matchingLabel = Array.from(labels._groups[0]).filter(
+            textEl => textEl.textContent === textContent
+        )[0];
+        matchingLabel.style.fill = color;
+    }
+
     // Display a message to the user
-    displayMessage(message) {
+    displayMessage(message, success) {
         let messageContainer = document.getElementById('pda-message');
         if (!messageContainer) {
             messageContainer = document.createElement('div');
@@ -257,7 +297,10 @@ export class PdaSimulation {
             messageContainer.classList.add('pda-message');
             document.querySelector('#pdaArea .rounded-container').appendChild(messageContainer);
         }
-        messageContainer.textContent = message;
+        const messageTextElement = document.createElement('span');
+        messageTextElement.textContent = message;
+        messageContainer.appendChild(messageTextElement);
+        messageTextElement.classList.add(`${success ? 'success' : 'failure'}--text`);
     }
 
     // Clear any existing messages

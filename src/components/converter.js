@@ -28,15 +28,8 @@ export class Cfg2PdaConverter {
     _getQLoopLabelsList() {
         const qLoopLabelsList = []
         Object.entries(this.cfg.toObject()).forEach(([varLetter, prods]) => {
-            prods.forEach(prod => {
-                const prodCharsReversed = prod.split('').reverse();
-                prodCharsReversed.forEach((prodChar, i) => {
-                    if (i == 0) {
-                        qLoopLabelsList.push(`${this.NULL_STRING}, ${varLetter} ${this.ARROW} ${prodChar}`);
-                    } else {
-                        qLoopLabelsList.push(`${this.NULL_STRING}, ${this.NULL_STRING} ${this.ARROW} ${prodChar}`);
-                    }
-                });
+            prods.forEach((prod, i) => {
+                qLoopLabelsList.push(`${this.NULL_STRING}, ${i ? this.NULL_STRING : varLetter} ${this.ARROW} ${prod}`);
             });
         });
         this.cfg.getTerminalSymbols().forEach(termSym => {
