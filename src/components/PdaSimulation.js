@@ -29,7 +29,6 @@ export class PdaSimulation {
         this.nextStepButton.addEventListener('click', () => this.nextPdaStep());
     }
 
-    // Start the PDA test
     startPdaTest() {
         // Reset the simulation state
         this.resetSimulation();
@@ -48,7 +47,6 @@ export class PdaSimulation {
         this.nextStepButton.style.display = 'block';
     }
 
-    // Reset the simulation state
     resetSimulation() {
         this.currentState = 'Qstart';
         this.stack = [];
@@ -64,7 +62,6 @@ export class PdaSimulation {
         this.clearMessage();
     }
 
-    // Perform the next step in the PDA simulation
     nextPdaStep() {
         if (this.isAccepted || this.isRejected) {
             return;
@@ -90,7 +87,6 @@ export class PdaSimulation {
         }
     }
 
-    // Perform the next transition based on the current state
     performNextTransition() {
         let inputSymbol = this.inputWord[this.currentInputIndex] || '';
         let stackTop = this.stack[this.stack.length - 1] || '';
@@ -148,7 +144,6 @@ export class PdaSimulation {
         }
     }
 
-    // Find valid transitions from the current state
     findTransitions(currentState, inputSymbol, stackTop) {
         return this.pdaTransitions.filter(trans =>
             trans.fromState === currentState &&
@@ -157,7 +152,6 @@ export class PdaSimulation {
         );
     }
 
-    // Display the stack visualization
     displayStack() {
         this.stackContainer.innerHTML = ''; // Clear previous stack
 
@@ -170,7 +164,6 @@ export class PdaSimulation {
         }
     }
 
-    // Display the word visualization
     displayWord() {
         this.wordContainer.innerHTML = ''; // Clear previous word
 
@@ -187,7 +180,6 @@ export class PdaSimulation {
         }
     }
 
-    // Update the word visualization to indicate the current input symbol
     updateWordVisualization() {
         const letters = document.querySelectorAll('.word-letter');
         letters.forEach((letter, index) => {
@@ -199,21 +191,7 @@ export class PdaSimulation {
         });
     }
 
-    // Highlight a state in the PDA graph
     highlightState(stateId, color = '#2861ff') {
-        // // Reset previous state's styles
-        // if (this.previousState) {
-        //     // Reset the fill color and scale of the previous state's ellipse
-        //     d3.select(`#${this.previousState}`)
-        //         .select('ellipse')
-        //         .style('fill', 'white');
-
-        //     // Reset the text color of the previous state's label
-        //     d3.select(`#${this.previousState}`)
-        //         .selectAll('text, tspan')
-        //         .style('fill', 'black');
-        // }
-
         // Highlight current state's ellipse with new fill color and scale
         d3.select(`#${stateId}`)
             .select('ellipse')
@@ -228,15 +206,7 @@ export class PdaSimulation {
         this.previousState = stateId;
     }
 
-    // Highlight a transition in the PDA graph
     highlightTransition(transition, color = '#2861ff') {
-        // // Reset previous transition
-        // if (this.previousTransition) {
-        //     d3.select(`#${this.previousTransition}`)
-        //         .selectAll('path, polygon')
-        //         .style('stroke', 'black');
-        // }
-
         // Highlight current transition
         if (transition?.transitionId) {
             d3.select(`#${transition.transitionId}`)
@@ -250,7 +220,6 @@ export class PdaSimulation {
         }
     }
 
-    // Reset highlighting of states and transitions
     resetHighlighting() {
         // Reset previous state
         if (this.previousState) {
@@ -288,7 +257,6 @@ export class PdaSimulation {
         matchingLabel.style.fill = color;
     }
 
-    // Display a message to the user
     displayMessage(message, success) {
         let messageContainer = document.getElementById('pda-message');
         if (!messageContainer) {
@@ -303,7 +271,6 @@ export class PdaSimulation {
         messageTextElement.classList.add(`${success ? 'success' : 'failure'}--text`);
     }
 
-    // Clear any existing messages
     clearMessage() {
         const messageContainer = document.getElementById('pda-message');
         if (messageContainer) {
