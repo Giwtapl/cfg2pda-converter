@@ -137,14 +137,14 @@ export class Pda {
             const labels = link.label.split('\n');
             labels.forEach(label => {
                 // Each label is in the format "input, pop → push"
-                const [inputPop, push] = label.split('&rarr;').map(s => s.trim());
+                const [inputPop, push] = label.split(window.ARROW).map(s => s.trim());
                 const [input, pop] = inputPop.split(',').map(s => s.trim());
                 const transition = {
                     fromState: link.source,
                     toState: link.target,
-                    input: (input === window.EMPTY_STRING || input === window.EMPTY_STRING) ? '' : input,
-                    stackTop: (pop === window.EMPTY_STRING || pop === window.EMPTY_STRING) ? '' : pop,
-                    stackPush: (push === window.EMPTY_STRING || push === window.EMPTY_STRING) ? '' : push,
+                    input: input,
+                    stackTop: pop,
+                    stackPush: push,
                     transitionId: `edge${index}` // Ensure this matches the id in the renderDot method
                 };
                 transitionsArray.push(transition);

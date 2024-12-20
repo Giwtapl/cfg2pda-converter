@@ -2,9 +2,9 @@ import { Pda } from "../entities/pda.js";
 
 export class Cfg2PdaConverter {
     NULL_STRING = window.EMPTY_STRING;
-    SPECIAL_CHAR = '$';
-    STARTING_VAR = 'S';
-    ARROW = '&rarr;'
+    SPECIAL_CHAR = window.SPECIAL_CHAR;
+    STARTING_VAR = window.STARTING_VAR;
+    ARROW = window.ARROW;
     STANDARD_TRANSITIONS = [
         { source: 'Qstart', target: 'Qo', label: `${this.NULL_STRING}, ${this.NULL_STRING} ${this.ARROW} ${this.SPECIAL_CHAR}` },
         { source: 'Qo', target: 'Qloop', label: `${this.NULL_STRING}, ${this.NULL_STRING} ${this.ARROW} ${this.STARTING_VAR}` },
@@ -17,7 +17,7 @@ export class Cfg2PdaConverter {
     }
 
     convert() {
-        this.transitions.push(this._constructQLoopTransition())
+        this.transitions.push(this._constructQLoopTransition());
         return new Pda(this.transitions);
     }
 
@@ -26,10 +26,10 @@ export class Cfg2PdaConverter {
     }
 
     _getQLoopLabelsList() {
-        const qLoopLabelsList = []
+        const qLoopLabelsList = [];
         Object.entries(this.cfg.toObject()).forEach(([varLetter, prods]) => {
-            prods.forEach((prod, i) => {
-                qLoopLabelsList.push(`${this.NULL_STRING}, ${i ? this.NULL_STRING : varLetter} ${this.ARROW} ${prod}`);
+            prods.forEach((prod) => {
+                qLoopLabelsList.push(`${this.NULL_STRING}, ${varLetter} ${this.ARROW} ${prod}`);
             });
         });
         this.cfg.getTerminalSymbols().forEach(termSym => {

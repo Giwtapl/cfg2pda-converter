@@ -1,5 +1,7 @@
 export const isUpperCase = letter => /^[A-Z]$/.test(letter);
 
+export const isLowerCase = letter => /^[a-z]$/.test(letter);
+
 function findStrDifference(str1, str2) {
     let result = '';
     const str2Set = new Set(str2);
