@@ -21,63 +21,85 @@ export class CfgTester {
     }
 
     canGenerate(cfg, startSymbol, word, steps) {
+        let derivedWord = startSymbol;
+
         const parse = (currentGeneratedWord, remainingWord) => {
-            // If currentGeneratedWord is longer than remaining word, this path is a dead end
             if (!this.canStillGenerateRemainingWord(cfg, currentGeneratedWord, remainingWord)) {
                 return null;
             }
 
-            // If both are empty, we have matched the word
             if (currentGeneratedWord === "" && remainingWord === "") {
                 return true;
             }
 
-            // If the currentGeneratedWord is empty but remainingWord is not, return null (dead end)
             if (currentGeneratedWord === "") {
                 return null;
             }
 
             const [head, ...tail] = currentGeneratedWord;
 
-            // If it's a non-terminal, try all productions
             if (cfg[head]) {
                 for (const production of cfg[head]) {
-                    let newCurrentGeneratedWord = (production === window.EMPTY_STRING ? "" : production) + tail.join("");
                     const previouslyDerivedWord = derivedWord;
-                    derivedWord = previouslyDerivedWord.replace(head, production === window.EMPTY_STRING ? "" : production);
 
-                    // Wrap capital letters in the first element
+                    derivedWord = previouslyDerivedWord.replace(
+                        head,
+                        production === window.EMPTY_STRING ? "" : production
+                    );
+
+                    let newCurrentGeneratedWord = (production === window.EMPTY_STRING ? "" : production) + tail.join("");
+
                     const ruleFormatted = `${head} → ${production}`.replace(/[A-Z]/g, "<span class='bold'>$&</span>");
+                    const applicationFormatted = previouslyDerivedWord.replace(
+                        head,
+                        `<span class='colored'>${head}</span>`
+                    );
+                    const resultFormatted = derivedWord.replace(
+                        production,
+                        `<span class='colored'>${production}</span>`
+                    );
 
-                    // Wrap capital letters in the second element
-                    const applicationFormatted = previouslyDerivedWord.replace(head, `<span class='colored'>${head}</span>`);
+                    // Push the new step with 'isMarked = false'
+                    // steps array shape: [ ruleCell, applicationCell, resultCell, isMarkedFlag ]
+                    steps.push([ruleFormatted, applicationFormatted, resultFormatted, false]);
 
-                    // Wrap the part of the third element that matches production in the third element
-                    const resultFormatted = derivedWord.replace(production, `<span class='colored'>${production}</span>`);
-
-                    steps.push([ruleFormatted, applicationFormatted, resultFormatted]);
-
+                    // Recurse
                     const result = parse(newCurrentGeneratedWord, remainingWord);
                     if (result) {
-                        return result; // Stop if this path leads to a solution
+                        return result; // success
                     } else {
-                        // If this production fails, remove the step and try the next production
-                        steps.pop();
+                        // Grab the last step
+                        const lastStep = steps[steps.length - 1];
+                        // lastStep is: [ruleCell, applicationCell, resultCell, isMarkedFlag]
+
+                        if (!lastStep[3]) {
+                            // If it's not yet marked, modify it in place
+                            lastStep[0] = `${ruleFormatted} <span class="dead-end">(dead-end)</span>`;
+                            lastStep[3] = true;
+                        } else {
+                            // Otherwise, it's already been marked once.
+                            // Push a brand new step as a dead-end.
+                            steps.push([
+                                `${ruleFormatted} <span class="dead-end">(dead-end)</span>`,
+                                applicationFormatted,
+                                resultFormatted,
+                                true
+                            ]);
+                        }
+
+                        // revert
                         derivedWord = previouslyDerivedWord;
                         newCurrentGeneratedWord = currentGeneratedWord;
                     }
                 }
-            }
-            // If it's a terminal, check if it matches the first char of remainingWord
-            else if (remainingWord[0] === head) {
+            } else if (remainingWord[0] === head) {
+                // If terminal matches the input, move on
                 return parse(tail.join(""), remainingWord.slice(1));
             }
 
-            // If no productions or matches worked, return null to indicate failure
             return null;
-        }
+        };
 
-        let derivedWord = startSymbol;
         return parse(startSymbol, word);
     }
 
@@ -88,13 +110,22 @@ export class CfgTester {
         tableBody.innerHTML = "";
 
         steps.forEach(step => {
+            // step is [ ruleCell, applicationCell, resultCell, isMarkedFlag ]
             const row = document.createElement("tr");
 
-            step.forEach(cellText => {
+            const isDeadEnd = step[0].includes("(dead-end)");
+
+            // Optional: style dead-end rows
+            if (isDeadEnd) {
+                row.classList.add("dead-end-row");
+            }
+
+            // Only show columns 0..2 (rule, application, result)
+            for (let i = 0; i < 3; i++) {
                 const cell = document.createElement("td");
-                cell.innerHTML = cellText;
+                cell.innerHTML = step[i];
                 row.appendChild(cell);
-            });
+            }
 
             tableBody.appendChild(row);
         });
