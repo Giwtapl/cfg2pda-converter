@@ -15,9 +15,9 @@ export class SharedInputHandler {
 
     setEventListeners() {
         this.generatedWordInputEl.addEventListener('input', () => {
-            const isWordEmpty = this.generatedWordInputEl.value.trim() === "";
-            this.testCfgBtnEl.disabled = isWordEmpty;
-            this.testPdaBtnEl.disabled = isWordEmpty || !window.isPdaRendered;
+            // const isWordEmpty = this.generatedWordInputEl.value.trim() === "";
+            // this.testCfgBtnEl.disabled = isWordEmpty;
+            this.testPdaBtnEl.disabled = !window.isPdaRendered;
         });
 
         this.testCfgBtnEl.onclick = this.cfgTester.testCfgBtnHandler.bind(this.cfgTester);

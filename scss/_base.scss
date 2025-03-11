@@ -1,11 +1,12 @@
+$color-background: #FFFFFF;
+$color-primary: #d4d6b8;
+$color-grey-medium: #c1c1c1;
+
 $color-grey-light: #aec1cc;
 $color-grey-light-2: #aaa;
-$color-grey-medium: #999;
 $color-grey-dark: #555;
-$color-primary-transparent: #3d0663b7;
-$color-primary: #3c0663;
-$color-secondary: #9112a4;
-$color-pale-plink: rgb(229, 211, 241);
+$color-primary-transparent: #d4d6b8b7;
+// $color-primary: #3c0663;
 $rule-font-size: 2.5rem;
 
 
@@ -25,7 +26,7 @@ html {
     font-family: sans-serif;
     font-weight: 400;
     color: $color-grey-light;
-    background-color: $color-pale-plink;
+    background-color: $color-background;
 
     margin: 3rem;
     height: 100rem;

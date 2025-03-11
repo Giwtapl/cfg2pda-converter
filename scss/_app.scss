@@ -1,13 +1,30 @@
-.heading--primary {
-    font-size: 4rem;
-    font-weight: 700px;
-    text-transform: uppercase;
-    display: inline-block;
-    margin-bottom: 2rem;
-    background-image: linear-gradient(to right, $color-primary, $color-secondary);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+.heading-grey-dark {
+    color: #2c2c2c;
+}
+
+// #input-generation {
+//     & .input-text,button {
+//         margin: auto 0;
+//     }
+// }
+
+#generateWordButton {
+    --bs-btn-padding-y: 0.2rem;
+    --bs-btn-padding-x: 1.5rem;
+    --bs-btn-font-size: 1.75rem;
+    margin-bottom: 10px;
+}
+
+.btn-large {
+    --bs-btn-padding-y: 1.25rem;
+    --bs-btn-padding-x: 1.5rem;
+    --bs-btn-font-size: 1.75rem;
+}
+
+.btn-large-cust {
+    --bs-btn-padding-y: 0.2rem;
+    --bs-btn-padding-x: 1.5rem;
+    --bs-btn-font-size: 1.75rem;
 }
 
 .outter-container {
@@ -22,7 +39,7 @@
     margin: 0 auto 2rem auto;
     width: 80vw;
     height: auto;
-    background-color: $color-secondary;
+    background-color: $color-primary;
     box-shadow: 0.5rem 0.7rem 1.5rem #000;
 }
 
@@ -54,8 +71,8 @@
         }
 
         &:disabled {
-            background-color: $color-secondary;
-            color: white;
+            background-color: $color-primary;
+            color: #2c2c2c;
         }
     }
 }
@@ -91,7 +108,7 @@
         }
 
         &:disabled {
-            background-color: $color-secondary;
+            background-color: $color-primary;
             color: white;
         }
     }
@@ -110,6 +127,7 @@
 
 .instruction {
     font-size: $rule-font-size;
+    color: #2c2c2c;
 }
 
 .hidden {
@@ -180,7 +198,7 @@
 
     & .var {
         font-size: $rule-font-size;
-        color: white;
+        color: #2c2c2c;
         flex: 0 0 6%;
     }
 
@@ -193,7 +211,7 @@
 
         & .prod-sep {
             font-size: $rule-font-size;
-            color: white;
+            color: #2c2c2c;
             margin: 0 0 1rem 0;
         }
 

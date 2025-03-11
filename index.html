@@ -15,12 +15,12 @@
             <a href="#cfg-area" class="header__btn">Get Started</a>
         </header>
         <div id="cfg-area" class="outter-container">
-            <h2 class="heading--primary">Enter Your CFG</h2>
+            <p class="display-1 heading-grey-dark">Enter Your CFG</p>
             <div class="reversed-cols-flex-container rounded-container">
-                <div class="buttons-container">
-                    <button id="btn-done" class="btn--primary btn--blue">Done</button>
-                    <button id="btn-convert" class="btn--primary btn--green" disabled>Convert to PDA</button>
-                    <button id="btn-restart" class="btn--primary btn--red">Restart</button>
+                <div class="buttons-container d-inline-flex gap-2">
+                    <button type="button" id="btn-done" class="btn btn-primary btn-large">Done</button>
+                    <button type="button" id="btn-convert" class="btn btn-primary btn-large" disabled>Convert to PDA</button>
+                    <button type="button" id="btn-restart" class="btn btn-danger btn-large">Restart</button>
                 </div>
                 <div class="test-wrapper hidden">
                     <div id="result"></div>
@@ -41,18 +41,22 @@
         </div>
 
         <div id="shared-input-handler" class="outter-container">
-            <h2 class="heading--primary">Shared Input Word</h2>
+            <p class="display-1 heading-grey-dark">Shared Input Word</p>
             <div class="rounded-container shared-input">
                 <p class="instruction">Enter or generate a word to use for both CFG and PDA testing:</p>
-                <input type="text" id="sharedWordInput" class="input-text" />
-                <button id="generateWordButton" class="btn--secondary">Generate Word</button>
-                <button id="btn-testcfg" class="btn--secondary btn--gold" disabled>Test CFG</button>
-                <button id="btn-testpda" class="btn--secondary btn--gold" disabled>Test PDA</button>
+                <div id="input-generation" class="container">
+                    <input type="text" id="sharedWordInput" class="input-text" />
+                    <button type="button" id="generateWordButton" class="btn btn-primary btn-large-cust">Generate Word</button>
+                </div>
+                <div id="test-buttons" class="container gap-2">
+                    <button type="button" id="btn-testcfg" class="btn btn-primary btn-large-cust">Test CFG</button>
+                    <button type="button" id="btn-testpda" class="btn btn-primary btn-large-cust">Test PDA</button>
+                </div>
             </div>
         </div>
 
         <div id="pdaArea" class="outter-container hidden">
-            <h2 class="heading--primary">Here is the equivalent PDA</h2>
+            <h2 class="display-1 heading-grey-dark">Here is the equivalent PDA</h2>
             <div class="rounded-container">
                 <div id="word-container" class="word-visual"></div>
                 <div id="graph"></div>
@@ -79,7 +83,7 @@
                 <span class="close">&times;</span>
                 <p class="instruction">Enter word length:</p>
                 <input type="number" id="wordLength" class="input-text" min="1">
-                <button id="goButton" class="btn--secondary">Go</button>
+                <button id="goButton" class="btn btn-primary btn-large">Go</button>
             </div>
         </div>
 

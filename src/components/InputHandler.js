@@ -162,7 +162,7 @@ export class InputHandler {
     }
 
     enableButtons() {
-        Array.from(document.getElementsByClassName('btn--primary')).forEach(buttonEl => {
+        Array.from(document.getElementsByClassName('btn-primary')).forEach(buttonEl => {
             buttonEl.disabled = false;
         });
     }
