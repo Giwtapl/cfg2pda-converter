@@ -292,6 +292,11 @@ export class PdaSimulation {
     displayStack() {
         this.stackContainer.innerHTML = ''; // Clear previous stack
 
+        const stackLabel = document.createElement('p');
+        stackLabel.classList.add('stack-label');
+        stackLabel.textContent = 'Stack:';
+        this.stackContainer.appendChild(stackLabel);
+
         // Create stack elements
         for (let i = this.stack.length - 1; i >= 0; i--) {
             const stackElement = document.createElement('div');

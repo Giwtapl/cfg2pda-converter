@@ -9470,7 +9470,7 @@ html {
   color: #2c2c2c; }
 
 .hidden {
-  display: none; }
+  display: none !important; }
 
 .btn--primary {
   order: 1;
@@ -9651,26 +9651,27 @@ table#stepsTable {
 
 /* Stack Visualization */
 .stack-label {
-  font-size: 18px;
+  font-size: large;
+  margin: auto;
   font-weight: bold;
-  margin-bottom: 5px;
-  color: #f9f9f9; }
+  color: #555; }
 
 .stack-visual {
-  position: absolute;
-  left: 10px;
-  top: 100px;
-  width: 80px;
-  border: 1px solid #ccc;
+  display: inline-flex;
+  border: 1px solid #000;
   padding: 5px;
-  background-color: #f9f9f9; }
+  background-color: #f9f9f9;
+  margin-bottom: 20px; }
+  .stack-visual div:first-of-type {
+    margin-left: 10px; }
 
 .stack-element {
   border: 1px solid #000;
   padding: 5px;
   text-align: center;
   margin-bottom: 2px;
-  background-color: #fff; }
+  background-color: #fff;
+  color: #555; }
 
 /* Word Visualization */
 .word-visual {
@@ -9680,7 +9681,8 @@ table#stepsTable {
 .word-letter {
   display: inline-block;
   font-size: 24px;
-  margin: 0 2px; }
+  margin: 0 2px;
+  color: #555; }
 
 .current-letter {
   text-decoration: underline;

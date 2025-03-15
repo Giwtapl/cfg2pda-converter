@@ -131,7 +131,7 @@
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 .btn--primary {
@@ -365,20 +365,28 @@ table#stepsTable {
 
 /* Stack Visualization */
 .stack-label {
-    font-size: 18px;
+    // position: absolute;
+    // left: 26px;
+    // top: 75px;
+    font-size: large;
+    margin: auto;
     font-weight: bold;
-    margin-bottom: 5px;
-    color: #f9f9f9;
+    color: $color-grey-dark;
 }
 
 .stack-visual {
-    position: absolute;
-    left: 10px;
-    top: 100px;
-    width: 80px;
-    border: 1px solid #ccc;
+    // position: absolute;
+    // left: 10px;
+    // top: 100px;
+    display: inline-flex;
+    border: 1px solid #000;
     padding: 5px;
     background-color: #f9f9f9;
+    margin-bottom: 20px;
+
+    & div:first-of-type {
+        margin-left: 10px;
+    }
 }
 
 .stack-element {
@@ -387,6 +395,7 @@ table#stepsTable {
     text-align: center;
     margin-bottom: 2px;
     background-color: #fff;
+    color: $color-grey-dark;
 }
 
 /* Word Visualization */
@@ -399,6 +408,7 @@ table#stepsTable {
     display: inline-block;
     font-size: 24px;
     margin: 0 2px;
+    color: $color-grey-dark;
 }
 
 .current-letter {
