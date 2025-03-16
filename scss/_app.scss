@@ -15,6 +15,25 @@
     margin-bottom: 10px;
 }
 
+#helpButton {
+    right: 20px;
+    top: 20px;
+    width: 50px;
+    height: 50px;
+    z-index: 9999;
+    font-style: bold;
+    font-size: 2.5rem;
+}
+
+#graph svg {
+    width: 70%;
+    height: 100%;
+}
+
+#graph + div.buttons-container{
+    margin-top: 5px;
+}
+
 .btn-large {
     --bs-btn-padding-y: 1.25rem;
     --bs-btn-padding-x: 1.5rem;

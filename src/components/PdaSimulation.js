@@ -35,36 +35,44 @@ export class PdaSimulation {
     }
 
     startPdaTest() {
-        // Reset the simulation state
+        // Reset everything
         this.resetSimulation();
 
-        // Get the input word from the shared input field
+        // Grab the user’s input
         this.inputWord = document.getElementById('sharedWordInput').value.trim();
 
-        // Find the accepting path
+        // Attempt to find a full accepting path
         this.transitionPath = this.findAcceptingPath();
 
         if (this.transitionPath) {
-            this.isAccepted = true;
-            this.displayMessage(`The provided word is recognised by this PDA. Please click 'Next' to see how.`, true);
-            this.stackContainer.classList.add('accepted'); // Add CSS class to color the container green
+          // If we found a path to Qaccept, mark it accepted
+          this.isAccepted = true;
+          this.displayMessage(
+            `The provided word is recognised by this PDA. Please click 'Next' to see how.`,
+            true
+          );
+          this.stackContainer.classList.add('accepted');
         } else {
-            this.isRejected = true;
-            this.displayMessage(`The provided word is NOT recognised by this PDA. Please click 'Next' to see why.`, false);
-            this.stackContainer.classList.add('rejected'); // Add CSS class to color the container red
+          // If there is no accepting path, build a partial path of valid transitions
+          this.transitionPath = this.findPartialPath();
+
+          // Mark it rejected, but still allow stepping
+          this.isRejected = true;
+          this.displayMessage(
+            `The provided word is NOT recognised by this PDA. ` +
+            `Please click 'Next' to see how far it got before failing.`,
+            false
+          );
+          this.stackContainer.classList.add('rejected');
         }
 
-        // Display the word and stack
+        // Show the initial word/stack, highlight Qstart, show Next button
         this.displayWord();
         this.displayStack();
-
-        // Highlight the initial state
         this.highlightState(this.currentState);
-
-        // Show the Next button
         this.nextStepButton.style.display = 'block';
         this.restartTestButton.style.display = 'block';
-    }
+      }
 
     resetSimulation() {
         this.currentState = 'Qstart';
@@ -79,7 +87,7 @@ export class PdaSimulation {
         this.transitionPath = [];
 
         // Clear previous messages and highlights
-        this.resetHighlighting();
+        this.resetAllHighlighting();
         this.clearMessage();
 
         // Reset container colors
@@ -101,6 +109,53 @@ export class PdaSimulation {
             return null;
         }
     }
+
+    findPartialPath() {
+        let path = [];
+        let currentState = 'Qstart';
+        let stack = [];
+        let inputIndex = 0;
+
+        while (true) {
+          // If we’re in Qaccept with empty stack and fully consumed input,
+          // we’d have accepted. But since we’re in partial mode, just break
+          if (currentState === 'Qaccept' && stack.length === 0 && inputIndex === this.inputWord.length) {
+            break;
+          }
+
+          const inputSymbol = this.inputWord[inputIndex] || window.EMPTY_STRING;
+          const stackTop = stack[stack.length - 1] || window.EMPTY_STRING;
+          const possibleTransitions = this.findTransitions(currentState, inputSymbol, stackTop, inputIndex);
+
+          if (possibleTransitions.length === 0) {
+            // No moves → done building partial path
+            break;
+          }
+
+          // Just pick the first possible transition
+          const t = possibleTransitions[0];
+
+          // Push it onto the path
+          path.push(t);
+
+          // Update state and stack
+          currentState = t.toState;
+          if (t.stackTop !== window.EMPTY_STRING) {
+            stack.pop();
+          }
+          if (t.stackPush !== window.EMPTY_STRING) {
+            const symbolsToPush = t.stackPush.split('').reverse();
+            symbolsToPush.forEach(s => stack.push(s));
+          }
+
+          if (t.input !== window.EMPTY_STRING) {
+            inputIndex++;
+          }
+        }
+
+        return path;
+      }
+
 
     dfs(currentState, stack, inputIndex, path, visited, depth = 0) {
         const MAX_DEPTH = 1000; // Adjust as needed
@@ -195,13 +250,39 @@ export class PdaSimulation {
 
     nextPdaStep() {
         if (this.transitionIndex >= this.transitionPath.length) {
-            // Simulation complete
-            this.nextStepButton.style.display = 'none';
-            return;
+          // No more transitions to show
+          this.nextStepButton.style.display = 'none';
+
+          // If we did not accept, color the current node border red,
+          // and fill Qaccept with red
+          if (!this.isAccepted) {
+            // Current node border = red
+            d3.select(`#${this.currentState}`)
+              .select('ellipse')
+              .style('stroke', 'red')
+              .style('stroke-width', '3')    // or whatever thickness you like
+              .style('fill', 'white');       // keep interior white
+
+            d3.select(`#${this.currentState}`)
+              .selectAll('text, tspan')
+              .style('fill', 'black');
+
+            // Qaccept interior = red
+            d3.select('#Qaccept')
+              .select('ellipse')
+              .style('fill', 'red');
+
+            // Make Qaccept label white
+            d3.select('#Qaccept')
+              .selectAll('text, tspan')
+              .style('fill', 'white');
+          }
+          return;
         }
 
-        // Get the next transition
+        // Otherwise, take the next transition and highlight it
         let transition = this.transitionPath[this.transitionIndex];
+
 
         // Update previous state and transition
         this.resetHighlighting();
@@ -298,7 +379,7 @@ export class PdaSimulation {
         this.stackContainer.appendChild(stackLabel);
 
         // Create stack elements
-        for (let i = this.stack.length - 1; i >= 0; i--) {
+        for (let i = 0; i < this.stack.length; i++) {
             const stackElement = document.createElement('div');
             stackElement.classList.add('stack-element');
             stackElement.textContent = this.stack[i];
@@ -385,6 +466,29 @@ export class PdaSimulation {
         if (this.previousLabel) {
             this.paintQloopTransitionLabel(this.getTextContentFromLabel(this.previousLabel), 'black');
         }
+    }
+
+    resetAllHighlighting() {
+        // Reset all states
+        d3.selectAll('.node')
+            .select('ellipse')
+            .style('fill', 'white')
+            .style('stroke', 'black')
+            .style('stroke-width', '1');
+
+        d3.selectAll('.node')
+            .selectAll('text, tspan')
+            .style('fill', 'black');
+
+        // Reset all transitions
+        d3.selectAll('.edge')
+            .selectAll('path, polygon')
+            .style('stroke', 'black');
+
+        // Reset all labels
+        d3.selectAll('.edge')
+            .selectAll('text')
+            .style('fill', 'black');
     }
 
     getTextContentFromLabel(label) {

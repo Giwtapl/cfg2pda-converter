@@ -10,6 +10,63 @@
         <title>CFG2nPDA Converter</title>
     </head>
     <body class="body">
+
+
+        <!-- Sticky "?" Button (triggering the modal) -->
+        <button
+            id="helpButton"
+            type="button"
+            class="btn btn-primary rounded-circle position-fixed"
+            data-bs-toggle="modal"
+            data-bs-target="#helpModal"
+
+            data-bs-toggle="tooltip"
+            data-bs-placement="right"
+            title="See app instructions"
+        >
+            ?
+        </button>
+
+        <!-- Bootstrap Modal -->
+        <div
+            class="modal fade"
+            id="helpModal"
+            tabindex="-1"
+            aria-labelledby="helpModalLabel"
+            aria-hidden="true"
+        >
+            <!--
+                .modal-fullscreen : makes the modal occupy nearly the entire viewport
+                .modal-dialog-scrollable : ensures body is scrollable if content is tall
+                You can swap these for, e.g., .modal-xl, etc., if you prefer.
+            -->
+            <div class="modal-dialog modal-dialog-scrollable modal-fullscreen">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="helpModalLabel">How to Use the App</h1>
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Put your instructions here -->
+                        <p>
+                            1. Enter your CFG in the “Enter Your CFG” section.<br>
+                            2. Click “Done” when finished, then “Convert to PDA” to see the PDA.<br>
+                            3. Optionally provide (or generate) a word to test both the CFG and PDA.<br>
+                            <!-- add more as needed -->
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
         <header class="header">
             <h1 class="header__heading--primary">CFG2nPDA Converter</h1>
             <a href="#cfg-area" class="header__btn">Get Started</a>
@@ -93,6 +150,13 @@
                 <p>Loading...</p>
             </div>
         </div>
+        <script src="src/bootstrap/bootstrap.bundle.js"></script>
+        <script>
+            // Select all elements that have [data-bs-toggle="tooltip"]
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            // Initialize each with Bootstrap’s Tooltip
+            const tooltipList = [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+        </script>
         <script src="src/app.js" type="module"></script>
     </body>
 </html>

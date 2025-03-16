@@ -11,12 +11,24 @@ export class Pda {
     render() {
         d3.select('#graph')
             .graphviz()
-            .zoom(false) // Disable zooming
+            .zoom(false) // Disable zooming if you wish
             .renderDot(
                 `digraph {
                     rankdir=LR;
-                    ${this.nPdaData.nodes.map(node => `${node.id} [id="${node.id}", label=${node.label}];`).join('\n')}
-                    ${this.nPdaData.links.map((link, index) => `${link.source} -> ${link.target} [label="${link.label}", id="edge${index}"];`).join('\n')}
+                    ${
+                        this.nPdaData.nodes.map(node => {
+                            if (node.id === 'Qaccept') {
+                                return `${node.id} [id="${node.id}", label=${node.label}, shape=ellipse, peripheries=2];`;
+                            } else {
+                                return `${node.id} [id="${node.id}", label=${node.label}];`;
+                            }
+                        }).join('\n')
+                    }
+                    ${
+                        this.nPdaData.links.map((link, index) =>
+                            `${link.source} -> ${link.target} [label="${link.label}", id="edge${index}"];`
+                        ).join('\n')
+                    }
                 }`
             )
             .on("end", () => {
