@@ -1,47 +1,44 @@
 export class WordGenerationModal {
-    constructor(generatedWordInputEl) {
-        this.element = document.getElementById('modal');
-        this.goBtnEl = document.getElementById('goButton');
-        this.generateWordBtnEl = document.getElementById('generateWordButton');
-        this.spanEl = document.getElementsByClassName('close')[0];
-        this.generatedWordInputEl = generatedWordInputEl;
-        this.setEventListeners();
-    }
+  constructor(generatedWordInputEl) {
+    // 1) Reference the Bootstrap modal element and create a new bootstrap.Modal instance
+    this.modalEl = document.getElementById('modal'); // The <div class="modal fade" id="modal">...
+    this.bsModal = new bootstrap.Modal(this.modalEl, {
+      backdrop: true,    // or 'static' if we don’t want it to close on backdrop click
+      keyboard: true,    // allows ESC key to close
+    });
 
-    setEventListeners() {
-        // When the user clicks the button, open the modal
-        this.generateWordBtnEl.onclick = () => {
-            this.element.style.display = 'block';
-        }
-        // When the user clicks on <span> (x), close the modal
-        this.spanEl.onclick = () => {
-            this.element.style.display = 'none';
-        }
-        // When the user clicks anywhere outside of the modal, close it
-        window.onclick = event => {
-            if (event.target == modal) {
-                this.element.style.display = 'none';
-            }
-        }
+    // 2) Grab your existing elements
+    this.goBtnEl = document.getElementById('goButton');
+    this.generateWordBtnEl = document.getElementById('generateWordButton');
+    this.generatedWordInputEl = generatedWordInputEl;
 
-        this.goBtnEl.onclick = () => {
-            const length = parseInt(document.getElementById('wordLength').value);
-            if (isNaN(length) || length < 1) {
-                alert('Please enter a valid length');
-                return;
-            }
+    // 3) Set up event listeners
+    this.setEventListeners();
+  }
 
-            const generatedWord = window.inputHandler.cfg.wordGenerator.generateWord(length);
+  setEventListeners() {
+    // When user clicks the "Generate Word" button, show the Bootstrap modal
+    this.generateWordBtnEl.addEventListener('click', () => {
+      this.bsModal.show();
+    });
 
-            this.generatedWordInputEl.value = generatedWord;
-            // Emit input event
-            const event = new Event('input', {
-                bubbles: true,
-                cancelable: true,
-            });
-            this.generatedWordInputEl.dispatchEvent(event);
-            this.element.style.display = 'none';
-            // this.testCfgBtnEl.removeAttribute("disabled");
-        }
-    }
+    // When user clicks Go, generate the word and then close the modal
+    this.goBtnEl.addEventListener('click', () => {
+      const length = parseInt(document.getElementById('wordLength').value, 10);
+      if (isNaN(length) || length < 1) {
+        alert('Please enter a valid length');
+        return;
+      }
+
+      const generatedWord = window.inputHandler.cfg.wordGenerator.generateWord(length);
+      this.generatedWordInputEl.value = generatedWord;
+
+      // Emit input event
+      const inputEvent = new Event('input', { bubbles: true, cancelable: true });
+      this.generatedWordInputEl.dispatchEvent(inputEvent);
+
+      // Hide the Bootstrap modal
+      this.bsModal.hide();
+    });
+  }
 }
