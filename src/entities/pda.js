@@ -1,4 +1,5 @@
 import { PdaSimulation } from "../components/PdaSimulation.js";
+import MobileDetection from "../utilities/mobile.js";
 
 
 export class Pda {
@@ -11,10 +12,10 @@ export class Pda {
     render() {
         d3.select('#graph')
             .graphviz()
-            .zoom(false) // Disable zooming if you wish
+            .zoom(false)
             .renderDot(
                 `digraph {
-                    rankdir=LR;
+                    rankdir=${window.isMobile.any() ? 'TB' : 'LR'};
                     ${
                         this.nPdaData.nodes.map(node => {
                             if (node.id === 'Qaccept') {

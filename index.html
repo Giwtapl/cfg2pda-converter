@@ -4,9 +4,6 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="css/style.css">
-        <script src="//d3js.org/d3.v5.min.js"></script>
-        <script src="https://unpkg.com/@hpcc-js/wasm@0.3.11/dist/index.min.js"></script>
-        <script src="https://unpkg.com/d3-graphviz@3.0.5/build/d3-graphviz.js"></script>
         <title>CFG2nPDA Converter</title>
     </head>
     <body class="body">
@@ -44,97 +41,96 @@
             </div>
         </div>
 
-
-
-
         <header class="header">
             <h1 class="header__heading--primary">CFG2nPDA Converter</h1>
             <a href="#cfg-area" class="header__btn">Get Started</a>
         </header>
-        <div id="cfg-area" class="outter-container">
-            <p class="display-1 heading-grey-dark">Enter Your CFG</p>
-            <div class="reversed-cols-flex-container rounded-container">
-                <div class="buttons-container d-inline-flex gap-2">
-                    <button type="button" id="btn-done" class="btn btn-primary btn-large">Done</button>
-                    <button type="button" id="btn-convert" class="btn btn-primary btn-large" disabled>Convert to PDA</button>
-                    <button type="button" id="btn-restart" class="btn btn-danger btn-large">Restart</button>
+        <main>
+            <div id="cfg-area" class="outter-container">
+                <p class="display-1 heading-grey-dark">Enter Your CFG</p>
+                <div class="reversed-cols-flex-container rounded-container">
+                    <div class="buttons-container d-inline-flex gap-2">
+                        <button type="button" id="btn-done" class="btn btn-primary btn-large">Done</button>
+                        <button type="button" id="btn-convert" class="btn btn-primary btn-large" disabled>Convert to PDA</button>
+                        <button type="button" id="btn-restart" class="btn btn-danger btn-large">Restart</button>
+                    </div>
+                    <div class="test-wrapper hidden">
+                        <div id="result"></div>
+                        <table id="stepsTable" class="hidden">
+                            <thead>
+                                <tr>
+                                    <th>Rule</th>
+                                    <th>Application</th>
+                                    <th>Result</th>
+                                </tr>
+                            </thead>
+                            <tbody id="parsingSteps">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="rules" id="user-input"></div>
                 </div>
-                <div class="test-wrapper hidden">
-                    <div id="result"></div>
-                    <table id="stepsTable" class="hidden">
-                        <thead>
-                            <tr>
-                                <th>Rule</th>
-                                <th>Application</th>
-                                <th>Result</th>
-                            </tr>
-                        </thead>
-                        <tbody id="parsingSteps">
-                        </tbody>
-                    </table>
-                </div>
-                <div class="rules" id="user-input"></div>
             </div>
-        </div>
 
-        <div id="shared-input-handler" class="outter-container">
-            <p class="display-1 heading-grey-dark">Shared Input Word</p>
-            <div class="rounded-container shared-input">
-                <p class="instruction">Enter or generate a word to use for both CFG and PDA testing:</p>
-                <div id="input-generation" class="container">
-                    <input type="text" id="sharedWordInput" class="input-text" />
-                    <button type="button" id="generateWordButton" class="btn btn-primary">Generate Word</button>
+            <div id="shared-input-handler" class="outter-container">
+                <p class="display-1 heading-grey-dark">Shared Input Word</p>
+                <div class="rounded-container shared-input">
+                    <p class="instruction">Enter or generate a word to use for both CFG and PDA testing:</p>
+                    <div id="input-generation" class="container">
+                        <input type="text" id="sharedWordInput" class="input-text" />
+                        <button type="button" id="generateWordButton" class="btn btn-primary">Generate Word</button>
 
-                    <!-- The modal (with id="modal") -->
-                    <div class="modal fade" id="modal" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-scrollable modal-sm">
-                            <div class="modal-content">
-                                <!-- Modal Header -->
-                                <div class="modal-header">
-                                    <h1 class="modal-title fs-1">Generate Word</h1>
-                                    <!-- Bootstrap’s built-in close button (no extra JS needed) -->
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
+                        <!-- The modal (with id="modal") -->
+                        <div class="modal fade" id="modal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-scrollable modal-sm">
+                                <div class="modal-content">
+                                    <!-- Modal Header -->
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-1">Generate Word</h1>
+                                        <!-- Bootstrap’s built-in close button (no extra JS needed) -->
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
 
-                                <!-- Modal Body -->
-                                <div class="modal-body">
-                                    <label for="wordLength" class="form-label fs-3">Enter word length:</label>
-                                    <input type="number" id="wordLength" class="form-control fs-3" min="1">
-                                </div>
+                                    <!-- Modal Body -->
+                                    <div class="modal-body">
+                                        <label for="wordLength" class="form-label fs-3">Enter word length:</label>
+                                        <input type="number" id="wordLength" class="form-control fs-3" min="1">
+                                    </div>
 
-                                <!-- Modal Footer -->
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-primary fs-3" id="goButton">Go</button>
+                                    <!-- Modal Footer -->
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-primary fs-3" id="goButton">Go</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div id="test-buttons" class="container gap-2">
-                    <button type="button" id="btn-testcfg" class="btn btn-primary btn-large-cust">Test CFG</button>
-                    <button type="button" id="btn-testpda" class="btn btn-primary btn-large-cust">Test PDA</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="pdaArea" class="outter-container hidden">
-            <h2 class="display-1 heading-grey-dark">Here is the equivalent PDA</h2>
-            <div class="rounded-container">
-                <div id="word-container" class="word-visual"></div>
-                <div id="stack-container" class="stack-visual hidden"></div>
-                <div id="graph"></div>
-                <div class="buttons-container d-inline-flex gap-2">
-                    <button id="next-step" class="btn btn-primary btn-large-cust" style="display: none;">Next</button>
-                    <button id="download-image" class="btn btn-primary btn-large-cust">Download PDA as Image</button>
-                    <button id="restart-test-button" class="btn btn-primary btn-large-cust" style="display: none;">Restart Test</button>
+                    <div id="test-buttons" class="container gap-2">
+                        <button type="button" id="btn-testcfg" class="btn btn-primary btn-large-cust">Test CFG</button>
+                        <button type="button" id="btn-testpda" class="btn btn-primary btn-large-cust">Test PDA</button>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <footer class="footer">
-            <div class="footer-content">
+            <div id="pdaArea" class="outter-container hidden">
+                <h2 class="display-1 heading-grey-dark">Here is the equivalent PDA</h2>
+                <div class="rounded-container">
+                    <div id="word-container" class="word-visual"></div>
+                    <div id="stack-container" class="stack-visual hidden"></div>
+                    <div id="graph"></div>
+                    <div class="buttons-container d-inline-flex gap-2">
+                        <button id="next-step" class="btn btn-primary btn-large-cust" style="display: none;">Next</button>
+                        <button id="download-image" class="btn btn-primary btn-large-cust">Download PDA as Image</button>
+                        <button id="restart-test-button" class="btn btn-primary btn-large-cust" style="display: none;">Restart Test</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="bg-dark text-light py-4">
+            <div class="container text-center">
                 <p>Diploma Thesis - CFG to PDA Converter</p>
-                <p>Developed by: Ploiarhopoulou Panagiwta(AM: 1043815)</p>
+                <p>Developed by: Ploiarhopoulou Panagiwta (AM: 1043815)</p>
                 <p>Computer Engineering & Informatics Department - University of Patras</p>
                 <p>Year: 2024</p>
             </div>
@@ -146,7 +142,9 @@
                 <p>Loading...</p>
             </div>
         </div>
-        <script src="src/bootstrap/bootstrap.bundle.js"></script>
+        <script src="src/libs/d3.min.js"></script>
+        <script src="src/libs/d3-graphviz.min.js"></script>
+        <script src="src/libs/bootstrap/bootstrap.bundle.js"></script>
         <script>
             // Select all elements that have [data-bs-toggle="tooltip"]
             const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');

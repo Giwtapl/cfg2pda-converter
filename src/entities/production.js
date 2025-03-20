@@ -19,6 +19,9 @@ export class Production {
         inputElement.id = this.id;
         inputElement.placeholder = window.EMPTY_STRING;
         inputElement.classList.add('input-text', 'input-text--rule');
+        if (window.isMobile.any()) {
+            inputElement.classList.add('fs-3');
+        }
         inputElement.addEventListener('input', inputEventHandler);
 
         // Add keydown event listener for Tab and Shift+Tab keys

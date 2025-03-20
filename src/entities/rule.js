@@ -1,7 +1,7 @@
 import { Production } from './production.js';
 
 export class Rule {
-    static instances = []; // Static array to keep track of all Rule instances
+    static instances = [];
     PARENT_ID = 'user-input';
 
     constructor(index, varLetter, refererProd) {
@@ -26,6 +26,9 @@ export class Rule {
         // Create the <span> element with the class and text content
         const spanElement = document.createElement('span');
         spanElement.classList.add('var');
+        if (window.isMobile.any()) {
+            spanElement.classList.add('fs-3');
+        }
         spanElement.innerHTML = `${varLetter} &rarr; `;
 
         // Create the main <div> with the id and class

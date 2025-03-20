@@ -93,6 +93,7 @@
         width: 75%;
         flex: 0 0 10%;
         font-size: $rule-font-size;
+        min-width: 95px;
 
         &:focus {
             background-color: white;
@@ -228,11 +229,13 @@
         font-size: $rule-font-size;
         color: #2c2c2c;
         flex: 0 0 6%;
+        text-wrap-mode: nowrap;
     }
 
     & .productions {
         display: flex;
         flex-wrap: wrap;
+        gap: 0.5rem;
         align-items: flex-start;
         flex: 0 0 90%;
         column-gap: 5px;

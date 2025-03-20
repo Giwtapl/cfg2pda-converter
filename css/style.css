@@ -9308,14 +9308,26 @@ textarea.form-control-lg {
   padding: 0;
   box-sizing: border-box; }
 
+html, body {
+  height: 100%;
+  margin: 0; }
+
 html {
   font-size: 62.5%; }
 
 .body {
   font-family: sans-serif;
   background-color: #FFFFFF;
-  margin: 3rem;
-  height: 100rem; }
+  margin: 3rem 3rem 0 3rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; }
+  @media (max-width: 768px) {
+    .body {
+      margin: 0; } }
+
+main {
+  flex: 1 0 auto; }
 
 .header {
   background-image: linear-gradient(#d4d6b8b7, #d4d6b8b7), url(../img/bg-header.jpg);
@@ -9442,7 +9454,8 @@ html {
   .input-text--rule {
     width: 75%;
     flex: 0 0 10%;
-    font-size: 2.5rem; }
+    font-size: 2.5rem;
+    min-width: 95px; }
     .input-text--rule:focus {
       background-color: white; }
     .input-text--rule:disabled {
@@ -9547,10 +9560,12 @@ html {
   .rule .var {
     font-size: 2.5rem;
     color: #2c2c2c;
-    flex: 0 0 6%; }
+    flex: 0 0 6%;
+    text-wrap-mode: nowrap; }
   .rule .productions {
     display: flex;
     flex-wrap: wrap;
+    gap: 0.5rem;
     align-items: flex-start;
     flex: 0 0 90%;
     column-gap: 5px; }
