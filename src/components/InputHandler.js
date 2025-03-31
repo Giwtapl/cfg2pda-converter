@@ -41,26 +41,7 @@ export class InputHandler {
             if (event.key === 'Enter') {
                 // Prevent default Enter key behavior
                 event.preventDefault();
-
-                // Check if there are any rules
-                if (this.rules.length > 0) {
-                    // Get the last rule
-                    const lastRule = this.rules[this.rules.length - 1];
-
-                    // Check if the last rule has any productions
-                    if (lastRule.productions.length > 0) {
-                        // Get the last production of the last rule
-                        const lastProduction = lastRule.productions[lastRule.productions.length - 1];
-
-                        // Get the input element of the last production
-                        const lastProdInputEl = document.getElementById(lastProduction.id);
-
-                        // Check if the currently focused element is the last production's input
-                        if (document.activeElement === lastProdInputEl) {
-                            this.doneBtnHandler(event);
-                        }
-                    }
-                }
+                this.doneBtnHandler();
             }
         });
     }
