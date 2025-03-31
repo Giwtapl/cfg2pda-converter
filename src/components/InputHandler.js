@@ -79,6 +79,8 @@ export class InputHandler {
 
     addRule(varLetter='S', refererProd=null) {
         this.rules.push(new Rule(this.rules.length + 1, varLetter, refererProd));
+
+        this.displayInstructionBelowLastRule();
     }
 
     removeRule(ruleIndex) {
@@ -110,6 +112,7 @@ export class InputHandler {
     doneBtnHandler() {
         if (this.isDone) return; // Prevent multiple submissions
         this.isDone = true;
+        this.removeExistingInstruction();
         const currentProductions = Array.from(document.getElementsByClassName('input-text--rule'));
         if (this.isCfgEmpty(currentProductions)) {
             alert('No CFG has been provided yet.\nPlease input the CFG rules and then press the "Done" button.');
@@ -203,5 +206,37 @@ export class InputHandler {
     hideLoadingModal() {
         const modal = document.getElementById('loading-modal');
         modal.style.display = 'none';
+    }
+
+    displayInstructionBelowLastRule() {
+        this.removeExistingInstruction();
+
+        // Create new instruction container
+        const instruction = document.createElement('div');
+        instruction.id = 'cfg-instruction';
+        instruction.className = 'alert alert-info mt-3';
+        instruction.role = 'alert';
+
+        instruction.innerHTML = `
+            <div style="text-align: left; font-size: 14px;">
+                <p style="margin-bottom: 0.4rem;">💡 <strong>Hint 1:</strong> When you type a capital letter (A–Z) in a production, a new rule for that variable is automatically created.</p>
+                <p style="margin-bottom: 0.4rem; margin-top: 0.8rem;">💡 <strong>Hint 2:</strong> Keyboard Shortcuts:</p>
+                <ul style="margin-bottom: 0; padding-left: 1.2rem; list-style-type: disc;">
+                    <li style="margin-bottom: 0.3rem;"><kbd>Tab</kbd> → Add a new production to the same rule</li>
+                    <li style="margin-bottom: 0.3rem;"><kbd>Shift</kbd> + <kbd>Tab</kbd> → Focus on the next rule's first empty production</li>
+                    <li style="margin-bottom: 0;"><kbd>Enter</kbd> → Equivalent to clicking the <strong>Done</strong> button</li>
+                </ul>
+            </div>
+        `;
+
+        // Append under last rule
+        const lastRule = document.querySelector('#user-input .rule:last-of-type');
+        lastRule.parentNode.insertBefore(instruction, lastRule.nextSibling);
+    }
+
+    removeExistingInstruction() {
+        // Remove existing instruction if any
+        const existingInstruction = document.getElementById('cfg-instruction');
+        if (existingInstruction) existingInstruction.remove();
     }
 }

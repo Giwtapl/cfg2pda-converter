@@ -4,7 +4,7 @@ import { isLowerCase } from "../utilities/tools.js";
 export class PdaSimulation {
     constructor(pdaTransitions) {
         // Simulation state variables
-        this.currentState = 'Qstart';
+        this.currentState = 'Qo';
         this.stack = [];
         this.inputWord = '';
         this.currentInputIndex = 0;
@@ -66,7 +66,7 @@ export class PdaSimulation {
           this.stackContainer.classList.add('rejected');
         }
 
-        // Show the initial word/stack, highlight Qstart, show Next button
+        // Show the initial word/stack, highlight Qo, show Next button
         this.displayWord();
         this.displayStack();
         this.highlightState(this.currentState);
@@ -75,7 +75,7 @@ export class PdaSimulation {
       }
 
     resetSimulation() {
-        this.currentState = 'Qstart';
+        this.currentState = 'Qo';
         this.stack = [];
         this.currentInputIndex = 0;
         this.isAccepted = false;
@@ -112,7 +112,7 @@ export class PdaSimulation {
 
     findPartialPath() {
         let path = [];
-        let currentState = 'Qstart';
+        let currentState = 'Qo';
         let stack = [];
         let inputIndex = 0;
 
@@ -144,7 +144,11 @@ export class PdaSimulation {
             stack.pop();
           }
           if (t.stackPush !== window.EMPTY_STRING) {
-            const symbolsToPush = t.stackPush.split('').reverse();
+            const symbolsToPush = t.stackPush.split('');
+            if (t.fromState !== 'Qo') {
+                symbolsToPush.reverse();
+            }
+            // const symbolsToPush = t.stackPush.split('').reverse();
             symbolsToPush.forEach(s => stack.push(s));
           }
 
@@ -201,7 +205,10 @@ export class PdaSimulation {
                 newStack.pop();
             }
             if (transition.stackPush !== window.EMPTY_STRING) {
-                const symbolsToPush = transition.stackPush.split('').reverse();
+                const symbolsToPush = transition.stackPush.split('');
+                if (transition.fromState !== 'Qo') {
+                    symbolsToPush.reverse();
+                }
                 symbolsToPush.forEach(symbol => newStack.push(symbol));
             }
 

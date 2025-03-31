@@ -17,6 +17,11 @@ export class WordGenerationModal {
   }
 
   setEventListeners() {
+    // Disable the "Generate Word" button if the input element is not empty
+    this.generatedWordInputEl.addEventListener('input', () => {
+      this.generateWordBtnEl.disabled = !!this.generatedWordInputEl.value;
+    });
+
     // When user clicks the "Generate Word" button, show the Bootstrap modal
     this.generateWordBtnEl.addEventListener('click', () => {
       this.bsModal.show();

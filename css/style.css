@@ -9275,32 +9275,6 @@ textarea.form-control-lg {
   .d-print-none {
     display: none !important; } }
 
-.footer {
-  background-color: #222;
-  border-radius: 20px 20px 0 0;
-  color: #fff;
-  padding: 20px 0;
-  text-align: center;
-  font-size: 1rem;
-  margin-top: 50px; }
-  .footer .footer-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px; }
-    .footer .footer-content p {
-      margin: 5px 0;
-      line-height: 1.5; }
-      .footer .footer-content p:first-of-type {
-        font-weight: bold;
-        font-size: 1.1rem; }
-  @media (max-width: 768px) {
-    .footer {
-      font-size: 0.9rem; }
-      .footer .footer-content p {
-        font-size: 0.95rem; }
-        .footer .footer-content p:first-of-type {
-          font-size: 1rem; } }
-
 *,
 *::after,
 *::before {
@@ -9342,7 +9316,6 @@ main {
   .header__heading--primary {
     font-size: 5rem;
     letter-spacing: 0.4rem;
-    text-transform: uppercase;
     color: #fff; }
   .header__btn:link, .header__btn:visited {
     font-family: inherit;

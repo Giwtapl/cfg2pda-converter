@@ -6,8 +6,7 @@ export class Cfg2PdaConverter {
     STARTING_VAR = window.STARTING_VAR;
     ARROW = window.ARROW;
     STANDARD_TRANSITIONS = [
-        { source: 'Qstart', target: 'Qo', label: `${this.NULL_STRING}, ${this.NULL_STRING} ${this.ARROW} ${this.SPECIAL_CHAR}` },
-        { source: 'Qo', target: 'Qloop', label: `${this.NULL_STRING}, ${this.NULL_STRING} ${this.ARROW} ${this.STARTING_VAR}` },
+        { source: 'Qo', target: 'Qloop', label: `${this.NULL_STRING}, ${this.NULL_STRING} ${this.ARROW} ${this.SPECIAL_CHAR}${this.STARTING_VAR}` },
         { source: 'Qloop', target: 'Qaccept', label: `${this.NULL_STRING}, ${this.SPECIAL_CHAR} ${this.ARROW} ${this.NULL_STRING}` }
     ];
 
