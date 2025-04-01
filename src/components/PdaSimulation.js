@@ -2,7 +2,7 @@ import { isLowerCase, displayMessage } from "../utilities/tools.js";
 
 export class PdaSimulation {
     constructor(pdaTransitions) {
-        // Simulation state variables
+        // Simulation state
         this.currentState = 'Qo';
         this.stack = [];
         this.inputWord = '';
@@ -11,6 +11,7 @@ export class PdaSimulation {
         this.isRejected = false;
         this.previousState = null;
         this.previousTransition = null;
+        this.previousLabel = null;  // track the exact line of a multiline label we highlighted
         this.step = 0;
 
         // PDA transitions data
@@ -34,18 +35,22 @@ export class PdaSimulation {
         this.restartTestButton.addEventListener('click', () => this.startPdaTest());
     }
 
+    /**
+     * Called when the user clicks “Test PDA.”
+     * Resets everything, attempts to find a path to acceptance with DFS,
+     * then uses the returned info (accepted + path) to set up acceptance or rejection.
+     */
     startPdaTest() {
-        // Reset everything
         this.resetSimulation();
 
         // Grab the user’s input
         this.inputWord = document.getElementById('sharedWordInput').value.trim();
 
-        // Attempt to find a path to acceptance with DFS
-        this.transitionPath = this.findAcceptingPath();
+        // Attempt to find a path to acceptance
+        const result = this.findAcceptingPath();
+        this.transitionPath = result.path;
 
-        if (this.transitionPath) {
-            // We found an accepting path
+        if (result.accepted) {
             this.isAccepted = true;
             displayMessage(
                 `The provided word is recognised by this PDA. Please click 'Next' to see how.`,
@@ -54,11 +59,10 @@ export class PdaSimulation {
             );
             this.stackContainer.classList.add('accepted');
         } else {
-            // No accepting path was found, so the DFS logic gave us a bestPartial path
             this.isRejected = true;
             displayMessage(
-                `The provided word is NOT recognised by this PDA. ` +
-                `Click 'Next' to see how far it got before failing.`,
+                `The provided word is NOT recognised by this PDA. 
+                 Click 'Next' to see how far it got before failing.`,
                 false,
                 'pda'
             );
@@ -81,185 +85,161 @@ export class PdaSimulation {
         this.isRejected = false;
         this.previousState = null;
         this.previousTransition = null;
+        this.previousLabel = null;
         this.step = 0;
         this.transitionIndex = 0;
         this.transitionPath = [];
 
-        // Clear previous messages and highlights
+        // Clear old highlights & messages
         this.resetAllHighlighting();
         this.clearMessage();
 
-        // Reset container colors
         this.stackContainer.classList.remove('accepted', 'rejected');
     }
 
     /**
-     * Uses DFS to find a path from (Qo, empty stack) to (Qaccept, entire input consumed, empty stack).
-     * If no full acceptance is found, we’ll store the “best partial” path that got furthest in input consumption
-     * and return that at the end.
+     * Full DFS to see if the machine can accept the input.
+     * Returns { accepted: boolean, path: Transition[] }.
+     * If accepted = false, path is the best partial path discovered.
      */
     findAcceptingPath() {
-        // Global visited set
-        let visited = new Set();
-        // This object tracks the best partial path that has consumed the most input so far
+        const visited = new Set();
         this.bestPartial = {
             path: [],
             consumed: 0
         };
 
-        // The array that eventually will hold the final path
-        let path = [];
-
-        const success = this.dfs(
-            'Qo',        // current state
-            [],          // stack
-            0,           // input index
-            path,        // path so far
-            visited
-        );
+        const pathSoFar = [];
+        const success = this.dfs('Qo', [], 0, pathSoFar, visited);
 
         if (success) {
-            // If we reached acceptance, path is stored in this.transitionPath from the DFS
-            return this.transitionPath;
+            // We found acceptance
+            return {
+                accepted: true,
+                path: this.transitionPath
+            };
         } else {
-            // Return the best partial path we found
-            return this.bestPartial.path.length ? this.bestPartial.path : null;
+            return {
+                accepted: false,
+                path: (this.bestPartial.path.length ? this.bestPartial.path : [])
+            };
         }
     }
 
     /**
-     * DFS backtracking
+     * DFS backtracking. If we find acceptance, we store the path in this.transitionPath and return true.
+     * Otherwise, we track the best partial path in this.bestPartial.
      */
     dfs(currentState, stack, inputIndex, path, visited, depth = 0) {
-        const MAX_DEPTH = 2000; // Avoid infinite recursion
+        const MAX_DEPTH = 2000; // safeguard
 
-        // If we are at Qaccept with full input consumed and stack empty, we’ve accepted
+        // Check acceptance
         if (
             currentState === 'Qaccept' &&
             inputIndex === this.inputWord.length &&
             stack.length === 0
         ) {
-            // Store the path as the actual path to acceptance
             this.transitionPath = [...path];
             return true;
         }
 
         if (depth > MAX_DEPTH) {
-            return false; // Guard
-        }
-
-        // Mark visited config so we don’t loop
-        const stackTop = stack[stack.length - 1] || window.EMPTY_STRING;
-        const key = `${currentState},${inputIndex},${stackTop},${stack.length}`;
-        if (visited.has(key)) {
             return false;
         }
-        visited.add(key);
 
-        // Each time we see that we’ve consumed more input than before, we update bestPartial
+        // Avoid loops
+        const stackTop = stack[stack.length - 1] || window.EMPTY_STRING;
+        const configKey = `${currentState},${inputIndex},${stackTop},${stack.length}`;
+        if (visited.has(configKey)) {
+            return false;
+        }
+        visited.add(configKey);
+
+        // Update best partial
         if (inputIndex > this.bestPartial.consumed) {
-            // Save a copy of the path
             this.bestPartial.consumed = inputIndex;
             this.bestPartial.path = [...path];
         }
 
-        // Current input symbol (or ε if we’re at end)
         const inputSymbol = this.inputWord[inputIndex] || window.EMPTY_STRING;
 
-        // Gather all transitions from current state that might match inputSymbol or ε
-        const possibleTransitions = this.findTransitions(currentState, inputSymbol, stackTop, inputIndex);
-
-        // Shuffle them if you want random order, or keep as-is. (We do not necessarily need random.)
+        // Gather possible transitions
+        let possibleTransitions = this.findTransitions(currentState, inputSymbol, stackTop, inputIndex);
+        // You can shuffle if desired
         // possibleTransitions = this.shuffleArray(possibleTransitions);
 
-        // For each possible transition, apply it and recurse
-        for (let transition of possibleTransitions) {
-            // Clone stack
-            let newStack = [...stack];
-
-            // Pop?
-            if (transition.stackTop !== window.EMPTY_STRING) {
+        // Try each
+        for (let t of possibleTransitions) {
+            const newStack = [...stack];
+            // Pop
+            if (t.stackTop !== window.EMPTY_STRING) {
                 newStack.pop();
             }
-
-            // Push?
-            if (transition.stackPush !== window.EMPTY_STRING) {
-                let symbolsToPush = transition.stackPush.split('');
-                // Typically reverse if fromState != Qo, depending on how your app wants it:
-                if (transition.fromState !== 'Qo') {
-                    symbolsToPush.reverse();
+            // Push
+            if (t.stackPush !== window.EMPTY_STRING) {
+                let symbols = t.stackPush.split('');
+                if (t.fromState !== 'Qo') {
+                    symbols.reverse();
                 }
-                symbolsToPush.forEach(s => newStack.push(s));
+                symbols.forEach(s => newStack.push(s));
             }
 
-            // Advance input pointer if consuming a real symbol
             let newInputIndex = inputIndex;
-            if (transition.input !== window.EMPTY_STRING) {
+            if (t.input !== window.EMPTY_STRING) {
                 newInputIndex++;
             }
 
-            // Extend the path
-            let newPath = [...path, transition];
-
-            // Recurse
-            let found = this.dfs(transition.toState, newStack, newInputIndex, newPath, visited, depth + 1);
-            if (found) {
-                // If we found an accepting path, bubble success upward
+            const newPath = [...path, t];
+            if (this.dfs(t.toState, newStack, newInputIndex, newPath, visited, depth + 1)) {
                 return true;
             }
-            // If not, backtrack (implicit with our cloned copies)
         }
 
-        // If no transitions lead to acceptance, fail
         return false;
     }
 
-    // Step forward once in the discovered transitionPath
+    /**
+     * Step forward along our stored path (either the full or best partial).
+     */
     nextPdaStep() {
         if (this.transitionIndex >= this.transitionPath.length) {
-            // No more transitions to show
+            // No more transitions
             this.nextStepButton.style.display = 'none';
 
-            // If we did not accept, highlight the final node in red
+            // If not accepted, highlight final node in red, etc.
             if (!this.isAccepted) {
-                // Current node border = red
                 d3.select(`#${this.currentState}`)
-                  .select('ellipse')
-                  .style('stroke', 'red')
-                  .style('stroke-width', '3')
-                  .style('fill', 'white');
+                    .select('ellipse')
+                    .style('stroke', 'red')
+                    .style('stroke-width', '3')
+                    .style('fill', 'white');
 
                 d3.select(`#${this.currentState}`)
-                  .selectAll('text, tspan')
-                  .style('fill', 'black');
+                    .selectAll('text, tspan')
+                    .style('fill', 'black');
 
-                // Qaccept interior = red
                 d3.select('#Qaccept')
-                  .select('ellipse')
-                  .style('fill', 'red');
+                    .select('ellipse')
+                    .style('fill', 'red');
 
-                // Make Qaccept label white
                 d3.select('#Qaccept')
-                  .selectAll('text, tspan')
-                  .style('fill', 'white');
+                    .selectAll('text, tspan')
+                    .style('fill', 'white');
             }
             return;
         }
 
-        // Otherwise, take the next transition in our stored path
-        let transition = this.transitionPath[this.transitionIndex];
-
-        // Un-highlight whatever was previous
+        // Un‐highlight the previously highlighted state/transition
         this.resetHighlighting();
 
-        // Highlight the transition
+        // Highlight the next transition
+        const transition = this.transitionPath[this.transitionIndex];
         this.highlightTransition(transition);
 
-        // Update the state
+        // Update state, stack, input pointer
         this.previousState = this.currentState;
         this.currentState = transition.toState;
 
-        // Update the stack
         if (transition.stackTop !== window.EMPTY_STRING) {
             this.stack.pop();
         }
@@ -268,25 +248,23 @@ export class PdaSimulation {
             if (transition.fromState !== 'Qo') {
                 symbolsToPush.reverse();
             }
-            symbolsToPush.forEach(symbol => this.stack.push(symbol));
+            symbolsToPush.forEach(s => this.stack.push(s));
         }
-
-        // Consume input symbol
         if (transition.input !== window.EMPTY_STRING) {
             this.currentInputIndex++;
         }
 
-        // Highlight the new state
+        // Highlight current state
         this.highlightState(this.currentState);
 
         // Move pointer
         this.transitionIndex++;
 
-        // Update the stack display and input visualization
+        // Update visuals
         this.displayStack();
         this.updateWordVisualization();
 
-        // Check acceptance condition
+        // Check acceptance
         if (
             this.currentState === 'Qaccept' &&
             this.currentInputIndex === this.inputWord.length &&
@@ -300,27 +278,120 @@ export class PdaSimulation {
     }
 
     /**
-     * Finds transitions from the current configuration that can match
-     * (state, inputSymbol/ε, stackTop/ε).
-     * Also includes a small logic that checks if pushing more terminals
-     * would not exceed the input length, as in your original approach.
+     * For a transition with multiple lines in the label, only highlight the exact line used.
+     * So we build the label string (e.g. “ε, S → aS”) that matches the transition.
+     */
+    highlightTransition(transition, color = '#2861ff') {
+        if (!transition?.transitionId) return;
+
+        // 1) Highlight the edge lines/polygon
+        d3.select(`#${transition.transitionId}`)
+            .selectAll('path, polygon')
+            .style('stroke', color);
+
+        // 2) Build the label text we need to match exactly:
+        const labelText = this.buildLabelText(transition);
+
+        // 3) Among all <text> elements in this edge’s group, we only color the matching line
+        d3.select(`#${transition.transitionId}`)
+            .selectAll('text')
+            .style('fill', function() {
+                // “this” is the <text> node; we compare its text content
+                return d3.select(this).text() === labelText ? color : 'black';
+            });
+
+        // Store them so we can revert later
+        this.previousTransition = transition.transitionId;
+        this.previousLabel = labelText;
+    }
+
+    /**
+     * Reverts the previously highlighted state and label line back to default colors.
+     */
+    resetHighlighting() {
+        // Revert previous state fill
+        if (this.previousState) {
+            d3.select(`#${this.previousState}`)
+                .select('ellipse')
+                .style('fill', 'white');
+
+            d3.select(`#${this.previousState}`)
+                .selectAll('text, tspan')
+                .style('fill', 'black');
+        }
+
+        // Revert previous transition edges
+        if (this.previousTransition) {
+            d3.select(`#${this.previousTransition}`)
+                .selectAll('path, polygon')
+                .style('stroke', 'black');
+        }
+
+        // Revert only the previously highlighted label line
+        if (this.previousTransition && this.previousLabel) {
+            d3.select(`#${this.previousTransition}`)
+                .selectAll('text')
+                .filter((d, i, nodes) => {
+                    return d3.select(nodes[i]).text() === this.previousLabel;
+                })
+                .style('fill', 'black');
+        }
+    }
+
+    resetAllHighlighting() {
+        // Reset all states
+        d3.selectAll('.node')
+            .select('ellipse')
+            .style('fill', 'white')
+            .style('stroke', 'black')
+            .style('stroke-width', '1');
+
+        d3.selectAll('.node')
+            .selectAll('text, tspan')
+            .style('fill', 'black');
+
+        // Reset all transitions
+        d3.selectAll('.edge')
+            .selectAll('path, polygon')
+            .style('stroke', 'black');
+
+        // Reset all label lines
+        d3.selectAll('.edge')
+            .selectAll('text')
+            .style('fill', 'black');
+    }
+
+    /**
+     * Returns the exact label text for the transition, matching the format in the graph:
+     *   input, stackTop -> stackPush
+     * where each empty symbol is shown as “ε” in the label.
+     */
+    buildLabelText(transition) {
+        const i = transition.input === window.EMPTY_STRING ? "ε" : transition.input;
+        const sTop = transition.stackTop === window.EMPTY_STRING ? "ε" : transition.stackTop;
+        const sPush = transition.stackPush === window.EMPTY_STRING ? "ε" : transition.stackPush;
+        return `${i}, ${sTop} → ${sPush}`;
+    }
+
+    /**
+     * Finds transitions from (currentState, inputSymbol/ε, stackTop/ε) 
+     * that do not exceed the user’s input length with terminal pushes.
      */
     findTransitions(currentState, inputSymbol, stackTop, inputIndex) {
-        let possibleTransitions = this.pdaTransitions.filter(trans =>
-            trans.fromState === currentState &&
-            (trans.input === inputSymbol || trans.input === window.EMPTY_STRING) &&
-            (trans.stackTop === stackTop || trans.stackTop === window.EMPTY_STRING)
+        let possible = this.pdaTransitions.filter(t =>
+            t.fromState === currentState &&
+            (t.input === inputSymbol || t.input === window.EMPTY_STRING) &&
+            (t.stackTop === stackTop || t.stackTop === window.EMPTY_STRING)
         );
 
-        // Additional check: if we push more terminals than the user’s input has left, skip it
-        // so we don't get stuck in silly expansions.
-        possibleTransitions = possibleTransitions.filter(transition => {
-            let terminalsInStack = this.countTerminalsInStack();
-            let terminalsInPush = this.countTerminalsInString(transition.stackPush);
-            return (inputIndex + terminalsInStack + terminalsInPush) <= this.inputWord.length;
+        // Optionally skip transitions that push more terminals than we can fit
+        possible = possible.filter(t => {
+            let stackTerminals = this.countTerminalsInStack();
+            let pushTerminals = this.countTerminalsInString(t.stackPush);
+            return (inputIndex + stackTerminals + pushTerminals) <= this.inputWord.length;
         });
 
-        return possibleTransitions;
+        return possible;
     }
 
     countTerminalsInStack() {
@@ -344,27 +415,25 @@ export class PdaSimulation {
         return count;
     }
 
-    // --- Visual Updates below here ---
-
     displayStack() {
-        this.stackContainer.innerHTML = ''; // Clear previous stack
+        this.stackContainer.innerHTML = '';
 
         const stackLabel = document.createElement('p');
         stackLabel.classList.add('stack-label');
         stackLabel.textContent = 'Stack:';
         this.stackContainer.appendChild(stackLabel);
 
-        // Show the current stack top at the bottom (or top, depending on your UI preference)
+        // Display the stack contents
         for (let i = 0; i < this.stack.length; i++) {
-            const stackElement = document.createElement('div');
-            stackElement.classList.add('stack-element');
-            stackElement.textContent = this.stack[i];
-            this.stackContainer.appendChild(stackElement);
+            const elem = document.createElement('div');
+            elem.classList.add('stack-element');
+            elem.textContent = this.stack[i];
+            this.stackContainer.appendChild(elem);
         }
     }
 
     displayWord() {
-        this.wordContainer.innerHTML = ''; // Clear previous word
+        this.wordContainer.innerHTML = '';
 
         for (let i = 0; i < this.inputWord.length; i++) {
             const letterElement = document.createElement('span');
@@ -391,69 +460,15 @@ export class PdaSimulation {
     }
 
     highlightState(stateId, color = '#2861ff') {
-        // Fill that state’s ellipse with the color
         d3.select(`#${stateId}`)
             .select('ellipse')
             .style('fill', color);
 
-        // Change text color to white for contrast
         d3.select(`#${stateId}`)
             .selectAll('text, tspan')
             .style('fill', 'white');
 
         this.previousState = stateId;
-    }
-
-    highlightTransition(transition, color = '#2861ff') {
-        if (transition?.transitionId) {
-            d3.select(`#${transition.transitionId}`)
-                .selectAll('path, polygon')
-                .style('stroke', color);
-            this.previousTransition = transition.transitionId;
-        }
-    }
-
-    resetHighlighting() {
-        // Reset the previously highlighted state
-        if (this.previousState) {
-            d3.select(`#${this.previousState}`)
-                .select('ellipse')
-                .style('fill', 'white');
-
-            d3.select(`#${this.previousState}`)
-                .selectAll('text, tspan')
-                .style('fill', 'black');
-        }
-
-        // Reset the previously highlighted transition
-        if (this.previousTransition) {
-            d3.select(`#${this.previousTransition}`)
-                .selectAll('path, polygon')
-                .style('stroke', 'black');
-        }
-    }
-
-    resetAllHighlighting() {
-        // Reset all states
-        d3.selectAll('.node')
-            .select('ellipse')
-            .style('fill', 'white')
-            .style('stroke', 'black')
-            .style('stroke-width', '1');
-
-        d3.selectAll('.node')
-            .selectAll('text, tspan')
-            .style('fill', 'black');
-
-        // Reset all transitions
-        d3.selectAll('.edge')
-            .selectAll('path, polygon')
-            .style('stroke', 'black');
-
-        // Reset all labels
-        d3.selectAll('.edge')
-            .selectAll('text')
-            .style('fill', 'black');
     }
 
     clearMessage() {
@@ -463,13 +478,13 @@ export class PdaSimulation {
         }
     }
 
-    // Optional: if you want transitions in random order
     shuffleArray(array) {
         let currentIndex = array.length, randomIndex;
         while (currentIndex !== 0) {
             randomIndex = Math.floor(Math.random() * currentIndex);
             currentIndex--;
-            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            [array[currentIndex], array[randomIndex]] =
+                [array[randomIndex], array[currentIndex]];
         }
         return array;
     }

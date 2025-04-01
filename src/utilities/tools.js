@@ -56,23 +56,25 @@ export function displayMessage(message, success, entity) {
     const messageContainerId = `${entity}-message`;
     const outerContainerId = entity === 'cfg' ? 'cfg-area' : 'pda-area';
     let messageContainer = document.getElementById(messageContainerId);
-    if (!messageContainer) {
-        messageContainer = document.createElement('div');
-        messageContainer.id = messageContainerId;
-        messageContainer.classList.add('mt-3', 'fs-3', 'alert', success ? 'alert-success' : 'alert-danger');
-        const nthChildToAppendMessageAfter = entity === 'cfg' ? 1 : null;
-        const container = document.querySelector(`#${outerContainerId} .rounded-container`);
+    if (messageContainer) {
+        // remove old message
+        messageContainer.remove();
+    }
+    messageContainer = document.createElement('div');
+    messageContainer.id = messageContainerId;
+    messageContainer.classList.add('mt-3', 'fs-3', 'alert', success ? 'alert-success' : 'alert-danger');
+    const nthChildToAppendMessageAfter = entity === 'cfg' ? 1 : null;
+    const container = document.querySelector(`#${outerContainerId} .rounded-container`);
 
-        if (nthChildToAppendMessageAfter) {
-            const referenceChild = container.children[nthChildToAppendMessageAfter];
-            if (referenceChild) {
-                referenceChild.after(messageContainer);
-            } else {
-                container.appendChild(messageContainer);
-            }
+    if (nthChildToAppendMessageAfter) {
+        const referenceChild = container.children[nthChildToAppendMessageAfter];
+        if (referenceChild) {
+            referenceChild.after(messageContainer);
         } else {
             container.appendChild(messageContainer);
         }
+    } else {
+        container.appendChild(messageContainer);
     }
     messageContainer.textContent = '';
     const messageTextElement = document.createElement('span');
