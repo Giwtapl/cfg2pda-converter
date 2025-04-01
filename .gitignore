@@ -6,4 +6,4 @@ todos.txt
 package-lock.json
 
 # Ignore all files in the css folder (but not the folder itself)
-css/*
+# css/*
