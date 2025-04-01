@@ -1,4 +1,4 @@
-import { isLowerCase } from "../utilities/tools.js";
+import { isLowerCase, displayMessage } from "../utilities/tools.js";
 
 
 export class PdaSimulation {
@@ -47,9 +47,10 @@ export class PdaSimulation {
         if (this.transitionPath) {
           // If we found a path to Qaccept, mark it accepted
           this.isAccepted = true;
-          this.displayMessage(
+          displayMessage(
             `The provided word is recognised by this PDA. Please click 'Next' to see how.`,
-            true
+            true,
+            'pda'
           );
           this.stackContainer.classList.add('accepted');
         } else {
@@ -58,10 +59,11 @@ export class PdaSimulation {
 
           // Mark it rejected, but still allow stepping
           this.isRejected = true;
-          this.displayMessage(
+          displayMessage(
             `The provided word is NOT recognised by this PDA. ` +
             `Please click 'Next' to see how far it got before failing.`,
-            false
+            false,
+            'pda'
           );
           this.stackContainer.classList.add('rejected');
         }
@@ -306,7 +308,10 @@ export class PdaSimulation {
             this.stack.pop();
         }
         if (transition.stackPush !== window.EMPTY_STRING) {
-            const symbolsToPush = transition.stackPush.split('').reverse();
+            const symbolsToPush = transition.stackPush.split('');
+            if (transition.fromState !== 'Qo') {
+                symbolsToPush.reverse();
+            }
             symbolsToPush.forEach(symbol => this.stack.push(symbol));
         }
 
@@ -333,7 +338,7 @@ export class PdaSimulation {
         ) {
             this.isAccepted = true;
             this.highlightState(this.currentState, 'green');
-            this.displayMessage(`The PDA accepts the word '${this.inputWord}'.`, true);
+            displayMessage(`The PDA accepts the word '${this.inputWord}'.`, true, 'pda');
             this.nextStepButton.style.display = 'none';
         }
     }
@@ -510,21 +515,6 @@ export class PdaSimulation {
         if (matchingLabel) {
             matchingLabel.style.fill = color;
         }
-    }
-
-    displayMessage(message, success) {
-        let messageContainer = document.getElementById('pda-message');
-        if (!messageContainer) {
-            messageContainer = document.createElement('div');
-            messageContainer.id = 'pda-message';
-            messageContainer.classList.add('pda-message');
-            document.querySelector('#pdaArea .rounded-container').appendChild(messageContainer);
-        }
-        messageContainer.textContent = '';
-        const messageTextElement = document.createElement('span');
-        messageTextElement.textContent = message;
-        messageContainer.appendChild(messageTextElement);
-        messageTextElement.classList.add(`${success ? 'success' : 'failure'}--text`);
     }
 
     clearMessage() {

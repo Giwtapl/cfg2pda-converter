@@ -48,7 +48,7 @@ export class Cfg {
         const terminalSymbols = new Set();
         this.rules.forEach(rule => {
             rule.productions.forEach(production => {
-                const terminals = production.text.match(/[^A-Z0-9ε]/g);
+                const terminals = production.text.match(/[^A-Zε]/g);
                 if (terminals) {
                     terminals.forEach(char => terminalSymbols.add(char));
                 }

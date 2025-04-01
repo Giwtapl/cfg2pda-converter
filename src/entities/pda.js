@@ -33,7 +33,7 @@ export class Pda {
                 }`
             )
             .on("end", () => {
-                const pdaArea = document.getElementById('pdaArea');
+                const pdaArea = document.getElementById('pda-area');
                 pdaArea.scrollIntoView({ behavior: 'smooth', block: 'start' });  // start, center, end, nearest
                 window.isPdaRendered = true;
                 const event = new Event('input', {

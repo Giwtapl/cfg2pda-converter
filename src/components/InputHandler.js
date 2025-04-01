@@ -27,7 +27,7 @@ export class InputHandler {
 
         const convertBtn = document.getElementById('btn-convert');
         convertBtn.addEventListener('click', (event) => {
-            const pdaArea = document.getElementById('pdaArea');
+            const pdaArea = document.getElementById('pda-area');
             pdaArea.classList.toggle('hidden');
             const converter = new Cfg2PdaConverter(window.inputHandler.cfg);
             const equivPda = converter.convert();

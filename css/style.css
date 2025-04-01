@@ -9288,6 +9288,9 @@ html, body {
 
 html {
   font-size: 62.5%; }
+  @media (max-width: 768px) {
+    html {
+      font-size: 50%; } }
 
 .body {
   font-family: sans-serif;
@@ -9637,7 +9640,8 @@ table#stepsTable {
   border: 3px solid #000000;
   border-radius: 20px;
   overflow: hidden;
-  color: black; }
+  color: black;
+  font-size: 1.5rem; }
   table#stepsTable thead {
     background-color: #f2f2f2; }
     table#stepsTable thead tr th {
@@ -9696,13 +9700,6 @@ table#stepsTable {
 .current-letter {
   text-decoration: underline;
   color: red; }
-
-/* PDA Message */
-.pda-message {
-  margin-top: 20px;
-  font-size: 18px;
-  text-align: center;
-  background-color: #f9f9f9; }
 
 #shared-input-handler {
   display: none; }

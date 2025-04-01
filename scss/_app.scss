@@ -358,6 +358,7 @@ table#stepsTable {
     border-radius: 20px;
     overflow: hidden;
     color: black;
+    font-size: 1.5rem;
 
     thead {
         background-color: #f2f2f2;
@@ -445,14 +446,6 @@ table#stepsTable {
 .current-letter {
     text-decoration: underline;
     color: red;
-}
-
-/* PDA Message */
-.pda-message {
-    margin-top: 20px;
-    font-size: 18px;
-    text-align: center;
-    background-color: #f9f9f9;
 }
 
 #shared-input-handler {
