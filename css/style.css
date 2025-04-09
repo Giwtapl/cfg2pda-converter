@@ -9565,6 +9565,8 @@ main {
 .add-rule-production {
   background-color: #0bbf4d;
   position: relative; }
+  .add-rule-production:focus, .add-rule-production:hover {
+    background-color: #0bbf4d; }
   .add-rule-production::before, .add-rule-production::after {
     display: inline-block;
     content: "";
@@ -9580,6 +9582,8 @@ main {
 .remove-rule-production {
   background-color: #db061c;
   position: relative; }
+  .remove-rule-production:focus, .remove-rule-production:hover {
+    background-color: #db061c; }
   .remove-rule-production::after {
     display: inline-block;
     content: "";

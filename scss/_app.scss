@@ -266,6 +266,10 @@
     background-color: #0bbf4d;
     position: relative;
 
+    &:focus, &:hover {
+        background-color: #0bbf4d;
+    }
+
     &::before,
     &::after {
         display: inline-block;
@@ -286,6 +290,10 @@
 .remove-rule-production {
     background-color: #db061c;
     position: relative;
+
+    &:focus, &:hover {
+        background-color: #db061c;
+    }
 
     &::after {
         display: inline-block;

@@ -14,70 +14,66 @@ export class Production {
 
     create() {
         this.id = `input-rule-${this.ruleIndex}-prod-${this.prodIndex}`;
+
+        // Create the production input
         const inputElement = document.createElement('input');
         inputElement.type = 'text';
         inputElement.id = this.id;
         inputElement.placeholder = window.EMPTY_STRING;
         inputElement.classList.add('input-text', 'input-text--rule');
+
         if (window.isMobile.any()) {
             inputElement.classList.add('fs-3');
         }
         inputElement.addEventListener('input', inputEventHandler);
 
-        // Add keydown event listener for Tab and Shift+Tab keys
+        // Add Tab / Shift+Tab logic
         inputElement.addEventListener('keydown', (event) => {
             if (event.key === 'Tab' && !event.shiftKey) {
-                // Handle Tab (add new production to same rule)
-                event.preventDefault(); // Prevent default Tab behavior
+                // Tab => Add a new production to the same rule
+                event.preventDefault();
                 const plusButton = document.getElementById(`plus-rule-${this.ruleIndex}`);
                 this.parentRule.plusBtnHandler({ target: plusButton });
-                // Focus on the new production's input field
+
+                // Focus on the newest production's input
                 const latestProd = this.parentRule.productions[this.parentRule.productions.length - 1];
                 const newInputEl = document.getElementById(latestProd.id);
                 newInputEl.focus();
             } else if (event.key === 'Tab' && event.shiftKey) {
-                // Handle Shift+Tab (move to next rule's first empty production)
+                // Shift+Tab => jump to next rule's empty production
                 event.preventDefault();
 
-                // Get the index of the current rule in Rule.instances
                 const currentRuleIndex = Rule.instances.indexOf(this.parentRule);
-
-                // Get the next rule
                 const nextRule = Rule.instances[currentRuleIndex + 1];
-
                 if (nextRule) {
-                    // Find the first empty production input in the next rule
                     const emptyProd = nextRule.productions.find(prod => {
                         const inputEl = document.getElementById(prod.id);
                         return inputEl && inputEl.value === '';
                     });
-
                     if (emptyProd) {
-                        const inputEl = document.getElementById(emptyProd.id);
-                        inputEl.focus();
+                        document.getElementById(emptyProd.id).focus();
                     } else {
                         // If no empty production, add a new one
-                        nextRule.plusBtnHandler({ target: document.getElementById(`plus-rule-${nextRule.index}`) });
+                        const plusBtnEl = document.getElementById(`plus-rule-${nextRule.index}`);
+                        nextRule.plusBtnHandler({ target: plusBtnEl });
                         const latestProd = nextRule.productions[nextRule.productions.length - 1];
-                        const newInputEl = document.getElementById(latestProd.id);
-                        newInputEl.focus();
+                        document.getElementById(latestProd.id).focus();
                     }
                 }
-                // If no next rule, do nothing
             }
         });
 
+        // Insert this new input into production-container, just before the .d-inline-flex group
         const productionContainerEl = document.getElementById(`${this.PARENT_ID_TEMPLATE}-${this.ruleIndex}`);
-        const rulePlusBtnEl = document.getElementById(`plus-rule-${this.ruleIndex}`);
-        productionContainerEl.insertBefore(inputElement, rulePlusBtnEl);
+        const lastGroupDiv = productionContainerEl.querySelector('.d-inline-flex.text-nowrap');
+        productionContainerEl.insertBefore(inputElement, lastGroupDiv);
     }
 
     remove() {
+        // Remove the input itself
         const productionEl = document.getElementById(this.id);
-        const adjacentProdSepEl = productionEl.previousElementSibling;
-        if (adjacentProdSepEl && adjacentProdSepEl.classList.contains('prod-sep')) {
-            adjacentProdSepEl.remove();
+        if (productionEl) {
+            productionEl.remove();
         }
-        productionEl.remove();
     }
 }
