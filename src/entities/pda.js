@@ -1,5 +1,4 @@
 import { PdaSimulation } from "../components/PdaSimulation.js";
-import MobileDetection from "../utilities/mobile.js";
 
 
 export class Pda {

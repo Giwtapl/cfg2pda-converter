@@ -200,14 +200,16 @@ export class InputHandler {
 
         instruction.innerHTML = `
             <div style="text-align: left; font-size: 14px;">
-                <p style="margin-bottom: 0.4rem;">💡 <strong>Hint 1:</strong> When you type a capital letter (A–Z) in a production, a new rule for that variable is automatically created.</p>
-                <p style="margin-bottom: 0.4rem;">💡 <strong>Hint 2:</strong> When a new rule production is generated, it's prepopulated with <strong>ε</strong> but can be modified.
-                <p style="margin-bottom: 0.4rem;">💡 <strong>Hint 3:</strong> Keyboard Shortcuts:</p>
-                <ul style="margin-bottom: 0; padding-left: 1.2rem; list-style-type: disc;">
-                    <li style="margin-bottom: 0.3rem;"><kbd>Tab</kbd> → Add a new production to the same rule</li>
-                    <li style="margin-bottom: 0.3rem;"><kbd>Shift</kbd> + <kbd>Tab</kbd> → Focus on the next rule's first empty production</li>
-                    <li style="margin-bottom: 0;"><kbd>Enter</kbd> → Equivalent to clicking the <strong>Done</strong> button</li>
-                </ul>
+            <p style="margin-bottom: 0.4rem;">💡 <strong>Hint 1:</strong> When you type a capital letter (A–Z) in a production, a new rule for that variable is automatically created.</p>
+            <p style="margin-bottom: 0.4rem;">💡 <strong>Hint 2:</strong> When a new rule production is generated, it's prepopulated with <strong>ε</strong> but can be modified.</p>
+            ${!window.isMobile.any() ? `
+            <p style="margin-bottom: 0.4rem;">💡 <strong>Hint 3:</strong> Keyboard Shortcuts:</p>
+            <ul style="margin-bottom: 0; padding-left: 1.2rem; list-style-type: disc;">
+                <li style="margin-bottom: 0.3rem;"><kbd>Tab</kbd> → Add a new production to the same rule</li>
+                <li style="margin-bottom: 0.3rem;"><kbd>Shift</kbd> + <kbd>Tab</kbd> → Focus on the next rule's first empty production</li>
+                <li style="margin-bottom: 0;"><kbd>Enter</kbd> → Equivalent to clicking the <strong>Done</strong> button</li>
+            </ul>
+            ` : ''}
             </div>
         `;
 

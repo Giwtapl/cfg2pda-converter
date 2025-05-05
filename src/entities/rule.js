@@ -28,7 +28,7 @@ export class Rule {
         const spanElement = document.createElement('span');
         spanElement.classList.add('var');
         if (window.isMobile.any()) {
-            spanElement.classList.add('fs-3');
+            spanElement.classList.add('fs-1');
         }
         // Use HTML entity for the arrow
         spanElement.innerHTML = `${varLetter} &rarr; `;

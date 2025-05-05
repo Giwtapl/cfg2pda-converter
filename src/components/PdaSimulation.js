@@ -426,7 +426,7 @@ export class PdaSimulation {
         // Display the stack contents
         for (let i = 0; i < this.stack.length; i++) {
             const elem = document.createElement('div');
-            elem.classList.add('stack-element');
+            elem.classList.add('stack-element', 'fs-1');
             elem.textContent = this.stack[i];
             this.stackContainer.appendChild(elem);
         }

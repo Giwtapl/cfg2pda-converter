@@ -23,7 +23,7 @@ export class Production {
         inputElement.classList.add('input-text', 'input-text--rule');
 
         if (window.isMobile.any()) {
-            inputElement.classList.add('fs-3');
+            inputElement.classList.add('fs-1');
         }
         inputElement.addEventListener('input', inputEventHandler);
 
