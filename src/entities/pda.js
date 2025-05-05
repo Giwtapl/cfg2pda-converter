@@ -32,6 +32,26 @@ export class Pda {
                 }`
             )
             .on("end", () => {
+                if (window.isMobile.any()) {
+                    // find the index of your Qloop link
+                    const loopIndex = this.nPdaData.links.findIndex(
+                        link => link.source === 'Qloop' && link.target === 'Qloop'
+                    );
+                    const loopEdgeId = `edge${loopIndex}`;
+
+                    // select all edge‐labels, but filter out the Qloop one
+                    d3.selectAll('#graph .edge text')
+                        .filter(function() {
+                            // this.parentNode is the <g class="edge" id="edgeX">
+                            return d3.select(this.parentNode).attr('id') !== loopEdgeId;
+                        })
+                        .each(function() {
+                            const t = d3.select(this);
+                            const x = parseFloat(t.attr('x'));
+                            if (!isNaN(x)) t.attr('x', x + 8);
+                        });
+                }
+
                 const pdaArea = document.getElementById('pda-area');
                 pdaArea.scrollIntoView({ behavior: 'smooth', block: 'start' });  // start, center, end, nearest
                 window.isPdaRendered = true;
