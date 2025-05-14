@@ -105,7 +105,9 @@ export class Pda {
                     // Create a temporary anchor element to trigger download
                     const downloadLink = document.createElement('a');
                     downloadLink.href = pngDataUrl;
-                    downloadLink.download = 'pda_graph.png'; // Set the desired file name
+                    const now = new Date();
+                    const formattedDate = now.toISOString().split('T')[0]; // Extract only the date part
+                    downloadLink.download = `pda_graph_${formattedDate}.png`; // Set the desired file name
 
                     // Append the anchor to the body
                     document.body.appendChild(downloadLink);

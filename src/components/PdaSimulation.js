@@ -1,4 +1,4 @@
-import { isLowerCase, displayMessage } from "../utilities/tools.js";
+import { isLowerCase, displayMessage, isGreek } from "../utilities/tools.js";
 
 export class PdaSimulation {
     constructor(pdaTransitions) {
@@ -52,20 +52,37 @@ export class PdaSimulation {
 
         if (result.accepted) {
             this.isAccepted = true;
-            displayMessage(
-                `The provided word is recognised by this PDA. Please click 'Next' to see how.`,
-                true,
-                'pda'
-            );
+            if (isGreek()) {
+                displayMessage(
+                    `Η παρεχόμενη λέξη αναγνωρίζεται από αυτό το PDA. Ακολουθήστε τα βήματα για να δείτε τις μεταβάσεις.`,
+                    true,
+                    'pda'
+                );
+            } else {
+                displayMessage(
+                    `The provided word is recognised by this PDA. Follow the steps to see the transitions.`,
+                    true,
+                    'pda'
+                );
+            }
             this.stackContainer.classList.add('accepted');
         } else {
             this.isRejected = true;
-            displayMessage(
-                `The provided word is NOT recognised by this PDA. 
-                 Click 'Next' to see how far it got before failing.`,
-                false,
-                'pda'
-            );
+            if (isGreek()) {
+                displayMessage(
+                    `Η παρεχόμενη λέξη ΔΕΝ αναγνωρίζεται από αυτό το PDA.
+                     Πατήστε 'Επόμενο' για να δείτε μέχρι πού έφτασε πριν αποτύχει.`,
+                    false,
+                    'pda'
+                );
+            } else {
+                displayMessage(
+                    `The provided word is NOT recognised by this PDA.
+                     Click 'Next' to see how far it got before failing.`,
+                    false,
+                    'pda'
+                );
+            }
             this.stackContainer.classList.add('rejected');
         }
 
@@ -374,7 +391,7 @@ export class PdaSimulation {
     }
 
     /**
-     * Finds transitions from (currentState, inputSymbol/ε, stackTop/ε) 
+     * Finds transitions from (currentState, inputSymbol/ε, stackTop/ε)
      * that do not exceed the user’s input length with terminal pushes.
      */
     findTransitions(currentState, inputSymbol, stackTop, inputIndex) {

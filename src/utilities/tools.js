@@ -1,3 +1,5 @@
+export const isGreek = () => document.documentElement.lang === "el";
+
 export const isUpperCase = letter => /^[A-Z]$/.test(letter);
 
 export const isLowerCase = letter => /^[a-z]$/.test(letter);

@@ -1,4 +1,4 @@
-import { displayMessage } from "../utilities/tools.js";
+import { displayMessage, isGreek } from "../utilities/tools.js";
 
 
 export class CfgTester {
@@ -32,10 +32,18 @@ export class CfgTester {
             this.displaySteps(stepsTableEl, steps, "lightgreen");
             stepsTableEl.classList.remove("hidden");
             stepsTableEl.scrollIntoView({ behavior: "smooth", block: "start" });
-            displayMessage(`The provided CFG recognizes the word '${word}'.`, true, "cfg");
+            if (isGreek()) {
+                displayMessage(`Η παρεχόμενη CFG αναγνωρίζει τη λέξη '${word}'.`, true, "cfg");
+            } else {
+                displayMessage(`The provided CFG recognizes the word '${word}'.`, true, "cfg");
+            }
         } else {
             // If not recognized, display a simple message
-            displayMessage(`The provided CFG does NOT recognize the word '${word}'.`, false, "cfg");
+            if (isGreek()) {
+                displayMessage(`Η παρεχόμενη CFG ΔΕΝ αναγνωρίζει τη λέξη '${word}'.`, false, "cfg");
+            } else {
+                displayMessage(`The provided CFG does NOT recognize the word '${word}'.`, false, "cfg");
+            }
         }
     }
 

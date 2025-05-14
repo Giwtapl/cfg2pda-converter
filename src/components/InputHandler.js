@@ -2,7 +2,7 @@ import { Cfg } from "../entities/cfg.js";
 import { Rule } from "../entities/rule.js";
 import { SharedInputHandler } from "./sharedInputHandler.js";
 import { Cfg2PdaConverter } from "./converter.js";
-import { isUpperCase } from "../utilities/tools.js";
+import { isUpperCase, isGreek } from "../utilities/tools.js";
 
 
 export class InputHandler {
@@ -198,7 +198,23 @@ export class InputHandler {
         instruction.className = 'alert alert-info mt-3';
         instruction.role = 'alert';
 
-        instruction.innerHTML = `
+        if (isGreek()) {
+            instruction.innerHTML = `
+            <div style="text-align: left; font-size: 14px;">
+            <p style="margin-bottom: 0.4rem;">💡 <strong>Υπόδειξη 1:</strong> Όταν πληκτρολογείτε ένα κεφαλαίο γράμμα (Α–Ζ) σε μια παραγωγή, δημιουργείται αυτόματα ένας νέος κανόνας για αυτήν τη μεταβλητή.</p>
+            <p style="margin-bottom: 0.4rem;">💡 <strong>Υπόδειξη 2:</strong> Όταν δημιουργείται μια νέα παραγωγή κανόνα, προγεμίζεται με <strong>ε</strong>, αλλά μπορεί να τροποποιηθεί.</p>
+            ${!window.isMobile.any() ? `
+            <p style="margin-bottom: 0.4rem;">💡 <strong>Υπόδειξη 3:</strong> Συντομεύσεις πληκτρολογίου:</p>
+            <ul style="margin-bottom: 0; padding-left: 1.2rem; list-style-type: disc;">
+                <li style="margin-bottom: 0.3rem;"><kbd>Tab</kbd> → Προσθήκη νέας παραγωγής στον ίδιο κανόνα</li>
+                <li style="margin-bottom: 0.3rem;"><kbd>Shift</kbd> + <kbd>Tab</kbd> → Εστίαση στην πρώτη κενή παραγωγή του επόμενου κανόνα</li>
+                <li style="margin-bottom: 0;"><kbd>Enter</kbd> → Ισοδύναμο με το πάτημα του κουμπιού <strong>Τέλος</strong></li>
+            </ul>
+            ` : ''}
+            </div>
+            `;
+        } else {
+            instruction.innerHTML = `
             <div style="text-align: left; font-size: 14px;">
             <p style="margin-bottom: 0.4rem;">💡 <strong>Hint 1:</strong> When you type a capital letter (A–Z) in a production, a new rule for that variable is automatically created.</p>
             <p style="margin-bottom: 0.4rem;">💡 <strong>Hint 2:</strong> When a new rule production is generated, it's prepopulated with <strong>ε</strong> but can be modified.</p>
@@ -211,7 +227,8 @@ export class InputHandler {
             </ul>
             ` : ''}
             </div>
-        `;
+            `;
+        }
 
         // Append under last rule
         const lastRule = document.querySelector('#user-input .rule:last-of-type');
