@@ -9696,3 +9696,117 @@ main {
   /* 3️⃣  λίγο μικρότερο κενό μετά το βέλος, για να κερδίσουμε χώρο */
   .rules.compressed .var {
     margin-right: .5rem; } }
+
+/* Derivation-table row colouring */
+.success {
+  background-color: #d0e9c6; }
+
+.success--text {
+  color: #407a52; }
+
+.failure {
+  background-color: #ebcccc; }
+
+.failure--text {
+  color: #a94442; }
+
+/* PDA acceptance / rejection banners */
+.accepted {
+  background-color: #d4edda; }
+
+/* light green */
+.rejected {
+  background-color: #f8d7da; }
+
+/* light red */
+/* Highlight for dead-end CFG rows */
+.dead-end-row {
+  background-color: #ffdddd; }
+
+.dead-end {
+  color: red;
+  font-weight: bold; }
+
+table#stepsTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 3px solid #000000;
+  border-radius: 20px;
+  overflow: hidden;
+  color: black;
+  font-size: 1.5rem; }
+  table#stepsTable thead {
+    background-color: #f2f2f2; }
+    table#stepsTable thead tr th {
+      padding: 8px;
+      text-align: left;
+      border: 1px solid #000000; }
+  table#stepsTable tbody .success {
+    background-color: lightgreen; }
+  table#stepsTable tbody .failure {
+    background-color: lightcoral; }
+  table#stepsTable tbody tr td {
+    padding: 8px;
+    text-align: left;
+    border: 1px solid #000000; }
+    table#stepsTable tbody tr td .bold {
+      font-weight: 800; }
+    table#stepsTable tbody tr td .colored {
+      font-weight: 800;
+      color: blue; }
+
+.loader {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite; }
+
+/* === PDA run-time visualisations === */
+/* Labels above stack / word visualisers */
+.stack-label {
+  font-size: large;
+  margin: auto;
+  font-weight: bold;
+  color: #555; }
+
+/* Container showing stack elements vertically */
+.stack-visual {
+  display: inline-flex;
+  border: 1px solid #000;
+  padding: 5px;
+  background-color: #f9f9f9;
+  margin-bottom: 20px; }
+  .stack-visual div:first-of-type {
+    margin-left: 10px; }
+
+/* Single stack symbol */
+.stack-element {
+  border: 1px solid #000;
+  padding: 5px;
+  text-align: center;
+  margin-bottom: 2px;
+  background-color: #fff;
+  color: #555; }
+
+/* Word visualisation row */
+.word-visual {
+  text-align: center;
+  margin-bottom: 20px; }
+
+/* Each letter in the current word */
+.word-letter {
+  display: inline-block;
+  font-size: 24px;
+  margin: 0 2px;
+  color: #555; }
+
+/* Highlight for current input symbol */
+.current-letter {
+  text-decoration: underline;
+  color: red; }
+
+#shared-input-handler {
+  display: none; }
