@@ -1,12 +1,14 @@
+
+/* ===========================================================
+   _app.scss  –  full file (FINAL)
+   - Align minus sign horizontally
+   - Ensure add/remove buttons share exact same size
+   - Make stacked action buttons equal width on small screens
+   =========================================================== */
+
 .heading-grey-dark {
     color: #2c2c2c;
 }
-
-// #input-generation {
-//     & .input-text,button {
-//         margin: auto 0;
-//     }
-// }
 
 #generateWordButton {
     --bs-btn-padding-y: 0.2rem;
@@ -30,35 +32,27 @@
     height: 100%;
 }
 
-#graph + div.buttons-container{
+#graph + div.buttons-container {
     margin-top: 5px;
 }
 
-#wordLength {
-    max-width: 100px;
-    margin: auto;
-}
+#wordLength { max-width: 100px; margin: auto; }
+#goButton   { width: 70px; }
 
-#goButton {
-    width: 70px;
-}
-
+/* Bootstrap utilities overrides for big buttons */
 .btn-large {
     --bs-btn-padding-y: 1.25rem;
     --bs-btn-padding-x: 1.5rem;
     --bs-btn-font-size: 1.75rem;
 }
-
 .btn-large-cust {
     --bs-btn-padding-y: 0.2rem;
     --bs-btn-padding-x: 1.5rem;
     --bs-btn-font-size: 1.75rem;
 }
 
-.outter-container {
-    width: 100%;
-    text-align: center;
-}
+/* ---------- Layout containers ---------- */
+.outter-container { width: 100%; text-align: center; }
 
 .rounded-container {
     position: relative;
@@ -71,16 +65,44 @@
     box-shadow: 0.5rem 0.7rem 1.5rem #000;
 }
 
-.reversed-cols-flex-container {
-    display: flex;
-    flex-direction: column-reverse;
+.reversed-cols-flex-container { display: flex; flex-direction: column-reverse; }
+
+/* ---------- Rules input / output ---------- */
+.rules { display: flex; flex-direction: column; }
+
+/* --- COMPRESSED (read‑only) VARIANT: applied after "Done" --- */
+.rules.compressed {
+
+    /* keep variable + arrow glued together */
+    .var {
+        margin-right: 1rem;
+        white-space: nowrap;
+        flex: 0 0 auto;      /* override edit-state 6% */
+    }
+
+    /* pack the productions tightly */
+    .productions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: clamp(.5rem, 2vw, 1rem);   /* responsive gap */
+        min-width: 0;                   /* allow shrinking */
+
+        /* separator "|" */
+        .prod-sep {
+            margin-inline: 0;                 /* override earlier clamp rule */
+            margin-right: clamp(.5rem, 2vw, 1rem);
+        }
+
+        /* disabled inputs shrink to content */
+        .input-text--rule {
+            width: auto;
+            min-width: 0;              /* cancel 95px */
+            // flex: 0 1 auto;
+        }
+    }
 }
 
-.rules {
-    display: flex;
-    flex-direction: column;
-}
-
+/* ---------- Input texts ---------- */
 .input-text {
     font-size: 2rem;
     border-radius: 50px;
@@ -89,30 +111,26 @@
     border: none;
     margin: 0 0 1rem 0;
 
+    /* production inputs EDIT MODE */
     &--rule {
-        width: 75%;
-        flex: 0 0 10%;
+        width: auto;
+        flex: 1 1 clamp(6rem, 25vw, 95px);
         font-size: $rule-font-size;
-        min-width: 95px;
+        min-width: 0;
 
-        &:focus {
-            background-color: white;
-        }
-
-        &:disabled {
+        &:focus   { background-color: #fff; }
+        &:disabled{
             background-color: $color-primary;
             color: #2c2c2c;
         }
     }
 }
 
-.buttons-container {
-    display: flex;
-    justify-content: end;
-}
+/* ---------- Buttons container ---------- */
+.buttons-container { display: flex; justify-content: end; }
 
+/* ---------- PDA area ---------- */
 .pda-container {
-    // margin-top: 20px;
     margin: 2rem auto;
     display: flex;
     flex-direction: column;
@@ -132,330 +150,184 @@
         width: 30%;
         margin: 0 0 1rem 0;
 
-        &:focus {
-            background-color: white;
-        }
-
-        &:disabled {
-            background-color: $color-primary;
-            color: white;
-        }
+        &:focus   { background-color: #fff; }
+        &:disabled{ background-color: $color-primary; color: #fff; }
     }
 }
 
-#derivationTable {
-    width: 100%;
-    border-collapse: collapse;
-}
+/* ---------- Derivation table ---------- */
+#derivationTable { width: 100%; border-collapse: collapse; }
+#derivationTable th,
+#derivationTable td { border: 1px solid #ddd; padding: 8px; text-align: left; }
 
-#derivationTable th, #derivationTable td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-}
+/* ---------- Misc text helpers ---------- */
+.instruction { font-size: $rule-font-size; color: #2c2c2c; }
+.hidden      { display: none !important; }
 
-.instruction {
-    font-size: $rule-font-size;
-    color: #2c2c2c;
-}
-
-.hidden {
-    display: none !important;
-}
-
-.btn--primary {
-    order: 1;
-    align-self: flex-end;
-    border-radius: 10px;
-    font-size: 2rem;
-    padding: 1rem 2rem;
-    margin-top: 1rem;
-    margin-right: 1rem;
-    color: white;
-    border: none;
-
-    &:last-child {
-        margin-right: 0;
-    }
-
-    &:disabled {
-        opacity: 0.5; /* Adjust the opacity to your preference */
-        cursor: not-allowed;
-        /* You can also add other styles like changing the background color or text color */
-    }
-}
-
+/* ---------- Primary / secondary buttons ---------- */
+.btn--primary,
 .btn--secondary {
     order: 1;
     align-self: flex-end;
     border-radius: 10px;
     font-size: 2rem;
-    color: white;
+    color: #fff;
     border: none;
+}
 
+#button-done,
+#button-convert,
+#button-restart {
+    min-width: 150px !important; /* ensure buttons are wide enough */
+}
+
+.btn--primary {
+    padding: 1rem 2rem;
+    margin-top: 1rem;
+    margin-right: 1rem;
+    &:last-child { margin-right: 0; }
+    &:disabled   { opacity: .5; cursor: not-allowed; }
+}
+
+.btn--secondary {
     background-color: #1f89f4;
+    padding: 0.1rem 2rem;
     margin-top: 0;
     margin-right: 0;
-    padding: 0.1rem 2rem;
-
-    &:last-child {
-        margin-right: 0;
-    }
-
-    &:disabled {
-        opacity: 0.5; /* Adjust the opacity to your preference */
-        cursor: not-allowed;
-        /* You can also add other styles like changing the background color or text color */
-    }
+    &:last-child { margin-right: 0; }
+    &:disabled   { opacity: .5; cursor: not-allowed; }
 }
 
-.btn--blue {
-    background-color: #1f89f4;
-}
-.btn--gold {
-    background-color: #a98a03;
-}
-.btn--green {
-    background-color: #0bbf4d;
-}
-.btn--red {
-    background-color: #db061c;
-}
+/* colour variants */
+.btn--blue  { background-color: #1f89f4; }
+.btn--gold  { background-color: #a98a03; }
+.btn--green { background-color: #0bbf4d; }
+.btn--red   { background-color: #db061c; }
 
+/* ---------- Single rule row ---------- */
 .rule {
     display: flex;
+    align-items: flex-start;
+    column-gap: clamp(.4rem, 2vw, 1rem);
+    min-width: 0;  /* let children shrink */
 
-    & .var {
+    .var {
         font-size: $rule-font-size;
         color: #2c2c2c;
         flex: 0 0 6%;
-        text-wrap-mode: nowrap;
+        white-space: nowrap;
     }
 
-    & .productions {
+    .productions {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.5rem;
-        align-items: flex-start;
-        flex: 0 0 90%;
-        column-gap: 5px;
+        gap: .5rem;
+        align-items: center;
+        column-gap: clamp(.35rem, 1.2vw, .7rem);
+        row-gap:    clamp(.3rem , 1vw, .6rem);
+        min-width: 0;
 
-        & .prod-sep {
+        .prod-sep {
             font-size: $rule-font-size;
             color: #2c2c2c;
-            margin: 0 0 1rem 0;
+            margin-inline: clamp(.25rem, .8vw, .5rem);
+            margin-bottom: 1rem;
         }
 
-        & .btn {
+        .btn {
             border-radius: 50px;
             border: 0;
             justify-self: center;
             width: $rule-font-size;
             height: $rule-font-size;
             line-height: $rule-font-size;
-            color: white;
+            color: #fff;
             font-size: $rule-font-size;
             align-self: center;
             cursor: pointer;
-            margin: 0 0 1rem 0;
+            margin-bottom: 1rem;
         }
     }
 }
 
-.add-rule-production {
-    background-color: #0bbf4d;
+/* ---------- Plus / minus custom buttons ---------- */
+.add-rule-production,
+.remove-rule-production {
+    /* ίδια διάμετρος / απόλυτο κέντρο */
     position: relative;
+    width: $rule-font-size;   /* π.χ. 2.5rem */
+    height: $rule-font-size;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
 
-    &:focus, &:hover {
-        background-color: #0bbf4d;
-    }
+    /* χρώματα */
+    &.add-rule-production    { background-color: #0bbf4d; }
+    &.remove-rule-production { background-color: #db061c; }
 
+    /* κοινά strokes (+ οριζόντια/κάθετα) */
     &::before,
     &::after {
-        display: inline-block;
         content: "";
-        height: 1.5rem;
-        width: 0.3rem;
-        background-color: white;
         position: absolute;
-        top: 0.5rem;
-        right: 1.17rem;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #fff;
     }
 
-    &::after {
-        transform: rotate(90deg);
-    }
-}
-
-.remove-rule-production {
-    background-color: #db061c;
-    position: relative;
-
-    &:focus, &:hover {
-        background-color: #db061c;
+    /* κάθετη γραμμή (μόνο +) */
+    &.add-rule-production::before {
+        width: .3rem;
+        height: 1.6rem;
     }
 
-    &::after {
-        display: inline-block;
-        content: "";
-        height: 1.5rem;
-        width: 0.3rem;
-        background-color: white;
-        position: absolute;
-        top: 0.5rem;
-        right: 1.17rem;
+    /* οριζόντια γραμμή (+ και –) */
+    &.add-rule-production::after,
+    &.remove-rule-production::after {
+        width: 1.6rem;
+        height: .3rem;
     }
 
-    &::after {
-        transform: rotate(90deg);
-    }
+    /* κρύβουμε το κάθετο stroke στο – */
+    &.remove-rule-production::before { display: none; }
 }
 
-.success {
-    background-color: #d0e9c6;
+/* ---------- Responsive overrides ---------- */
+@media (max-width: 576px) {
+  /*  στοιχίζουμε κάθετα τα κουμπιά */
+  .buttons-container {
+      display: flex !important;   /* ακυρώνει το inline-flex του HTML */
+      flex-direction: column;
+      align-items: center;
+      gap: .75rem;
+  }
+
+  /*  ΟΛΑ τα κουμπιά ίσου πλάτους */
+  .buttons-container .btn {
+      width: 150px;      /* κοινό πλάτος */
+      max-width: 150px;  /* μην τεντώνουν περισσότερο */
+  }
 }
 
-.success--text {
-    color: #407a52;
+@media (max-width: 340px) {
+  .rules.compressed .productions { gap: .5rem; }
+  .rules.compressed .prod-sep    { margin-right: .5rem; }
 }
 
-.failure {
-    background-color: #ebcccc;
-}
+@media (max-width: 320px) {
 
-.failure--text {
-    color: #a94442;
-}
+  /* 1️⃣  μηδενίζουμε τα bottom-margins που “σπάγαν” τις γραμμές */
+  .rules.compressed .prod-sep,
+  .rules.compressed .btn        { margin-bottom: 0; }
 
-.accepted {
-    background-color: #d4edda; /* Light green background */
-}
+  /* 2️⃣  μικρότερο gap & margin ώστε να χωράνε περισσότερα στοιχεία */
+  .rules.compressed .productions { gap: .25rem; }
+  .rules.compressed .prod-sep    { margin-right: .25rem; }
 
-.rejected {
-    background-color: #f8d7da; /* Light red background */
-}
-
-.dead-end-row {
-    background-color: #ffdddd;
-}
-
-.dead-end {
-    color: red;
-    font-weight: bold;
-}
-
-.loader {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #3498db;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-table#stepsTable {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    border: 3px solid #000000;
-    border-radius: 20px;
-    overflow: hidden;
-    color: black;
-    font-size: 1.5rem;
-
-    thead {
-        background-color: #f2f2f2;
-        tr {
-            th {
-                padding: 8px;
-                text-align: left;
-                border: 1px solid #000000;
-            }
-        }
-    }
-
-    tbody {
-        .success {
-            background-color: lightgreen;
-        }
-        .failure {
-            background-color: lightcoral;
-        }
-        tr {
-            td {
-                padding: 8px;
-                text-align: left;
-                border: 1px solid #000000;
-                .bold {
-                    font-weight: 800;
-                }
-                .colored {
-                    font-weight: 800;
-                    color: blue;
-                }
-            }
-        }
-    }
-}
-
-/* Stack Visualization */
-.stack-label {
-    // position: absolute;
-    // left: 26px;
-    // top: 75px;
-    font-size: large;
-    margin: auto;
-    font-weight: bold;
-    color: $color-grey-dark;
-}
-
-.stack-visual {
-    // position: absolute;
-    // left: 10px;
-    // top: 100px;
-    display: inline-flex;
-    border: 1px solid #000;
-    padding: 5px;
-    background-color: #f9f9f9;
-    margin-bottom: 20px;
-
-    & div:first-of-type {
-        margin-left: 10px;
-    }
-}
-
-.stack-element {
-    border: 1px solid #000;
-    padding: 5px;
-    text-align: center;
-    margin-bottom: 2px;
-    background-color: #fff;
-    color: $color-grey-dark;
-}
-
-/* Word Visualization */
-.word-visual {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.word-letter {
-    display: inline-block;
-    font-size: 24px;
-    margin: 0 2px;
-    color: $color-grey-dark;
-}
-
-.current-letter {
-    text-decoration: underline;
-    color: red;
-}
-
-#shared-input-handler {
-    display: none;
+  /* 3️⃣  λίγο μικρότερο κενό μετά το βέλος, για να κερδίσουμε χώρο */
+  .rules.compressed .var         { margin-right: .5rem; }
 }

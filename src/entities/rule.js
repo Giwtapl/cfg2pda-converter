@@ -31,7 +31,7 @@ export class Rule {
             spanElement.classList.add('fs-1');
         }
         // Use HTML entity for the arrow
-        spanElement.innerHTML = `${varLetter} &rarr; `;
+        spanElement.innerHTML = `${varLetter}&nbsp;&rarr;`;
 
         // Container for all productions
         const productionsDiv = document.createElement('div');
@@ -81,7 +81,7 @@ export class Rule {
         // Insert a vertical bar ("|") as a separator
         const spanElement = document.createElement('span');
         spanElement.classList.add('prod-sep');
-        spanElement.textContent = ' | ';
+        spanElement.textContent = '|';
 
         const productionsDiv = document.getElementById(`production-container-${this.index}`);
         // Insert that separator just before our .d-inline-flex (the last group)

@@ -114,6 +114,16 @@ export class InputHandler {
         this.destroyPlusMinusRuleButtons();
         this.handleEmptyProductions();
         this.disableProductionsInput();
+
+        /*  NEW: squeeze everything for the “read-only” stage */
+        const rulesRoot = document.getElementById('user-input');   // #user-input is the <div class="rules" …>
+        rulesRoot.classList.add('compressed');
+
+        /* optional: the empty .d-inline-flex wrappers only held the +/– buttons.
+        Now that the buttons are gone, remove the wrappers so they don't eat space. */
+        document.querySelectorAll('.productions .d-inline-flex.text-nowrap')
+                .forEach(w => w.remove());
+
         this.hideDoneButton(document.getElementById('btn-done'));
         this.transformInputToCfg();
 
@@ -201,10 +211,10 @@ export class InputHandler {
         if (isGreek()) {
             instruction.innerHTML = `
             <div style="text-align: left; font-size: 14px;">
-            <p style="margin-bottom: 0.4rem;">💡 <strong>Υπόδειξη 1:</strong> Όταν πληκτρολογείτε ένα κεφαλαίο γράμμα (Α–Ζ) σε μια παραγωγή, δημιουργείται αυτόματα ένας νέος κανόνας για αυτήν τη μεταβλητή.</p>
-            <p style="margin-bottom: 0.4rem;">💡 <strong>Υπόδειξη 2:</strong> Όταν δημιουργείται μια νέα παραγωγή κανόνα, προγεμίζεται με <strong>ε</strong>, αλλά μπορεί να τροποποιηθεί.</p>
+            <p style="margin-bottom: 0.4rem;">💡 <strong>Hint 1:</strong> Όταν πληκτρολογείτε ένα κεφαλαίο γράμμα (Α–Ζ) σε μια παραγωγή, δημιουργείται αυτόματα ένας νέος κανόνας για αυτήν τη μεταβλητή.</p>
+            <p style="margin-bottom: 0.4rem;">💡 <strong>Hint 2:</strong> Όταν δημιουργείται μια νέα παραγωγή κανόνα, προγεμίζεται με <strong>ε</strong>, αλλά μπορεί να τροποποιηθεί.</p>
             ${!window.isMobile.any() ? `
-            <p style="margin-bottom: 0.4rem;">💡 <strong>Υπόδειξη 3:</strong> Συντομεύσεις πληκτρολογίου:</p>
+            <p style="margin-bottom: 0.4rem;">💡 <strong>Hint 3:</strong> Συντομεύσεις πληκτρολογίου:</p>
             <ul style="margin-bottom: 0; padding-left: 1.2rem; list-style-type: disc;">
                 <li style="margin-bottom: 0.3rem;"><kbd>Tab</kbd> → Προσθήκη νέας παραγωγής στον ίδιο κανόνα</li>
                 <li style="margin-bottom: 0.3rem;"><kbd>Shift</kbd> + <kbd>Tab</kbd> → Εστίαση στην πρώτη κενή παραγωγή του επόμενου κανόνα</li>

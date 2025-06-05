@@ -1,3 +1,4 @@
+@charset "UTF-8";
 /*!
    * Bootstrap  v5.3.3 (https://getbootstrap.com/)
    * Copyright 2011-2024 The Bootstrap Authors
@@ -9356,6 +9357,12 @@ main {
     z-index: -1;
     transition: all .2s; }
 
+/* ===========================================================
+   _app.scss  –  full file (FINAL)
+   - Align minus sign horizontally
+   - Ensure add/remove buttons share exact same size
+   - Make stacked action buttons equal width on small screens
+   =========================================================== */
 .heading-grey-dark {
   color: #2c2c2c; }
 
@@ -9388,6 +9395,7 @@ main {
 #goButton {
   width: 70px; }
 
+/* Bootstrap utilities overrides for big buttons */
 .btn-large {
   --bs-btn-padding-y: 1.25rem;
   --bs-btn-padding-x: 1.5rem;
@@ -9398,6 +9406,7 @@ main {
   --bs-btn-padding-x: 1.5rem;
   --bs-btn-font-size: 1.75rem; }
 
+/* ---------- Layout containers ---------- */
 .outter-container {
   width: 100%;
   text-align: center; }
@@ -9416,32 +9425,64 @@ main {
   display: flex;
   flex-direction: column-reverse; }
 
+/* ---------- Rules input / output ---------- */
 .rules {
   display: flex;
   flex-direction: column; }
 
+/* --- COMPRESSED (read‑only) VARIANT: applied after "Done" --- */
+.rules.compressed {
+  /* keep variable + arrow glued together */
+  /* pack the productions tightly */ }
+  .rules.compressed .var {
+    margin-right: 1rem;
+    white-space: nowrap;
+    flex: 0 0 auto;
+    /* override edit-state 6% */ }
+  .rules.compressed .productions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(0.5rem, 2vw, 1rem);
+    /* responsive gap */
+    min-width: 0;
+    /* allow shrinking */
+    /* separator "|" */
+    /* disabled inputs shrink to content */ }
+    .rules.compressed .productions .prod-sep {
+      margin-inline: 0;
+      /* override earlier clamp rule */
+      margin-right: clamp(0.5rem, 2vw, 1rem); }
+    .rules.compressed .productions .input-text--rule {
+      width: auto;
+      min-width: 0;
+      /* cancel 95px */ }
+
+/* ---------- Input texts ---------- */
 .input-text {
   font-size: 2rem;
   border-radius: 50px;
   background-color: #c1c1c1;
   text-align: center;
   border: none;
-  margin: 0 0 1rem 0; }
+  margin: 0 0 1rem 0;
+  /* production inputs EDIT MODE */ }
   .input-text--rule {
-    width: 75%;
-    flex: 0 0 10%;
+    width: auto;
+    flex: 1 1 clamp(6rem, 25vw, 95px);
     font-size: 2.5rem;
-    min-width: 95px; }
+    min-width: 0; }
     .input-text--rule:focus {
-      background-color: white; }
+      background-color: #fff; }
     .input-text--rule:disabled {
       background-color: #d4d6b8;
       color: #2c2c2c; }
 
+/* ---------- Buttons container ---------- */
 .buttons-container {
   display: flex;
   justify-content: end; }
 
+/* ---------- PDA area ---------- */
 .pda-container {
   margin: 2rem auto;
   display: flex;
@@ -9461,20 +9502,23 @@ main {
     width: 30%;
     margin: 0 0 1rem 0; }
     .pda-container input:focus {
-      background-color: white; }
+      background-color: #fff; }
     .pda-container input:disabled {
       background-color: #d4d6b8;
-      color: white; }
+      color: #fff; }
 
+/* ---------- Derivation table ---------- */
 #derivationTable {
   width: 100%;
   border-collapse: collapse; }
 
-#derivationTable th, #derivationTable td {
+#derivationTable th,
+#derivationTable td {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: left; }
 
+/* ---------- Misc text helpers ---------- */
 .instruction {
   font-size: 2.5rem;
   color: #2c2c2c; }
@@ -9482,43 +9526,44 @@ main {
 .hidden {
   display: none !important; }
 
-.btn--primary {
-  order: 1;
-  align-self: flex-end;
-  border-radius: 10px;
-  font-size: 2rem;
-  padding: 1rem 2rem;
-  margin-top: 1rem;
-  margin-right: 1rem;
-  color: white;
-  border: none; }
-  .btn--primary:last-child {
-    margin-right: 0; }
-  .btn--primary:disabled {
-    opacity: 0.5;
-    /* Adjust the opacity to your preference */
-    cursor: not-allowed;
-    /* You can also add other styles like changing the background color or text color */ }
-
+/* ---------- Primary / secondary buttons ---------- */
+.btn--primary,
 .btn--secondary {
   order: 1;
   align-self: flex-end;
   border-radius: 10px;
   font-size: 2rem;
-  color: white;
-  border: none;
+  color: #fff;
+  border: none; }
+
+#button-done,
+#button-convert,
+#button-restart {
+  min-width: 150px !important;
+  /* ensure buttons are wide enough */ }
+
+.btn--primary {
+  padding: 1rem 2rem;
+  margin-top: 1rem;
+  margin-right: 1rem; }
+  .btn--primary:last-child {
+    margin-right: 0; }
+  .btn--primary:disabled {
+    opacity: .5;
+    cursor: not-allowed; }
+
+.btn--secondary {
   background-color: #1f89f4;
+  padding: 0.1rem 2rem;
   margin-top: 0;
-  margin-right: 0;
-  padding: 0.1rem 2rem; }
+  margin-right: 0; }
   .btn--secondary:last-child {
     margin-right: 0; }
   .btn--secondary:disabled {
-    opacity: 0.5;
-    /* Adjust the opacity to your preference */
-    cursor: not-allowed;
-    /* You can also add other styles like changing the background color or text color */ }
+    opacity: .5;
+    cursor: not-allowed; }
 
+/* colour variants */
 .btn--blue {
   background-color: #1f89f4; }
 
@@ -9531,24 +9576,31 @@ main {
 .btn--red {
   background-color: #db061c; }
 
+/* ---------- Single rule row ---------- */
 .rule {
-  display: flex; }
+  display: flex;
+  align-items: flex-start;
+  column-gap: clamp(0.4rem, 2vw, 1rem);
+  min-width: 0;
+  /* let children shrink */ }
   .rule .var {
     font-size: 2.5rem;
     color: #2c2c2c;
     flex: 0 0 6%;
-    text-wrap-mode: nowrap; }
+    white-space: nowrap; }
   .rule .productions {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    align-items: flex-start;
-    flex: 0 0 90%;
-    column-gap: 5px; }
+    gap: .5rem;
+    align-items: center;
+    column-gap: clamp(0.35rem, 1.2vw, 0.7rem);
+    row-gap: clamp(0.3rem, 1vw, 0.6rem);
+    min-width: 0; }
     .rule .productions .prod-sep {
       font-size: 2.5rem;
       color: #2c2c2c;
-      margin: 0 0 1rem 0; }
+      margin-inline: clamp(0.25rem, 0.8vw, 0.5rem);
+      margin-bottom: 1rem; }
     .rule .productions .btn {
       border-radius: 50px;
       border: 0;
@@ -9556,154 +9608,91 @@ main {
       width: 2.5rem;
       height: 2.5rem;
       line-height: 2.5rem;
-      color: white;
+      color: #fff;
       font-size: 2.5rem;
       align-self: center;
       cursor: pointer;
-      margin: 0 0 1rem 0; }
+      margin-bottom: 1rem; }
 
-.add-rule-production {
-  background-color: #0bbf4d;
-  position: relative; }
-  .add-rule-production:focus, .add-rule-production:hover {
-    background-color: #0bbf4d; }
-  .add-rule-production::before, .add-rule-production::after {
-    display: inline-block;
-    content: "";
-    height: 1.5rem;
-    width: 0.3rem;
-    background-color: white;
-    position: absolute;
-    top: 0.5rem;
-    right: 1.17rem; }
-  .add-rule-production::after {
-    transform: rotate(90deg); }
-
+/* ---------- Plus / minus custom buttons ---------- */
+.add-rule-production,
 .remove-rule-production {
-  background-color: #db061c;
-  position: relative; }
-  .remove-rule-production:focus, .remove-rule-production:hover {
-    background-color: #db061c; }
-  .remove-rule-production::after {
-    display: inline-block;
-    content: "";
-    height: 1.5rem;
-    width: 0.3rem;
-    background-color: white;
-    position: absolute;
-    top: 0.5rem;
-    right: 1.17rem; }
-  .remove-rule-production::after {
-    transform: rotate(90deg); }
-
-.success {
-  background-color: #d0e9c6; }
-
-.success--text {
-  color: #407a52; }
-
-.failure {
-  background-color: #ebcccc; }
-
-.failure--text {
-  color: #a94442; }
-
-.accepted {
-  background-color: #d4edda;
-  /* Light green background */ }
-
-.rejected {
-  background-color: #f8d7da;
-  /* Light red background */ }
-
-.dead-end-row {
-  background-color: #ffdddd; }
-
-.dead-end {
-  color: red;
-  font-weight: bold; }
-
-.loader {
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #3498db;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  animation: spin 1s linear infinite; }
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg); }
-  100% {
-    transform: rotate(360deg); } }
-
-table#stepsTable {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  border: 3px solid #000000;
-  border-radius: 20px;
-  overflow: hidden;
-  color: black;
-  font-size: 1.5rem; }
-  table#stepsTable thead {
-    background-color: #f2f2f2; }
-    table#stepsTable thead tr th {
-      padding: 8px;
-      text-align: left;
-      border: 1px solid #000000; }
-  table#stepsTable tbody .success {
-    background-color: lightgreen; }
-  table#stepsTable tbody .failure {
-    background-color: lightcoral; }
-  table#stepsTable tbody tr td {
-    padding: 8px;
-    text-align: left;
-    border: 1px solid #000000; }
-    table#stepsTable tbody tr td .bold {
-      font-weight: 800; }
-    table#stepsTable tbody tr td .colored {
-      font-weight: 800;
-      color: blue; }
-
-/* Stack Visualization */
-.stack-label {
-  font-size: large;
-  margin: auto;
-  font-weight: bold;
-  color: #555; }
-
-.stack-visual {
+  /* ίδια διάμετρος / απόλυτο κέντρο */
+  position: relative;
+  width: 2.5rem;
+  /* π.χ. 2.5rem */
+  height: 2.5rem;
   display: inline-flex;
-  border: 1px solid #000;
-  padding: 5px;
-  background-color: #f9f9f9;
-  margin-bottom: 20px; }
-  .stack-visual div:first-of-type {
-    margin-left: 10px; }
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  /* χρώματα */
+  /* κοινά strokes (+ οριζόντια/κάθετα) */
+  /* κάθετη γραμμή (μόνο +) */
+  /* οριζόντια γραμμή (+ και –) */
+  /* κρύβουμε το κάθετο stroke στο – */ }
+  .add-rule-production.add-rule-production,
+  .remove-rule-production.add-rule-production {
+    background-color: #0bbf4d; }
+  .add-rule-production.remove-rule-production,
+  .remove-rule-production.remove-rule-production {
+    background-color: #db061c; }
+  .add-rule-production::before, .add-rule-production::after,
+  .remove-rule-production::before,
+  .remove-rule-production::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff; }
+  .add-rule-production.add-rule-production::before,
+  .remove-rule-production.add-rule-production::before {
+    width: .3rem;
+    height: 1.6rem; }
+  .add-rule-production.add-rule-production::after, .add-rule-production.remove-rule-production::after,
+  .remove-rule-production.add-rule-production::after,
+  .remove-rule-production.remove-rule-production::after {
+    width: 1.6rem;
+    height: .3rem; }
+  .add-rule-production.remove-rule-production::before,
+  .remove-rule-production.remove-rule-production::before {
+    display: none; }
 
-.stack-element {
-  border: 1px solid #000;
-  padding: 5px;
-  text-align: center;
-  margin-bottom: 2px;
-  background-color: #fff;
-  color: #555; }
+/* ---------- Responsive overrides ---------- */
+@media (max-width: 576px) {
+  /*  στοιχίζουμε κάθετα τα κουμπιά */
+  .buttons-container {
+    display: flex !important;
+    /* ακυρώνει το inline-flex του HTML */
+    flex-direction: column;
+    align-items: center;
+    gap: .75rem; }
+  /*  ΟΛΑ τα κουμπιά ίσου πλάτους */
+  .buttons-container .btn {
+    width: 150px;
+    /* κοινό πλάτος */
+    max-width: 150px;
+    /* μην τεντώνουν περισσότερο */ } }
 
-/* Word Visualization */
-.word-visual {
-  text-align: center;
-  margin-bottom: 20px; }
+@media (max-width: 340px) {
+  .rules.compressed .productions {
+    gap: .5rem; }
+  .rules.compressed .prod-sep {
+    margin-right: .5rem; } }
 
-.word-letter {
-  display: inline-block;
-  font-size: 24px;
-  margin: 0 2px;
-  color: #555; }
-
-.current-letter {
-  text-decoration: underline;
-  color: red; }
-
-#shared-input-handler {
-  display: none; }
+@media (max-width: 320px) {
+  /* 1️⃣  μηδενίζουμε τα bottom-margins που “σπάγαν” τις γραμμές */
+  .rules.compressed .prod-sep,
+  .rules.compressed .btn {
+    margin-bottom: 0; }
+  /* 2️⃣  μικρότερο gap & margin ώστε να χωράνε περισσότερα στοιχεία */
+  .rules.compressed .productions {
+    gap: .25rem; }
+  .rules.compressed .prod-sep {
+    margin-right: .25rem; }
+  /* 3️⃣  λίγο μικρότερο κενό μετά το βέλος, για να κερδίσουμε χώρο */
+  .rules.compressed .var {
+    margin-right: .5rem; } }
