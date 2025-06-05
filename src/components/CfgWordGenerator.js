@@ -1,91 +1,116 @@
+/**
+ * CfgWordGenerator.js
+ * ===================
+ * Μη‑αναδρομική (BFS) γεννήτρια λέξεων για context‑free grammars.
+ * 
+ * ➤ Προσφέρει τη μέθοδο `generateWord(targetLength)` που επιστρέφει
+ *    • μία ΝΕΑ (μη διπλότυπη) λέξη ακριβώς `targetLength` τερματικών, ή
+ *    • `null` αν η CFG δεν παράγει καμία τέτοια λέξη.
+ * 
+ * ➤ Χρησιμοποιεί Breadth‑First Search ώστε να αποφεύγει stack overflows.
+ *    Κλαδεύει τα μονοπάτια με βάση το ελάχιστο δυνατό μήκος τους, έτσι
+ *    χειρίζεται σωστά παραγωγές ε (κενή λέξη).
+ * 
+ * Αναμένει αντικείμενο `cfg` της υπάρχουσας εφαρμογής:
+ *   cfg.rules[0].varLetter  → start symbol (π.χ. 'S')
+ *   cfg.cfgObj              → { 'S': ['ε', '0S1', ...], ... }
+ *   window.EMPTY_STRING     → σταθερά για το "ε".
+ */
+
 export class CfgWordGenerator {
-    constructor(cfg) {
-        this.cfg = cfg;
-        this.cfgObj = this.cfg.cfgObj;
-        this.generatedWords = new Set(); // Use Set for unique generated words
-        this.duplicateGeneratedWords = new Set(); // Use Set for duplicate words
-    }
+  constructor(cfg) {
+    this.cfg = cfg;
+    this.cfgObj = cfg.cfgObj;
+    // Για να μην επιστρέφουμε ξανά την ίδια λέξη
+    this.generatedWords = new Set();
+  }
 
-    canStillGenerateRemainingWord(cfg, currentGeneratedWord, targetLength) {
-        // Calculate the number of variables in the currentGeneratedWord that can produce ε
-        const currentGeneratedWordVariablesWithEpsilon = currentGeneratedWord.split('').filter(s => cfg[s] && cfg[s].includes(window.EMPTY_STRING));
-        return currentGeneratedWord.length - currentGeneratedWordVariablesWithEpsilon.length <= targetLength;
-    }
+  /** ***************  private helpers  **************** */
 
-    generateWord(targetLength) {
-        const cfg = this.cfgObj;
+  // true αν το string περιέχει μόνο τερματικά
+  #isTerminal(word) {
+    return !/[A-Z]/.test(word);
+  }
 
-        const generateWordRec = currentWord => {
-            if (!this.canStillGenerateRemainingWord(cfg, currentWord, targetLength)) {
-                return null;
-            }
-
-            if (isTerminal(currentWord)) {
-                // If the current word has the correct length and consists only of terminals, return it
-                if (currentWord.length === targetLength) {
-                    if (this.generatedWords.has(currentWord)) {
-                        this.duplicateGeneratedWords.add(currentWord); // Add to set of duplicates
-                    }
-                    return currentWord;
-                } else {
-                    return null;
-                }
-            }
-
-            const cfgClone = JSON.parse(JSON.stringify(cfg));
-
-            // Find the first non-terminal symbol in the word
-            for (let i = 0; i < currentWord.length; i++) {
-                if (cfg[currentWord[i]]) { // Check if it's a non-terminal (present in the CFG)
-                    const nonTerminal = currentWord[i];
-
-                    // Randomly choose one of the productions for this non-terminal
-                    const productions = cfgClone[nonTerminal];
-                    const randomIndex = Math.floor(Math.random() * productions.length);
-                    let chosenProduction = productions.splice(randomIndex, 1)[0];
-                    chosenProduction = chosenProduction === window.EMPTY_STRING ? "" : chosenProduction;
-
-                    // Replace the non-terminal with the chosen production
-                    const newWord = currentWord.slice(0, i) + chosenProduction + currentWord.slice(i + 1);
-
-                    // Recursive call to generate further
-                    const result = generateWordRec(newWord);
-
-                    // If a valid word is generated, return it
-                    if (result) {
-                        return result;
-                    } else {
-                        i = -1;
-                    }
-                }
-            }
-
-            // If no valid word is found after trying all productions, return null (backtrack)
-            return null;
+  /*
+   * Κατώτερο φράγμα μήκους που μπορεί να φτάσει το word, 
+   * θεωρώντας ότι κάθε non‑terminal χωρίς παραγωγή ε
+   * θα συνεισφέρει τουλάχιστον έναν χαρακτήρα.
+   */
+  #minPossibleLength(word) {
+    const cfg = this.cfgObj;
+    let min = 0;
+    for (const ch of word) {
+      if (cfg[ch]) {
+        // non‑terminal
+        if (!cfg[ch].includes(window.EMPTY_STRING)) {
+          min += 1; // δεν μπορεί να εξαφανιστεί τελείως
         }
-
-        // Helper function to check if a word is fully terminal
-        const isTerminal = word => !/[A-Z]/.test(word);
-
-        // Start the recursive process with the start symbol
-        const generatedWord = generateWordRec(this.cfg.rules[0].varLetter);
-
-        if (!generatedWord && this.duplicateGeneratedWords.size > 0) {
-            // Convert set to array to randomly select a duplicate word
-            const duplicatesArray = Array.from(this.duplicateGeneratedWords).filter(dWord => dWord.length === targetLength);
-            return duplicatesArray[Math.floor(Math.random() * duplicatesArray.length)];
-        } else if (generatedWord && !this.generatedWords.has(generatedWord)) {
-            this.generatedWords.add(generatedWord); // Add unique word to set
-            return generatedWord;
-        } else if (generatedWord && this.duplicateGeneratedWords.has(generatedWord)) {
-            if (this.duplicateGeneratedWords.size === 1) {
-                return generatedWord;
-            } else {
-                const duplicatesArray = Array.from(this.duplicateGeneratedWords).filter(dWord => dWord.length === targetLength);
-                const idx = duplicatesArray.indexOf(generatedWord);
-                const allDuplicatesNotCurrent = duplicatesArray.splice(idx, 1)[0];
-                return duplicatesArray[Math.floor(Math.random() * allDuplicatesNotCurrent.length)];
-            }
-        }
+      } else {
+        // terminal
+        min += 1;
+      }
     }
-};
+    return min;
+  }
+
+  /** *************************************************** */
+
+  /**
+   * Παράγει μία (νέα) λέξη μήκους `targetLength`·
+   * επιστρέφει null όταν δεν υπάρχει καμία.
+   */
+  generateWord(targetLength) {
+    const cfg = this.cfgObj;
+
+    // BFS ουρά
+    const queue = [this.cfg.rules[0].varLetter];
+    const visited = new Set(queue);
+
+    while (queue.length) {
+      const current = queue.shift();
+
+      // pruning: αν το ελάχιστο δυνατό μήκος ξεπερνά το ζητούμενο => skip
+      if (this.#minPossibleLength(current) > targetLength) continue;
+
+      // Πλήρως τερματικό string
+      if (this.#isTerminal(current)) {
+        if (current.length === targetLength && !this.generatedWords.has(current)) {
+          this.generatedWords.add(current);
+          return current;
+        }
+        // διαφορετικό μήκος ή ήδη παρήχθη — συνεχίζουμε
+        continue;
+      }
+
+      /*
+       * Επέκταση: βρίσκουμε το ΠΡΩΤΟ non‑terminal και δοκιμάζουμε
+       * όλες τις παραγωγές του.
+       */
+      for (let i = 0; i < current.length; i++) {
+        const symbol = current[i];
+        const productions = cfg[symbol];
+        if (!productions) continue; // terminal χαρακτήρας
+
+        for (const prod of productions) {
+          const replacement = prod === window.EMPTY_STRING ? "" : prod;
+          const next = current.slice(0, i) + replacement + current.slice(i + 1);
+
+          if (!visited.has(next)) {
+            visited.add(next);
+            queue.push(next);
+          }
+        }
+        break; // Επεκτείνουμε μόνο το ΠΡΩΤΟ non‑terminal σε αυτό το βήμα BFS
+      }
+    }
+
+    // Δεν βρέθηκε καμία λέξη κατάλληλου μήκους
+    return null;
+  }
+
+  /**  Καθαρίζει το ιστορικό για νέο session  */
+  reset() {
+    this.generatedWords.clear();
+  }
+}

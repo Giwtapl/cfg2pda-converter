@@ -1,3 +1,5 @@
+import { isGreek } from "../utilities/tools.js";
+
 export class WordGenerationModal {
   constructor(generatedWordInputEl) {
     // 1) Reference the Bootstrap modal element and create a new bootstrap.Modal instance
@@ -36,6 +38,15 @@ export class WordGenerationModal {
       }
 
       const generatedWord = window.inputHandler.cfg.wordGenerator.generateWord(length);
+
+      if (!generatedWord) {
+          const msg = isGreek()
+              ? `Η CFG που δώσατε δεν παράγει καμία λέξη μήκους ${length}.`
+              : `The CFG you provided does not generate any word of length ${length}.`;
+              alert(msg);
+          return;               // δεν κλείνουμε το modal
+      }
+
       this.generatedWordInputEl.value = generatedWord;
 
       // Emit input event
