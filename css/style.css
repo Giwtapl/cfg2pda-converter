@@ -9579,7 +9579,7 @@ main {
 /* ---------- Single rule row ---------- */
 .rule {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   column-gap: clamp(0.4rem, 2vw, 1rem);
   min-width: 0;
   /* let children shrink */ }

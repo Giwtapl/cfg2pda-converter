@@ -113,7 +113,9 @@ export class InputHandler {
         this.enableButtons();
         this.destroyPlusMinusRuleButtons();
         this.handleEmptyProductions();
-        this.disableProductionsInput();
+        // this.disableProductionsInput();
+
+        this.replaceInputsWithParagraphs();
 
         /*  NEW: squeeze everything for the “read-only” stage */
         const rulesRoot = document.getElementById('user-input');   // #user-input is the <div class="rules" …>
@@ -132,6 +134,34 @@ export class InputHandler {
         console.log(this.cfg.toStr());
         console.log(this.cfg.toObject());
         new SharedInputHandler();
+    }
+
+    /**
+     * Αντικαθιστά όλα τα <input> μιας παραγωγής με ένα
+     * απλό <p> που δείχνει το “ενοποιημένο” RHS.
+     */
+    replaceInputsWithParagraphs() {
+        this.rules.forEach(rule => {
+            // ενοποιημένο κείμενο: ε | SS | 0S1 | 1S0 ...
+            const rhs = rule.productions.map(p => p.text).join(' | ');
+
+            // container που μέχρι τώρα είχε τα input fields
+            const container = document.getElementById(
+                `production-container-${rule.index}`
+            );
+
+            // εξαφανίζουμε ΟΛΑ τα children (inputs, separatοrs, κ.λπ.)
+            container.innerHTML = '';
+
+            // δημιουργούμε το <p>
+            const p = document.createElement('p');
+            // ό,τι inline bootstrap classes θες· παράδειγμα:
+            // p.className = 'd-inline mb-0 fw-normal fs-5';
+            p.className = 'd-inline mb-0 px-2 py-1 rounded fs-1';
+            p.textContent = rhs;
+
+            container.appendChild(p);
+        });
     }
 
     isCfgEmpty(currentProductions) {

@@ -26,7 +26,7 @@ export class Rule {
 
         // Create the <span> element that shows the variable, e.g. "S →"
         const spanElement = document.createElement('span');
-        spanElement.classList.add('var');
+        spanElement.classList.add('fs-1', 'var');
         if (window.isMobile.any()) {
             spanElement.classList.add('fs-1');
         }
