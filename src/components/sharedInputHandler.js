@@ -8,6 +8,7 @@ export class SharedInputHandler {
         this.element.style.display = 'block';
         this.testCfgBtnEl = document.getElementById('btn-testcfg');
         this.testPdaBtnEl = document.getElementById('btn-testpda');
+        this.testPdaBtnEl.disabled = !window.isPdaRendered; // Disable if PDA is not rendered
         this.generatedWordInputEl = document.getElementById('sharedWordInput');
         this.cfgTester = new CfgTester(this.generatedWordInputEl);
         this.modal = new WordGenerationModal(this.generatedWordInputEl);
