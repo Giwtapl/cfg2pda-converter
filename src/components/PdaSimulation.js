@@ -1,4 +1,6 @@
-import { isGreek, displayMessage } from "../utilities/tools.js";
+import { CfgWordGenerator } from "./CfgWordGenerator.js";
+import { isGreek, displayMessage, minPossibleLength } from "../utilities/tools.js";
+
 
 export class PdaSimulation {
     constructor(pdaTransitions) {
@@ -45,7 +47,31 @@ export class PdaSimulation {
         this.resetSimulation();
         this.inputWord = document.getElementById("sharedWordInput").value.trim();
 
-        const cfgObj = window.inputHandler.cfg.cfgObj;
+        const cfg = window.inputHandler.cfg;
+        const isvalidWordLength = new CfgWordGenerator(cfg).canGenerateLength(this.inputWord.length);
+        if (!isvalidWordLength) {
+            if (isGreek()) {
+                displayMessage(`Η CFG που παρέχεται ΔΕΝ μπορεί να παράξει λέξη μήκους ${this.inputWord.length}.`, false, "pda");
+            } else {
+                displayMessage(`The provided CFG cannot generate any word of length ${this.inputWord.length}.`, false, "pda");
+            }
+            return;
+        }
+
+        const wordTerminals = [...new Set(this.inputWord.split(""))].filter(ch => !/[A-Z]/.test(ch));
+
+        const cfgTerminals = cfg.getTerminals();
+        const invalidChars = wordTerminals.filter(term => !cfgTerminals.includes(term));
+        if (invalidChars.length > 0) {
+            if (isGreek()) {
+                displayMessage(`Η λέξη '${this.inputWord}' περιέχει χαρακτήρες ('${invalidChars}') που δεν ανήκουν στα τερματικά σύμβολα της CFG.`, false, "pda");
+            } else {
+                displayMessage(`The word '${this.inputWord}' contains characters ('${invalidChars}') that are not part of the CFG's terminal symbols.`, false, "pda");
+            }
+            return;
+        }
+
+        const cfgObj = cfg.cfgObj;
         const accepted = this.buildTransitionPath(cfgObj, window.STARTING_VAR, this.inputWord);
 
         if (accepted) {
@@ -96,70 +122,81 @@ export class PdaSimulation {
      * ===================================================*/
     buildTransitionPath(cfgObj, startSymbol, word) {
         const EMPTY = window.EMPTY_STRING;
+
+        /* queue items: { stack: string[], idx: number, path: [] } */
+        const queue   = [];
         const visited = new Set();
-        const bestPartial = { path: [], consumed: 0 };
+        const best    = { consumed: 0, path: [] };   // for the reject case
 
-        const canStillMatch = (stack, remainingLen) => {
-            let vanishables = 0;
-            for (const ch of stack) {
-                if (cfgObj[ch] && cfgObj[ch].includes(EMPTY)) vanishables++;
-            }
-            return stack.length - vanishables <= remainingLen;
-        };
+        const keyOf = (stack, idx) => stack.join("") + "|" + idx;
 
-        const dfs = (stack, idx, path) => {
-            // acceptance
+        /* quick bound: if the *produced* terminals already exceed the target */
+        const tooManyTerminals = (stack, idx) =>
+            stack.filter(ch => !cfgObj[ch]).length > word.length - idx;
+
+        queue.push({ stack: [startSymbol], idx: 0, path: [] });
+
+        while (queue.length) {
+            const { stack, idx, path } = queue.shift();
+
+            /* ---- accept ---- */
             if (stack.length === 0 && idx === word.length) {
                 this.transitionPath = path;
                 return true;
             }
 
-            if (stack.length === 0 || !canStillMatch(stack, word.length - idx)) {
-                if (idx > bestPartial.consumed) {
-                    bestPartial.consumed = idx;
-                    bestPartial.path = path;
-                }
-                return false;
+            /* ---- quick rejections / pruning ---- */
+            if (idx > word.length) continue;
+            if (stack.length + (word.length - idx) > 2 * word.length) continue;
+            if (stack.length === 0) {
+                if (idx > best.consumed) { best.consumed = idx; best.path = path; }
+                continue;
             }
+            if (tooManyTerminals(stack, idx)) continue;
+            if (minPossibleLength(stack.join(""), cfgObj) > word.length - idx) continue;
 
-            const memoKey = stack.join("") + "|" + idx;
-            if (visited.has(memoKey)) return false;
-            visited.add(memoKey);
+            const memo = keyOf(stack, idx);
+            if (visited.has(memo)) continue;
+            visited.add(memo);
 
             const [top, ...rest] = stack;
 
-            // variable on top
+            /* ---- variable on top of the stack ---- */
             if (cfgObj[top]) {
                 for (const prod of cfgObj[top]) {
-                    const pushSyms = prod === EMPTY ? [] : prod.split("");
-                    const newStack = [...pushSyms, ...rest];
+                    const pushSyms = prod === EMPTY ? [] : prod.split("").reverse(); // reverse → first symbol on top
+                    const newStack = [...pushSyms.reverse(), ...rest];  // keep left-to-right order
 
                     const label = `${EMPTY}, ${top} → ${prod || EMPTY}`;
                     const trans = this.syntheticTransition(label, EMPTY, top, prod || EMPTY);
 
-                    if (dfs(newStack, idx, [...path, trans])) return true;
+                    queue.push({
+                        stack : newStack,
+                        idx,
+                        path  : [...path, trans]
+                    });
                 }
-                return false;
+                continue;
             }
 
-            // terminal on top
+            /* ---- terminal on top ---- */
             if (idx < word.length && word[idx] === top) {
                 const label = `${top}, ${top} → ${EMPTY}`;
                 const trans = this.syntheticTransition(label, top, top, EMPTY);
-                return dfs(rest, idx + 1, [...path, trans]);
-            }
 
-            // dead end
-            if (idx > bestPartial.consumed) {
-                bestPartial.consumed = idx;
-                bestPartial.path = path;
+                queue.push({
+                    stack : rest,
+                    idx   : idx + 1,
+                    path  : [...path, trans]
+                });
+            } else {
+                if (idx > best.consumed) { best.consumed = idx; best.path = path; }
             }
-            return false;
-        };
+        }
 
-        const success = dfs([startSymbol], 0, []);
-        if (!success) this.transitionPath = bestPartial.path;
-        return success;
+        /* no accept state – keep best partial path for step-through view */
+        this.transitionPath = best.path;
+        return false;
     }
 
     /* produce an object that mimics a real edge, including id if found */

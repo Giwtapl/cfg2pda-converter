@@ -84,3 +84,16 @@ export function displayMessage(message, success, entity) {
     messageContainer.appendChild(messageTextElement);
     messageTextElement.classList.add(`${success ? 'success' : 'failure'}--text`);
 }
+
+export const minPossibleLength = (word, cfgObj) => {
+    const EMPTY = window.EMPTY_STRING;     // 'ε'
+    let min = 0;
+    for (const ch of word) {
+        if (/[A-Z]/.test(ch)) {
+            if (!(cfgObj[ch]?.includes(EMPTY))) min += 1;
+        } else {
+            min += 1;
+        }
+    }
+    return min;
+};

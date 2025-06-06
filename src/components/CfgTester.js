@@ -1,4 +1,5 @@
-import { displayMessage, isGreek } from "../utilities/tools.js";
+import { CfgWordGenerator } from "./CfgWordGenerator.js";
+import { displayMessage, isGreek, minPossibleLength } from "../utilities/tools.js";
 
 
 export class CfgTester {
@@ -9,6 +10,29 @@ export class CfgTester {
     testCfgBtnHandler = () => {
         const word = this.generatedWordInputEl.value.trim();
         const startSymbol = "S";
+
+        const cfg = window.inputHandler.cfg;
+        const isvalidWordLength = new CfgWordGenerator(cfg).canGenerateLength(word.length);
+        if (!isvalidWordLength) {
+            if (isGreek()) {
+                displayMessage(`Η CFG που παρέχεται ΔΕΝ μπορεί να παράξει λέξη μήκους ${word.length}.`, false, "cfg");
+            } else {
+                displayMessage(`The provided CFG cannot generate any word of length ${word.length}.`, false, "cfg");
+            }
+            return;
+        }
+        const wordTerminals = [...new Set(word.split(""))].filter(ch => !/[A-Z]/.test(ch));
+
+        const cfgTerminals = cfg.getTerminals();
+        const invalidChars = wordTerminals.filter(term => !cfgTerminals.includes(term));
+        if (invalidChars.length > 0) {
+            if (isGreek()) {
+                displayMessage(`Η λέξη '${word}' περιέχει χαρακτήρες ('${invalidChars}') που δεν ανήκουν στα τερματικά σύμβολα της CFG.`, false, "cfg");
+            } else {
+                displayMessage(`The word '${word}' contains characters ('${invalidChars}') that are not part of the CFG's terminal symbols.`, false, "cfg");
+            }
+            return;
+        }
 
         // We'll store only the expansions that actually lead to a successful derivation.
         // Each element is an array of the form [ruleUsed, oldString, newString].
@@ -47,115 +71,99 @@ export class CfgTester {
         }
     }
 
-    /**
-     * A top-down parser with memoization + length bounding to avoid infinite recursion,
-     * while also highlighting each substitution step with <span class="colored">...</span>.
-     *
-     * @param {Object} cfgObj    - The CFG as an object { V: [productions...] }
-     * @param {String} startSymbol
-     * @param {String} word
-     * @param {Array} steps      - Will store expansions if parse is successful
-     *
-     * @return {boolean} true if 'word' is derived; otherwise false
-     */
     canGenerate(cfgObj, startSymbol, word, steps) {
-        let derivedWord = startSymbol;
+        const EMPTY = window.EMPTY_STRING;              // "ε"
 
-        // Keep track of visited states to avoid repeated expansions
+        /* queue items:  { derived: string, trace: [[rule,before,after], …] } */
+        const queue   = [];
         const visited = new Set();
 
-        // Helper: can the derived string still match the remainder of the input,
-        // considering ε-productions?
-        const canStillMatch = (str, inputLeft) => {
-            // Count how many variables in str can vanish (ε).
-            let canDisappear = 0;
-            for (const ch of str) {
-                if (cfgObj[ch] && cfgObj[ch].includes(window.EMPTY_STRING)) {
-                    canDisappear++;
-                }
-            }
-            // If (str.length - canDisappear) > inputLeft.length, we can't match anymore.
-            return (str.length - canDisappear) <= inputLeft.length;
-        };
+        console.clear();
+        console.log("=== CFG recogniser ===");
+        console.log("Target:", word);
 
-        const parse = (currentDerived, remaining) => {
-            // Check for exact match
-            if (currentDerived === "" && remaining === "") {
+        queue.push({ derived: startSymbol, trace: [] });
+
+        while (queue.length) {
+            const { derived, trace } = queue.shift();
+            console.log("• pop  ->", derived);
+
+            /* ---------- success ---------- */
+            if (derived === word) {
+                console.log("%c✓ recognised", "color:green;font-weight:bold");
+                steps.push(...trace);
                 return true;
             }
-            // If derived is empty but leftover input remains → fail
-            if (currentDerived === "" && remaining !== "") {
-                return false;
-            }
-            // Basic bounding check to avoid huge expansions
-            if (!canStillMatch(currentDerived, remaining)) {
-                return false;
-            }
 
-            // Memo key
-            const memoKey = currentDerived + "||" + remaining;
-            if (visited.has(memoKey)) {
-                // Already visited this config
-                return false;
-            }
-            visited.add(memoKey);
+            /* ---------- fast-fail tests ---------- */
 
-            // Leftmost symbol
-            const [head, ...tail] = currentDerived;
-
-            // Case 1: If head is a nonterminal
-            if (cfgObj[head]) {
-                const productions = cfgObj[head];
-                for (const production of productions) {
-                    const oldDerived = derivedWord;
-
-                    // Replace 'head' with production (or ε→"")
-                    const expansion = production === window.EMPTY_STRING ? "" : production;
-                    derivedWord = oldDerived.replace(head, expansion);
-                    const newDerived = expansion + tail.join("");
-
-                    // --- Highlighting for the steps table ---
-                    const ruleCell = `${head} → ${production || "ε"}`;
-                    // Mark where we replaced 'head' in the old string
-                    const applicationCell = oldDerived.replace(
-                        head,
-                        `<span class="colored">${head}</span>`
-                    );
-                    // Mark the newly inserted production in the new string
-                    const headIndex = oldDerived.indexOf(head);
-                    const resultCell = derivedWord.replace(
-                        new RegExp(`(.{0,${headIndex}})(${expansion})`),
-                        `$1<span class="colored">$2</span>`
-                    );
-                    // Record this step
-                    steps.push([ruleCell, applicationCell, resultCell]);
-
-                    // Recurse
-                    const result = parse(newDerived, remaining);
-                    if (result) {
-                        return true;
-                    }
-                    // Otherwise, backtrack
-                    derivedWord = oldDerived;
-                    steps.pop();
-                }
-                // None of the expansions worked
-                return false;
+            // terminals already produced must not exceed the target length
+            const termCount = [...derived].filter(ch => !/[A-Z]/.test(ch)).length;
+            if (termCount > word.length) {
+                console.log("  ✗ pruned – too many terminals");
+                continue;
             }
 
-            // Case 2: If head is a terminal, it must match the next char
-            if (remaining[0] === head) {
-                // consume 1 char from both
-                return parse(tail.join(""), remaining.slice(1));
+            // even the *shortest* word reachable from ‹derived› would be too long
+            if (minPossibleLength(derived, cfgObj) > word.length) {
+                console.log("  ✗ pruned – min-length bound");
+                continue;
             }
 
-            // If we reach here, no match
-            return false;
-        };
+            if (derived.length > 2 * word.length) {
+                console.log("  ✗ pruned – exceeds 2n bound");
+                continue;
+            }
 
-        // Start recursion
-        return parse(startSymbol, word);
+            // the produced terminals **before the first NT** must match the prefix
+            let prefixOK = true;
+            for (let i = 0; i < derived.length && i < word.length; i++) {
+                const ch = derived[i];
+                if (/[A-Z]/.test(ch)) break;            // stop at 1st NT
+                if (ch !== word[i]) { prefixOK = false; break; }
+            }
+            if (!prefixOK) {
+                console.log("  ✗ pruned – prefix mismatch");
+                continue;
+            }
+
+            /* ---------- duplicate check ---------- */
+            if (visited.has(derived)) continue;
+            visited.add(derived);
+
+            /* ---------- expand the left-most non-terminal ---------- */
+            const idx = derived.search(/[A-Z]/);
+            if (idx === -1) continue;                   // no NTs left
+
+            const nonTerm = derived[idx];
+
+            for (const prod of cfgObj[nonTerm]) {
+                const expansion = prod === EMPTY ? "" : prod;
+                const newDerived =
+                      derived.slice(0, idx) + expansion + derived.slice(idx + 1);
+
+                /* pretty row for the UI table */
+                const ruleCell        = `${nonTerm} → ${prod === EMPTY ? "ε" : prod}`;
+                const applicationCell = derived.slice(0, idx) +
+                                         `<span class="colored">${nonTerm}</span>` +
+                                         derived.slice(idx + 1);
+                const resultCell      = derived.slice(0, idx) +
+                                         `<span class="colored">${expansion || ""}</span>` +
+                                         derived.slice(idx + 1);
+
+                console.log(`  ↳ push ->`, newDerived);
+
+                queue.push({
+                    derived : newDerived,
+                    trace   : [...trace, [ruleCell, applicationCell, resultCell]]
+                });
+            }
+        }
+
+        console.log("%c✗ not recognised", "color:red;font-weight:bold");
+        return false;                                    // queue exhausted
     }
+
 
     /**
      * Displays the final steps in the steps table (only if the word is recognized).
