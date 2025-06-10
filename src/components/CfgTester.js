@@ -55,7 +55,6 @@ export class CfgTester {
             // If recognized, show final expansions
             this.displaySteps(stepsTableEl, steps, "lightgreen");
             stepsTableEl.classList.remove("hidden");
-            stepsTableEl.scrollIntoView({ behavior: "smooth", block: "start" });
             if (isGreek()) {
                 displayMessage(`Η παρεχόμενη CFG αναγνωρίζει τη λέξη '${word}'.`, true, "cfg");
             } else {
@@ -69,6 +68,8 @@ export class CfgTester {
                 displayMessage(`The provided CFG does NOT recognize the word '${word}'.`, false, "cfg");
             }
         }
+
+        document.getElementById("cfg-message").scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
     canGenerate(cfgObj, startSymbol, word, steps) {
