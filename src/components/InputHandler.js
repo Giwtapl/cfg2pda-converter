@@ -241,10 +241,10 @@ export class InputHandler {
         if (isGreek()) {
             instruction.innerHTML = `
             <div style="text-align: left; font-size: 14px;">
-            <p style="margin-bottom: 0.4rem;">💡 <strong>Hint 1:</strong> Όταν πληκτρολογείτε ένα κεφαλαίο γράμμα (Α–Ζ) σε μια παραγωγή, δημιουργείται αυτόματα ένας νέος κανόνας για αυτήν τη μεταβλητή.</p>
-            <p style="margin-bottom: 0.4rem;">💡 <strong>Hint 2:</strong> Όταν δημιουργείται μια νέα παραγωγή κανόνα, προγεμίζεται με <strong>ε</strong>, αλλά μπορεί να τροποποιηθεί.</p>
+            <p style="margin-bottom: 0.4rem;">💡 <strong>Υπόδειξη 1:</strong> Όταν πληκτρολογείτε ένα κεφαλαίο γράμμα (A–Z) για μια μεταβλητή, δημιουργείται αυτόματα νέος κανόνας για αυτή τη μεταβλητή.</p>
+            <p style="margin-bottom: 0.4rem;">💡 <strong>Υπόδειξη 2:</strong> Όταν δημιουργείται νέα γραμμή για μια νέα μεταβλητή, συμπληρώνεται αυτόματα με τον κανόνα <variable> --> ε αλλά μπορεί να τροποποιηθεί.</p>
             ${!window.isMobile.any() ? `
-            <p style="margin-bottom: 0.4rem;">💡 <strong>Hint 3:</strong> Συντομεύσεις πληκτρολογίου:</p>
+            <p style="margin-bottom: 0.4rem;">💡 <strong>Υπόδειξη 3:</strong> Συντομεύσεις πληκτρολογίου:</p>
             <ul style="margin-bottom: 0; padding-left: 1.2rem; list-style-type: disc;">
                 <li style="margin-bottom: 0.3rem;"><kbd>Tab</kbd> → Προσθήκη νέας παραγωγής στον ίδιο κανόνα</li>
                 <li style="margin-bottom: 0.3rem;"><kbd>Shift</kbd> + <kbd>Tab</kbd> → Εστίαση στην πρώτη κενή παραγωγή του επόμενου κανόνα</li>
@@ -256,10 +256,10 @@ export class InputHandler {
         } else {
             instruction.innerHTML = `
             <div style="text-align: left; font-size: 14px;">
-            <p style="margin-bottom: 0.4rem;">💡 <strong>Hint 1:</strong> When you type a capital letter (A–Z) in a production, a new rule for that variable is automatically created.</p>
-            <p style="margin-bottom: 0.4rem;">💡 <strong>Hint 2:</strong> When a new rule production is generated, it's prepopulated with <strong>ε</strong> but can be modified.</p>
+            <p style="margin-bottom: 0.4rem;">💡 <strong>Hint 1:</strong> When you type a capital letter (A–Z) for a variable, a new rule for that variable is automatically created.</p>
+            <p style="margin-bottom: 0.4rem;">💡 <strong>Hint 2:</strong> When a new row is generated for a newly detected variable, it's prepopulated with the rule <variable> --> ε but can be modified.</p>
             ${!window.isMobile.any() ? `
-            <p style="margin-bottom: 0.4rem;">💡 <strong>Hint 3:</strong> Keyboard Shortcuts:</p>
+            <p style="margin-bottom: 0.4rem;">💡 <strong>Hint 3:</strong> Keyboard shortcuts:</p>
             <ul style="margin-bottom: 0; padding-left: 1.2rem; list-style-type: disc;">
                 <li style="margin-bottom: 0.3rem;"><kbd>Tab</kbd> → Add a new production to the same rule</li>
                 <li style="margin-bottom: 0.3rem;"><kbd>Shift</kbd> + <kbd>Tab</kbd> → Focus on the next rule's first empty production</li>

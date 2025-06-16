@@ -37,7 +37,7 @@ export class CfgTester {
         // We'll store only the expansions that actually lead to a successful derivation.
         // Each element is an array of the form [ruleUsed, oldString, newString].
         const steps = [
-            ["Start → S", "Start", "S"] // A descriptive first row
+            ["--", "--", "S"] // A descriptive first row
         ];
 
         // Attempt to parse the word from the start symbol
