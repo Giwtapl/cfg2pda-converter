@@ -111,7 +111,7 @@ export class CfgTester {
                 continue;
             }
 
-            if (derived.length > 2 * word.length) {
+            if (word.length && (derived.length > 2 * word.length)) {
                 console.log("  ✗ pruned – exceeds 2n bound");
                 continue;
             }

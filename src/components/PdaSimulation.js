@@ -149,7 +149,7 @@ export class PdaSimulation {
 
             /* ---- quick rejections / pruning ---- */
             if (idx > word.length) continue;
-            if (stack.length + (word.length - idx) > 2 * word.length) continue;
+            if (word.length && (stack.length + (word.length - idx) > 2 * word.length)) continue;
             if (stack.length === 0) {
                 if (idx > best.consumed) { best.consumed = idx; best.path = path; }
                 continue;
@@ -219,8 +219,6 @@ export class PdaSimulation {
         const GUARD  = window.SPECIAL_CHAR;      // ‘$’
         const first  = this.pdaTransitions.find(e => e.fromState === "Qo"
                                                &&  e.toState   === "Qloop");
-        const last   = this.pdaTransitions.find(e => e.fromState === "Qloop"
-                                               &&  e.toState   === "Qaccept");
 
         /* 1️⃣  Qo ─ε, ε → S$──► Qloop  (S επάνω, $ στον πάτο) */
         const initStep = {
@@ -232,18 +230,25 @@ export class PdaSimulation {
             transitionId: first ? first.transitionId : null
         };
 
-        /* 2️⃣  Qloop ─ε, $ → ε──► Qaccept */
-        const finalStep = {
-            fromState   : "Qloop",
-            toState     : "Qaccept",
-            input       : EMPTY,
-            stackTop    : GUARD,
-            stackPush   : EMPTY,
-            transitionId: last ? last.transitionId : null
-        };
+        this.transitionPath = [initStep, ...this.transitionPath]
 
-        /* Κολάμε τα δύο βήματα γύρω από την «πραγματική» transitionPath */
-        this.transitionPath = [initStep, ...this.transitionPath, finalStep];
+        if (this.isAccepted) {
+            const last = this.pdaTransitions.find(
+                e => e.fromState === "Qloop" &&  e.toState   === "Qaccept"
+            );
+
+            /* 2️⃣  Qloop ─ε, $ → ε──► Qaccept */
+            const finalStep = {
+                fromState   : "Qloop",
+                toState     : "Qaccept",
+                input       : EMPTY,
+                stackTop    : GUARD,
+                stackPush   : EMPTY,
+                transitionId: last ? last.transitionId : null
+            };
+
+            this.transitionPath = [...this.transitionPath, finalStep];
+        }
     }
 
     /* =====================================================
@@ -290,7 +295,11 @@ export class PdaSimulation {
 
         if (this.transitionIndex >= this.transitionPath.length) {
             this.nextStepButton.style.display = "none";     // εξαφανίζουμε το Next
-            this.highlightState("Qaccept", "green");        // Qaccept πράσινο
+            if (this.isRejected) {
+                this.highlightState(this.currentState, "red"); // Qloop κόκκινο
+            } else if (this.isAccepted) {
+                this.highlightState("Qaccept", "green");        // Qaccept πράσινο
+            }
             // προεραιτικά:  this.displayMessage("Word accepted!", true);
         }
     }
