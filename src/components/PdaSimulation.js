@@ -96,6 +96,8 @@ export class PdaSimulation {
             this.stackContainer.classList.add("rejected");
         }
 
+        this.decoratePathWithGuard(window.STARTING_VAR);
+
         /* initial visuals */
         this.displayWord();
         this.displayStack();
@@ -212,6 +214,38 @@ export class PdaSimulation {
         };
     }
 
+    decoratePathWithGuard(startSym) {
+        const EMPTY  = window.EMPTY_STRING;
+        const GUARD  = window.SPECIAL_CHAR;      // ‘$’
+        const first  = this.pdaTransitions.find(e => e.fromState === "Qo"
+                                               &&  e.toState   === "Qloop");
+        const last   = this.pdaTransitions.find(e => e.fromState === "Qloop"
+                                               &&  e.toState   === "Qaccept");
+
+        /* 1️⃣  Qo ─ε, ε → S$──► Qloop  (S επάνω, $ στον πάτο) */
+        const initStep = {
+            fromState   : "Qo",
+            toState     : "Qloop",
+            input       : EMPTY,
+            stackTop    : EMPTY,
+            stackPush   : `${startSym}${GUARD}`,   // προσοχή: S$ ώστε η S να μείνει ΠΑΝΩ
+            transitionId: first ? first.transitionId : null
+        };
+
+        /* 2️⃣  Qloop ─ε, $ → ε──► Qaccept */
+        const finalStep = {
+            fromState   : "Qloop",
+            toState     : "Qaccept",
+            input       : EMPTY,
+            stackTop    : GUARD,
+            stackPush   : EMPTY,
+            transitionId: last ? last.transitionId : null
+        };
+
+        /* Κολάμε τα δύο βήματα γύρω από την «πραγματική» transitionPath */
+        this.transitionPath = [initStep, ...this.transitionPath, finalStep];
+    }
+
     /* =====================================================
      *  STEP‑BY‑STEP EXECUTION
      * ===================================================*/
@@ -253,6 +287,12 @@ export class PdaSimulation {
         this.highlightState(t.toState);
 
         this.transitionIndex++;
+
+        if (this.transitionIndex >= this.transitionPath.length) {
+            this.nextStepButton.style.display = "none";     // εξαφανίζουμε το Next
+            this.highlightState("Qaccept", "green");        // Qaccept πράσινο
+            // προεραιτικά:  this.displayMessage("Word accepted!", true);
+        }
     }
 
     /* =====================================================
