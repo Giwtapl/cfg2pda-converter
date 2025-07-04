@@ -125,6 +125,13 @@ export class PdaSimulation {
     buildTransitionPath(cfgObj, startSymbol, word) {
         const EMPTY = window.EMPTY_STRING;
 
+        const MAX_RHS = Math.max(
+            1,
+            ...Object.values(cfgObj)
+                .flat()
+                .map(p => p === EMPTY ? 0 : p.length)
+        );
+
         /* queue items: { stack: string[], idx: number, path: [] } */
         const queue   = [];
         const visited = new Set();
@@ -149,7 +156,9 @@ export class PdaSimulation {
 
             /* ---- quick rejections / pruning ---- */
             if (idx > word.length) continue;
-            if (word.length && (stack.length + (word.length - idx) > 2 * word.length)) continue;
+
+            if (stack.length + (word.length - idx) > MAX_RHS * word.length) continue;
+
             if (stack.length === 0) {
                 if (idx > best.consumed) { best.consumed = idx; best.path = path; }
                 continue;
