@@ -9308,7 +9308,7 @@ main {
   flex: 1 0 auto; }
 
 .header {
-  background-image: linear-gradient(#d4d6b8b7, #d4d6b8b7), url(../img/bg-header.jpg);
+  background-image: linear-gradient(#d4d6b87e, #d4d6b87e), url(../img/bg-header-resized.jpg);
   background-size: cover;
   display: flex;
   flex-direction: column;
@@ -9320,14 +9320,15 @@ main {
   .header__heading--primary {
     font-size: 5rem;
     letter-spacing: 0.4rem;
-    color: #fff; }
+    color: #fff;
+    margin-top: 75px; }
   .header__btn:link, .header__btn:visited {
     font-family: inherit;
     font-size: 3rem;
     text-transform: uppercase;
     text-decoration: none;
     color: #555;
-    margin-bottom: 30rem;
+    margin-bottom: 20rem;
     border-radius: 50px;
     background-color: #fff;
     padding: 2rem 3rem;

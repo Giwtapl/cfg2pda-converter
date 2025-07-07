@@ -1,5 +1,5 @@
 .header {
-    background-image: linear-gradient($color-primary-transparent, $color-primary-transparent), url(../img/bg-header.jpg);
+    background-image: linear-gradient($color-primary-transparent, $color-primary-transparent), url(../img/bg-header-resized.jpg);
     background-size: cover;
 
     display: flex;
@@ -15,6 +15,7 @@
         letter-spacing: 0.4rem;
         // text-transform: uppercase;
         color: #fff;
+        margin-top: 75px;
     }
 
     &__btn:link,
@@ -25,7 +26,7 @@
         text-decoration: none;
         color: $color-grey-dark;
 
-        margin-bottom: 30rem;
+        margin-bottom: 20rem;
         border-radius: 50px;
         background-color: #fff;
         padding: 2rem 3rem;
