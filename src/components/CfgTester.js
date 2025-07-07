@@ -58,14 +58,14 @@ export class CfgTester {
             if (isGreek()) {
                 displayMessage(`Η παρεχόμενη CFG αναγνωρίζει τη λέξη '${word}'.`, true, "cfg");
             } else {
-                displayMessage(`The provided CFG recognizes the word '${word}'.`, true, "cfg");
+                displayMessage(`The provided CFG generates the word '${word}'.`, true, "cfg");
             }
         } else {
             // If not recognized, display a simple message
             if (isGreek()) {
                 displayMessage(`Η παρεχόμενη CFG ΔΕΝ αναγνωρίζει τη λέξη '${word}'.`, false, "cfg");
             } else {
-                displayMessage(`The provided CFG does NOT recognize the word '${word}'.`, false, "cfg");
+                displayMessage(`The provided CFG does NOT generate the word '${word}'.`, false, "cfg");
             }
         }
 
