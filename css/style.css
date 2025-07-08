@@ -9315,7 +9315,6 @@ main {
   align-items: center;
   justify-content: space-evenly;
   text-align: center;
-  height: calc(100vh - 6rem);
   clip-path: polygon(0 0, 100% 0%, 100% 75%, 0% 100%); }
   .header__heading--primary {
     font-size: 5rem;
@@ -9419,6 +9418,7 @@ main {
   margin: 0 auto 2rem auto;
   width: 80vw;
   height: auto;
+  min-height: 350px;
   background-color: #d4d6b8;
   box-shadow: 0.5rem 0.7rem 1.5rem #000; }
 

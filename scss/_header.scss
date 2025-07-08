@@ -7,7 +7,7 @@
     align-items: center;
     justify-content: space-evenly;
     text-align: center;
-    height: calc(100vh - 6rem);
+    // height: calc(100vh - 6rem);
     clip-path: polygon(0 0, 100% 0%, 100% 75%, 0% 100%);
 
     &__heading--primary {
