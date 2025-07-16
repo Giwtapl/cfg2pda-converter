@@ -242,13 +242,13 @@ export class InputHandler {
             instruction.innerHTML = `
             <div style="text-align: left; font-size: 14px;">
             <p style="margin-bottom: 0.4rem;">💡 <strong>Υπόδειξη 1:</strong> Όταν πληκτρολογείτε ένα κεφαλαίο γράμμα (A–Z) για μια μεταβλητή, δημιουργείται αυτόματα νέος κανόνας για αυτή τη μεταβλητή.</p>
-            <p style="margin-bottom: 0.4rem;">💡 <strong>Υπόδειξη 2:</strong> Όταν δημιουργείται νέα γραμμή για μια νέα μεταβλητή, συμπληρώνεται αυτόματα με τον κανόνα <variable> --> ε αλλά μπορεί να τροποποιηθεί.</p>
+            <p style="margin-bottom: 0.4rem;">💡 <strong>Υπόδειξη 2:</strong> Όταν δημιουργείτε νέα γραμμή για μια νέα μεταβλητή, συμπληρώνεται αυτόματα με τον κανόνα <variable> → ε αλλά μπορεί να τροποποιηθεί.</p>
             ${!window.isMobile.any() ? `
             <p style="margin-bottom: 0.4rem;">💡 <strong>Υπόδειξη 3:</strong> Συντομεύσεις πληκτρολογίου:</p>
             <ul style="margin-bottom: 0; padding-left: 1.2rem; list-style-type: disc;">
-                <li style="margin-bottom: 0.3rem;"><kbd>Tab</kbd> → Προσθήκη νέας παραγωγής στον ίδιο κανόνα</li>
-                <li style="margin-bottom: 0.3rem;"><kbd>Shift</kbd> + <kbd>Tab</kbd> → Εστίαση στην πρώτη κενή παραγωγή του επόμενου κανόνα</li>
-                <li style="margin-bottom: 0;"><kbd>Enter</kbd> → Ισοδύναμο με το πάτημα του κουμπιού <strong>Τέλος</strong></li>
+                <li style="margin-bottom: 0.3rem;"><kbd>Tab</kbd> → Προσθήκη νέου κανόνα για την ίδια μεταβλητή</li>
+                <li style="margin-bottom: 0.3rem;"><kbd>Shift</kbd> + <kbd>Tab</kbd> → Εστίαση στον πρώτο κανόνα για την επόμενη μεταβλητή</li>
+                <li style="margin-bottom: 0;"><kbd>Enter</kbd> → Ισοδύναμο με το πάτημα του κουμπιού <strong>Υποβολή</strong></li>
             </ul>
             ` : ''}
             </div>

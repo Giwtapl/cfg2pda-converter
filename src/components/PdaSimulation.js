@@ -78,7 +78,7 @@ export class PdaSimulation {
             this.isAccepted = true;
             displayMessage(
                 isGreek()
-                    ? `Η παρεχόμενη λέξη αναγνωρίζεται από αυτό το Διάγραμμα Καταστάσεων (PDA). Ακολουθήστε τα βήματα για να δείτε τις μεταβάσεις.`
+                    ? `Η δοσμένη λέξη αναγνωρίζεται από αυτό το Αυτόματο Στοίβας (PDA). Ακολουθήστε τα βήματα για να δείτε τις μεταβάσεις.`
                     : `The provided word is recognised by this PDA. Follow the steps to see the transitions.`,
                 true,
                 "pda"
@@ -88,7 +88,7 @@ export class PdaSimulation {
             this.isRejected = true;
             displayMessage(
                 isGreek()
-                    ? `Η παρεχόμενη λέξη ΔΕΝ αναγνωρίζεται από αυτό το Διάγραμμα Καταστάσεων (PDA). Πατήστε "Next" για να δείτε τη διαδρομή πριν "κολλήσει".`
+                    ? `Η δοσμένη λέξη ΔΕΝ αναγνωρίζεται από αυτό το Αυτόματο Στοίβας (PDA). Πατήστε "Next" για να δείτε τη διαδρομή πριν "κολλήσει".`
                     : `The provided word is NOT recognised by this PDA. Click "Next" to see the path before it got stuck.`,
                 false,
                 "pda"

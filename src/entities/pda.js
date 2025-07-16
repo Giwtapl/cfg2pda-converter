@@ -106,8 +106,10 @@ export class Pda {
                     const downloadLink = document.createElement('a');
                     downloadLink.href = pngDataUrl;
                     const now = new Date();
-                    const formattedDate = now.toISOString().split('T')[0]; // Extract only the date part
-                    downloadLink.download = `pda_graph_${formattedDate}.png`; // Set the desired file name
+                    const datePart = now.toISOString().split('T')[0]; // Extract the date part
+                    const timePart = now.toTimeString().split(' ')[0].replace(/:/g, '.'); // HH-MM-SS (Extract the time part)
+                    const formattedDateTime = `${datePart}_${timePart}`;
+                    downloadLink.download = `pda_${formattedDateTime}.png`; //Set the desired file name
 
                     // Append the anchor to the body
                     document.body.appendChild(downloadLink);

@@ -56,14 +56,14 @@ export class CfgTester {
             this.displaySteps(stepsTableEl, steps, "lightgreen");
             stepsTableEl.classList.remove("hidden");
             if (isGreek()) {
-                displayMessage(`Η παρεχόμενη CFG αναγνωρίζει τη λέξη '${word}'.`, true, "cfg");
+                displayMessage(`Η δοσμένη CFG αναγνωρίζει τη λέξη '${word}'.`, true, "cfg");
             } else {
                 displayMessage(`The provided CFG generates the word '${word}'.`, true, "cfg");
             }
         } else {
             // If not recognized, display a simple message
             if (isGreek()) {
-                displayMessage(`Η παρεχόμενη CFG ΔΕΝ αναγνωρίζει τη λέξη '${word}'.`, false, "cfg");
+                displayMessage(`Η δοσμένη CFG ΔΕΝ αναγνωρίζει τη λέξη '${word}'.`, false, "cfg");
             } else {
                 displayMessage(`The provided CFG does NOT generate the word '${word}'.`, false, "cfg");
             }
