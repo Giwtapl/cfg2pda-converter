@@ -350,6 +350,19 @@
 .dead-end-row { background-color: #ffdddd; }
 .dead-end     { color: red; font-weight: bold; }
 
+.test-wrapper {
+    width: 100%;           /* or any fixed width you want */
+    overflow-x: auto;       /* horizontal scrollbar when needed */
+    overflow-y: hidden;     /* optional */
+    -webkit-overflow-scrolling: touch; /* smooth on iOS */
+}
+
+.test-wrapper table {
+  border-collapse: collapse;
+  /* Let the table be as wide as it needs; if it exceeds the wrapper width, it'll scroll */
+  width: max-content;     /* or min-width: 100%; depending on your layout */
+}
+
 table#stepsTable {
     width: 100%;
     border-collapse: separate;
@@ -372,6 +385,9 @@ table#stepsTable {
     }
 
     tbody {
+        max-width: 200px;
+        overflow-x: auto;
+        white-space: nowrap;
         .success {
             background-color: lightgreen;
         }
@@ -383,6 +399,8 @@ table#stepsTable {
                 padding: 8px;
                 text-align: left;
                 border: 1px solid #000000;
+                max-width: 100%;
+                white-space: nowrap;
                 .bold {
                     font-weight: 800;
                 }
@@ -456,4 +474,9 @@ table#stepsTable {
 
 #shared-input-handler {
     display: none;
+}
+
+/* Utility classes */
+.mb-rem1 {
+    margin-bottom: 1rem;
 }

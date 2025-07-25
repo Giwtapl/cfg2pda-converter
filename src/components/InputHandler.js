@@ -32,6 +32,7 @@ export class InputHandler {
             const converter = new Cfg2PdaConverter(window.inputHandler.cfg);
             const equivPda = converter.convert();
             equivPda.render();
+            window.pda = equivPda; // Store the PDA instance globally for further use
             event.target.style.display = 'none';
         });
     }
@@ -64,21 +65,18 @@ export class InputHandler {
         this.displayInstructionBelowLastRule();
     }
 
-    removeRule(ruleIndex) {
-        this.rules = this.rules.filter(rule => {
-            if (rule.index === ruleIndex) {
-                rule.remove();
-                return false;
-            }
-            return true;
-        });
+    removeRule (ruleIndex) {
+        const idx = this.rules.findIndex(r => r.index === ruleIndex);
+        if (idx === -1) return;          // δεν υπάρχει
+        const [rule] = this.rules.splice(idx, 1);  // ασφαλής αφαίρεση
+        rule.remove();                                // τώρα κατεβάζεις το DOM
     }
 
-    checkAndRemoveRule(currentRuleVarLetter, deletedText, productionEl) {
+    checkAndRemoveRule(currentRuleVarLetter, deletedText, productionElId) {
         deletedText.split('').forEach(char => {
             if (isUpperCase(char)) {
                 const rule = this.getRuleByVarLetter(char);
-                rule.removeReferer(productionEl.id);
+                rule.removeReferer(productionElId);
                 if (currentRuleVarLetter !== char && rule.refererProductions.length === 0) {
                     this.removeRule(rule.index);
                 }

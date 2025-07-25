@@ -53,7 +53,7 @@ export class PdaSimulation {
             if (isGreek()) {
                 displayMessage(`Η CFG που παρέχεται ΔΕΝ μπορεί να παράξει λέξη μήκους ${this.inputWord.length}.`, false, "pda");
             } else {
-                displayMessage(`The provided CFG cannot generate any word of length ${this.inputWord.length}.`, false, "pda");
+                displayMessage(`The provided PDA cannot generate any word of length ${this.inputWord.length}.`, false, "pda");
             }
             return;
         }
@@ -126,10 +126,7 @@ export class PdaSimulation {
         const EMPTY = window.EMPTY_STRING;
 
         const MAX_RHS = Math.max(
-            1,
-            ...Object.values(cfgObj)
-                .flat()
-                .map(p => p === EMPTY ? 0 : p.length)
+            ...Object.values(cfgObj).flat().map(p => (p === EMPTY ? 0 : p.length))
         );
 
         /* queue items: { stack: string[], idx: number, path: [] } */
@@ -157,7 +154,7 @@ export class PdaSimulation {
             /* ---- quick rejections / pruning ---- */
             if (idx > word.length) continue;
 
-            if (stack.length + (word.length - idx) > MAX_RHS * word.length) continue;
+            if (stack.length + (word.length - idx) > word.length + MAX_RHS) continue;
 
             if (stack.length === 0) {
                 if (idx > best.consumed) { best.consumed = idx; best.path = path; }
@@ -264,17 +261,6 @@ export class PdaSimulation {
      *  STEP‑BY‑STEP EXECUTION
      * ===================================================*/
     nextPdaStep() {
-        if (this.transitionIndex >= this.transitionPath.length) {
-            this.nextStepButton.style.display = "none";
-            if (this.isAccepted) {
-                this.highlightState("Qaccept", "green");
-            } else {
-                // rejection: keep current state highlighted in red
-                this.highlightState(this.currentState, "red");
-            }
-            return;
-        }
-
         // reset previous highlighting
         this.resetHighlighting();
 
@@ -304,6 +290,17 @@ export class PdaSimulation {
 
         if (this.transitionIndex >= this.transitionPath.length) {
             this.nextStepButton.style.display = "none";     // εξαφανίζουμε το Next
+            // Remove any trailing instructions like "Follow the steps..." or "Click 'Next'..." from the message
+            this.displayedMessage = document.getElementById("pda-message");
+            if (this.displayedMessage) {
+                const spanEl = this.displayedMessage.firstElementChild;
+                // Remove sentences starting with "Follow" or "Click" (case-insensitive)
+                const regexp = isGreek()
+                    ? /(\s?(Ακολουθήστε|Πατήστε)[^.]*\.)/gi
+                    : /(\s?(Follow|Click)[^.]*\.)/gi;
+                spanEl.textContent = spanEl.textContent
+                    .replace(regexp, "");
+            }
             if (this.isRejected) {
                 this.highlightState(this.currentState, "red"); // Qloop κόκκινο
             } else if (this.isAccepted) {
@@ -372,7 +369,7 @@ export class PdaSimulation {
         this.stackContainer.innerHTML = "";
         const lbl = document.createElement("p");
         lbl.classList.add("stack-label");
-        lbl.textContent = "Stack:";
+        lbl.textContent = isGreek() ? "Στοίβα:" : "Stack:";
         this.stackContainer.appendChild(lbl);
         this.stack.forEach(s => {
             const div = document.createElement("div");
@@ -403,6 +400,6 @@ export class PdaSimulation {
 
     clearMessage() {
         const m = document.getElementById("pda-message");
-        if (m) m.textContent = "";
+        if (m) m.remove();
     }
 }

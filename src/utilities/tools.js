@@ -32,6 +32,15 @@ export function inputEventHandler(event) {
     const currentRule = window.inputHandler.getRuleByProductionElement(event.target);
     const currentProduction = currentRule.productions.filter(prod => prod.id === event.target.id)[0];
 
+    const added = findStrDifference(inputValue, currentProduction.text);
+    [...added].forEach(ch => {
+      if (isUpperCase(ch)) {
+        const r = window.inputHandler.getRuleByVarLetter(ch);
+        r ? r.addReferer(event.target.id)
+          : window.inputHandler.addRule(ch, event.target.id);
+      }
+    });
+
     if (currentChar) {
         if (!isUpperCase(currentChar)) {
             currentProduction.text = inputValue;
@@ -48,7 +57,7 @@ export function inputEventHandler(event) {
         window.inputHandler.checkAndRemoveRule(
             currentRule.varLetter,
             findStrDifference(currentProduction.text, inputValue),
-            event.target
+            event.target.id
         );
     }
     currentProduction.text = inputValue;

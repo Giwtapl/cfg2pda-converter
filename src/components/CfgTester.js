@@ -8,6 +8,14 @@ export class CfgTester {
     }
 
     testCfgBtnHandler = () => {
+        const stepsTableEl = document.getElementById("stepsTable");
+        stepsTableEl.classList.add("hidden");
+
+        const pdaAreaEl = document.getElementById("pda-area");
+        if (pdaAreaEl && !pdaAreaEl.classList.contains("hidden") && window.pda) {
+            window.pda.pdaSimulation.resetSimulation();
+        }
+
         const word = this.generatedWordInputEl.value.trim();
         const startSymbol = "S";
 
@@ -31,6 +39,9 @@ export class CfgTester {
             } else {
                 displayMessage(`The word '${word}' contains characters ('${invalidChars}') that are not part of the CFG's terminal symbols.`, false, "cfg");
             }
+            if (stepsTableEl && !stepsTableEl.classList.contains("hidden")) {
+                stepsTableEl.classList.add("hidden");
+            }
             return;
         }
 
@@ -47,9 +58,6 @@ export class CfgTester {
             word,
             steps
         );
-
-        const stepsTableEl = document.getElementById("stepsTable");
-        stepsTableEl.classList.add("hidden");
 
         if (recognized) {
             // If recognized, show final expansions

@@ -9727,6 +9727,22 @@ main {
   color: red;
   font-weight: bold; }
 
+.test-wrapper {
+  width: 100%;
+  /* or any fixed width you want */
+  overflow-x: auto;
+  /* horizontal scrollbar when needed */
+  overflow-y: hidden;
+  /* optional */
+  -webkit-overflow-scrolling: touch;
+  /* smooth on iOS */ }
+
+.test-wrapper table {
+  border-collapse: collapse;
+  /* Let the table be as wide as it needs; if it exceeds the wrapper width, it'll scroll */
+  width: max-content;
+  /* or min-width: 100%; depending on your layout */ }
+
 table#stepsTable {
   width: 100%;
   border-collapse: separate;
@@ -9742,19 +9758,25 @@ table#stepsTable {
       padding: 8px;
       text-align: left;
       border: 1px solid #000000; }
-  table#stepsTable tbody .success {
-    background-color: lightgreen; }
-  table#stepsTable tbody .failure {
-    background-color: lightcoral; }
-  table#stepsTable tbody tr td {
-    padding: 8px;
-    text-align: left;
-    border: 1px solid #000000; }
-    table#stepsTable tbody tr td .bold {
-      font-weight: 800; }
-    table#stepsTable tbody tr td .colored {
-      font-weight: 800;
-      color: blue; }
+  table#stepsTable tbody {
+    max-width: 200px;
+    overflow-x: auto;
+    white-space: nowrap; }
+    table#stepsTable tbody .success {
+      background-color: lightgreen; }
+    table#stepsTable tbody .failure {
+      background-color: lightcoral; }
+    table#stepsTable tbody tr td {
+      padding: 8px;
+      text-align: left;
+      border: 1px solid #000000;
+      max-width: 100%;
+      white-space: nowrap; }
+      table#stepsTable tbody tr td .bold {
+        font-weight: 800; }
+      table#stepsTable tbody tr td .colored {
+        font-weight: 800;
+        color: blue; }
 
 .loader {
   border: 4px solid #f3f3f3;
@@ -9810,3 +9832,7 @@ table#stepsTable {
 
 #shared-input-handler {
   display: none; }
+
+/* Utility classes */
+.mb-rem1 {
+  margin-bottom: 1rem; }

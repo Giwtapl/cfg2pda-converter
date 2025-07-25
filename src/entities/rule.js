@@ -122,7 +122,7 @@ export class Rule {
     }
 
     addReferer(refererProdId) {
-        if (refererProdId) {
+        if (refererProdId && !this.refererProductions.includes(refererProdId) && refererProdId.indexOf(this.id) === -1) {
             this.refererProductions.push(refererProdId);
         }
     }
@@ -133,11 +133,21 @@ export class Rule {
 
     remove() {
         if (this.index === 1) return;
+
         const ruleEl = document.getElementById(this.id);
         ruleEl.remove();
 
         // Remove this Rule instance from the static array
         Rule.instances = Rule.instances.filter(rule => rule !== this);
+
+        for (const prod of this.productions) {
+            const prodText = prod.text;
+            window.inputHandler.checkAndRemoveRule(
+                this.varLetter,
+                prodText,
+                prod.id
+            );
+        }
     }
 
     updateProductionIndex() {

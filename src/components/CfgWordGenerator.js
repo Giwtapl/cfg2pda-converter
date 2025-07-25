@@ -115,6 +115,7 @@ export class CfgWordGenerator {
     const visited = new Set(queue);
     let nodes = 0;
 
+    let foundDuplicateWord = false;
     while (queue.length) {
       const current = queue.shift();
       if (++nodes > maxNodes) return null; // safety‑valve
@@ -123,11 +124,15 @@ export class CfgWordGenerator {
       if (minLen > targetLength) continue;   // δεν μπορεί ποτέ να μικρύνει αρκετά
 
       if (CfgWordGenerator.isTerminal(current)) {
-        if (current.length === targetLength && !this.generatedWords.has(current)) {
+        if (current.length === targetLength) {
+          if (this.generatedWords.has(current)) {
+            foundDuplicateWord = true;
+            continue; // skip duplicates
+          }
           this.generatedWords.add(current);
           return current;
         }
-        continue;    // λάθος μήκος ή διπλότυπο
+        continue;    // λάθος μήκος
       }
 
       // Επέκταση του ΠΡΩΤΟΥ μη‑τερματικού (αρκεί για BFS)
@@ -150,6 +155,9 @@ export class CfgWordGenerator {
       }
     }
 
+    if (foundDuplicateWord) {
+      return [...this.generatedWords][Math.floor(Math.random() * this.generatedWords.size)];
+    }
     return null; // δεν βρέθηκε (το DP λέει ψέματα μόνο αν ξεπεράσαμε maxNodes)
   }
 
