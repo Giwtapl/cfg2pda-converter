@@ -32,7 +32,7 @@ export class SharedInputHandler {
         if (isGreek()) {
             hint.innerHTML = `💡 <strong>Hint:</strong> Για να δοκιμάσετε την κενή λέξη <strong>ε</strong>, αφήστε το πεδίο κενό και πατήστε «<strong>Δοκιμή CFG</strong>» ή «<strong>Δοκιμή PDA</strong>».`;
         } else {
-            hint.innerHTML = `💡 <strong>Hint:</strong> To test the empty word <strong>ε</strong>, leave the input field blank and click “<strong>Test CFG</strong>” or “<strong>Test PDA</strong>”.`;
+            hint.innerHTML = `💡 <strong>Hint:</strong> To test the empty string <strong>ε</strong>, leave the input field blank and click “<strong>Test CFG</strong>” or “<strong>Test PDA</strong>”.`;
         }
 
         // Place the hint just above the test buttons

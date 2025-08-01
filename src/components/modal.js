@@ -42,7 +42,7 @@ export class WordGenerationModal {
       if (!generatedWord) {
           const msg = isGreek()
               ? `Η CFG που δώσατε δεν παράγει καμία λέξη μήκους ${length}.`
-              : `The CFG you provided does not generate any word of length ${length}.`;
+              : `The CFG you provided does not generate any string of length ${length}.`;
               alert(msg);
           return;               // δεν κλείνουμε το modal
       }

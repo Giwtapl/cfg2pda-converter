@@ -53,7 +53,7 @@ export class PdaSimulation {
             if (isGreek()) {
                 displayMessage(`Η CFG που παρέχεται ΔΕΝ μπορεί να παράξει λέξη μήκους ${this.inputWord.length}.`, false, "pda");
             } else {
-                displayMessage(`The provided PDA cannot generate any word of length ${this.inputWord.length}.`, false, "pda");
+                displayMessage(`The provided PDA cannot recognise any string of length ${this.inputWord.length}.`, false, "pda");
             }
             return;
         }
@@ -66,7 +66,7 @@ export class PdaSimulation {
             if (isGreek()) {
                 displayMessage(`Η λέξη '${this.inputWord}' περιέχει χαρακτήρες ('${invalidChars}') που δεν ανήκουν στα τερματικά σύμβολα της CFG.`, false, "pda");
             } else {
-                displayMessage(`The word '${this.inputWord}' contains characters ('${invalidChars}') that are not part of the CFG's terminal symbols.`, false, "pda");
+                displayMessage(`The string '${this.inputWord}' contains characters ('${invalidChars}') that are not part of the CFG's terminal symbols.`, false, "pda");
             }
             return;
         }
@@ -79,7 +79,7 @@ export class PdaSimulation {
             displayMessage(
                 isGreek()
                     ? `Η δοσμένη λέξη αναγνωρίζεται από αυτό το Αυτόματο Στοίβας (PDA). Ακολουθήστε τα βήματα για να δείτε τις μεταβάσεις.`
-                    : `The provided word is recognised by this PDA. Follow the steps to see the transitions.`,
+                    : `The provided string is recognised by this PDA. Follow the steps to see the transitions.`,
                 true,
                 "pda"
             );
@@ -89,7 +89,7 @@ export class PdaSimulation {
             displayMessage(
                 isGreek()
                     ? `Η δοσμένη λέξη ΔΕΝ αναγνωρίζεται από αυτό το Αυτόματο Στοίβας (PDA). Πατήστε "Next" για να δείτε τη διαδρομή πριν "κολλήσει".`
-                    : `The provided word is NOT recognised by this PDA. Click "Next" to see the path before it got stuck.`,
+                    : `The provided string is NOT recognised by this PDA. Click "Next" to see the path before it got stuck.`,
                 false,
                 "pda"
             );

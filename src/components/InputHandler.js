@@ -259,8 +259,8 @@ export class InputHandler {
             ${!window.isMobile.any() ? `
             <p style="margin-bottom: 0.4rem;">💡 <strong>Hint 3:</strong> Keyboard shortcuts:</p>
             <ul style="margin-bottom: 0; padding-left: 1.2rem; list-style-type: disc;">
-                <li style="margin-bottom: 0.3rem;"><kbd>Tab</kbd> → Add a new production to the same rule</li>
-                <li style="margin-bottom: 0.3rem;"><kbd>Shift</kbd> + <kbd>Tab</kbd> → Focus on the next rule's first empty production</li>
+                <li style="margin-bottom: 0.3rem;"><kbd>Tab</kbd> → Add a new rule to the same variable</li>
+                <li style="margin-bottom: 0.3rem;"><kbd>Shift</kbd> + <kbd>Tab</kbd> → Focus on the next variable's first empty rule</li>
                 <li style="margin-bottom: 0;"><kbd>Enter</kbd> → Equivalent to clicking the <strong>Done</strong> button</li>
             </ul>
             ` : ''}

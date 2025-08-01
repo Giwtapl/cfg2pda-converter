@@ -25,7 +25,7 @@ export class CfgTester {
             if (isGreek()) {
                 displayMessage(`Η CFG που παρέχεται ΔΕΝ μπορεί να παράξει λέξη μήκους ${word.length}.`, false, "cfg");
             } else {
-                displayMessage(`The provided CFG cannot generate any word of length ${word.length}.`, false, "cfg");
+                displayMessage(`The provided CFG cannot generate any string of length ${word.length}.`, false, "cfg");
             }
             return;
         }
@@ -37,7 +37,7 @@ export class CfgTester {
             if (isGreek()) {
                 displayMessage(`Η λέξη '${word}' περιέχει χαρακτήρες ('${invalidChars}') που δεν ανήκουν στα τερματικά σύμβολα της CFG.`, false, "cfg");
             } else {
-                displayMessage(`The word '${word}' contains characters ('${invalidChars}') that are not part of the CFG's terminal symbols.`, false, "cfg");
+                displayMessage(`The string '${word}' contains characters ('${invalidChars}') that are not part of the CFG's terminal' symbols'.`, false, "cfg");
             }
             if (stepsTableEl && !stepsTableEl.classList.contains("hidden")) {
                 stepsTableEl.classList.add("hidden");
@@ -60,20 +60,20 @@ export class CfgTester {
         );
 
         if (recognized) {
-            // If recognized, show final expansions
+            // If recognised, show final expansions
             this.displaySteps(stepsTableEl, steps, "lightgreen");
             stepsTableEl.classList.remove("hidden");
             if (isGreek()) {
                 displayMessage(`Η δοσμένη CFG αναγνωρίζει τη λέξη '${word}'.`, true, "cfg");
             } else {
-                displayMessage(`The provided CFG generates the word '${word}'.`, true, "cfg");
+                displayMessage(`The provided CFG generates the string '${word}'.`, true, "cfg");
             }
         } else {
-            // If not recognized, display a simple message
+            // If not recognised, display a simple message
             if (isGreek()) {
                 displayMessage(`Η δοσμένη CFG ΔΕΝ αναγνωρίζει τη λέξη '${word}'.`, false, "cfg");
             } else {
-                displayMessage(`The provided CFG does NOT generate the word '${word}'.`, false, "cfg");
+                displayMessage(`The provided CFG does NOT generate the string '${word}'.`, false, "cfg");
             }
         }
 
@@ -175,7 +175,7 @@ export class CfgTester {
 
 
     /**
-     * Displays the final steps in the steps table (only if the word is recognized).
+     * Displays the final steps in the steps table (only if the word is recognised).
      */
     displaySteps(stepsTableEl, steps, tableBgColor) {
         stepsTableEl.classList.remove("hidden");
