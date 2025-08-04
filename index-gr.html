@@ -116,7 +116,8 @@
                     <p class="instruction">Εισάγετε ή δημιουργήστε μια λέξη για τη δοκιμή της CFG και του PDA:</p>
                     <div id="input-generation" class="container">
                         <input type="text" id="sharedWordInput" class="input-text" />
-                        <button type="button" id="generateWordButton" class="btn btn-primary">Δημιουργία λέξης</button>
+                        <button type="button" id="btn-testcfg" class="btn btn-primary btn-large-cust mb-rem1">Δοκιμή CFG</button>
+                        <button type="button" id="btn-testpda" class="btn btn-primary btn-large-cust mb-rem1">Δοκιμή PDA</button>
 
                         <!-- Το modal (id="modal") -->
                         <div class="modal fade" id="modal" tabindex="-1" aria-hidden="true">
@@ -137,10 +138,7 @@
                             </div>
                         </div>
                     </div>
-                    <div id="test-buttons" class="container gap-2">
-                        <button type="button" id="btn-testcfg" class="btn btn-primary btn-large-cust">Δοκιμή CFG</button>
-                        <button type="button" id="btn-testpda" class="btn btn-primary btn-large-cust">Δοκιμή PDA</button>
-                    </div>
+                    <button type="button" id="generateWordButton" class="btn btn-primary">Δημιουργία λέξης</button>
                 </div>
             </div>
 

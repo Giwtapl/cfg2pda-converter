@@ -154,7 +154,8 @@ export class PdaSimulation {
             /* ---- quick rejections / pruning ---- */
             if (idx > word.length) continue;
 
-            if (stack.length + (word.length - idx) > word.length + MAX_RHS) continue;
+            // if (stack.length + (word.length - idx) > word.length + MAX_RHS) continue;
+            if (stack.length > word.length + MAX_RHS) continue;
 
             if (stack.length === 0) {
                 if (idx > best.consumed) { best.consumed = idx; best.path = path; }
