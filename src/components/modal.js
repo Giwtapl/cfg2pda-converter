@@ -31,30 +31,37 @@ export class WordGenerationModal {
 
     // When user clicks Go, generate the word and then close the modal
     this.goBtnEl.addEventListener('click', () => {
+      // Hide the Bootstrap modal
+      this.bsModal.hide();
+      window.showLoadingModal(); // Show loading modal
       const length = parseInt(document.getElementById('wordLength').value, 10);
-      if (isNaN(length) || length < 1) {
-        alert('Please enter a valid length');
+      if (isNaN(length) || length < 1 || length > window.MAX_LENGTH) {
+        window.hideLoadingModal(); // Hide loading modal
+        alert(
+          isGreek()
+          ? `Παρακαλώ εισάγετε έγκυρο μήκος. Πρέπει να είναι από 1 μέχρι ${window.MAX_LENGTH}.`
+          : `Please enter a valid length. It should be from 1 to ${window.MAX_LENGTH}.`
+        );
         return;
       }
 
       const generatedWord = window.inputHandler.cfg.wordGenerator.generateWord(length);
 
       if (!generatedWord) {
-          const msg = isGreek()
-              ? `Η CFG που δώσατε δεν παράγει καμία λέξη μήκους ${length}.`
-              : `The CFG you provided does not generate any string of length ${length}.`;
-              alert(msg);
-          return;               // δεν κλείνουμε το modal
+        window.hideLoadingModal(); // Hide loading modal
+        const msg = isGreek()
+            ? `Η CFG που δώσατε δεν παράγει καμία λέξη μήκους ${length}.`
+            : `The CFG you provided does not generate any string of length ${length}.`;
+            alert(msg);
+        return;               // δεν κλείνουμε το modal
       }
+      window.hideLoadingModal(); // Hide loading modal
 
       this.generatedWordInputEl.value = generatedWord;
 
       // Emit input event
       const inputEvent = new Event('input', { bubbles: true, cancelable: true });
       this.generatedWordInputEl.dispatchEvent(inputEvent);
-
-      // Hide the Bootstrap modal
-      this.bsModal.hide();
     });
   }
 }

@@ -119,93 +119,102 @@ export class PdaSimulation {
         this.stackContainer.classList.remove("accepted", "rejected");
     }
 
-    /* =====================================================
-     *  CFG‑LIKE PARSING – ALSO BUILDS BEST PARTIAL PATH
-     * ===================================================*/
-    buildTransitionPath(cfgObj, startSymbol, word) {
-        const EMPTY = window.EMPTY_STRING;
+    /* -------------------------------------------------------------
+     |  Φτιάχνει transition path (BFS πάνω σε {stack, idx})           |
+     |  Προστέθηκαν console logs.                                    |
+     ------------------------------------------------------------- */
+    buildTransitionPath(cfgObj, startSymbol, word, debug = false) {
+      const EMPTY = window.EMPTY_STRING;
+      const logEnabled = debug || (typeof window !== "undefined" && window.DEBUG_LOGS);
+      const log = (...args) => { if (logEnabled) console.log("[PDA build]", ...args); };
 
-        const MAX_RHS = Math.max(
-            ...Object.values(cfgObj).flat().map(p => (p === EMPTY ? 0 : p.length))
-        );
+      log("start", { startSymbol, word });
 
-        /* queue items: { stack: string[], idx: number, path: [] } */
-        const queue   = [];
-        const visited = new Set();
-        const best    = { consumed: 0, path: [] };   // for the reject case
+      const MAX_RHS = Math.max(
+        ...Object.values(cfgObj).flat().map(p => (p === EMPTY ? 0 : p.length))
+      );
 
-        const keyOf = (stack, idx) => stack.join("") + "|" + idx;
+      // queue items: { stack: string[], idx: number, path: [] }
+      const queue   = [];
+      const visited = new Set();
+      const best    = { consumed: 0, path: [] }; // για το reject
 
-        /* quick bound: if the *produced* terminals already exceed the target */
-        const tooManyTerminals = (stack, idx) =>
-            stack.filter(ch => !cfgObj[ch]).length > word.length - idx;
+      const keyOf = (stack, idx) => stack.join("") + "|" + idx;
 
-        queue.push({ stack: [startSymbol], idx: 0, path: [] });
+      // «υπερβολικοί» τερματικοί στη στοίβα σε σχέση με το υπόλοιπο input
+      const tooManyTerminals = (stack, idx) => {
+        const termsOnStack = stack.filter(ch => !/[A-Z]/.test(ch)).length;
+        return termsOnStack > (word.length - idx);
+      };
 
-        while (queue.length) {
-            const { stack, idx, path } = queue.shift();
+      queue.push({ stack: [startSymbol], idx: 0, path: [] });
 
-            /* ---- accept ---- */
-            if (stack.length === 0 && idx === word.length) {
-                this.transitionPath = path;
-                return true;
-            }
+      while (queue.length) {
+        const { stack, idx, path } = queue.shift();
 
-            /* ---- quick rejections / pruning ---- */
-            if (idx > word.length) continue;
-
-            // if (stack.length + (word.length - idx) > word.length + MAX_RHS) continue;
-            if (stack.length > word.length + MAX_RHS) continue;
-
-            if (stack.length === 0) {
-                if (idx > best.consumed) { best.consumed = idx; best.path = path; }
-                continue;
-            }
-            if (tooManyTerminals(stack, idx)) continue;
-            if (minPossibleLength(stack.join(""), cfgObj) > word.length - idx) continue;
-
-            const memo = keyOf(stack, idx);
-            if (visited.has(memo)) continue;
-            visited.add(memo);
-
-            const [top, ...rest] = stack;
-
-            /* ---- variable on top of the stack ---- */
-            if (cfgObj[top]) {
-                for (const prod of cfgObj[top]) {
-                    const pushSyms = prod === EMPTY ? [] : prod.split("").reverse(); // reverse → first symbol on top
-                    const newStack = [...pushSyms.reverse(), ...rest];  // keep left-to-right order
-
-                    const label = `${EMPTY}, ${top} → ${prod || EMPTY}`;
-                    const trans = this.syntheticTransition(label, EMPTY, top, prod || EMPTY);
-
-                    queue.push({
-                        stack : newStack,
-                        idx,
-                        path  : [...path, trans]
-                    });
-                }
-                continue;
-            }
-
-            /* ---- terminal on top ---- */
-            if (idx < word.length && word[idx] === top) {
-                const label = `${top}, ${top} → ${EMPTY}`;
-                const trans = this.syntheticTransition(label, top, top, EMPTY);
-
-                queue.push({
-                    stack : rest,
-                    idx   : idx + 1,
-                    path  : [...path, trans]
-                });
-            } else {
-                if (idx > best.consumed) { best.consumed = idx; best.path = path; }
-            }
+        if (visited.size % 200 === 0) {
+          log("state", { idx, stack: stack.join(""), pathLen: path.length, q: queue.length, visited: visited.size });
         }
 
-        /* no accept state – keep best partial path for step-through view */
-        this.transitionPath = best.path;
-        return false;
+        // accept
+        if (stack.length === 0 && idx === word.length) {
+          this.transitionPath = path;
+          log("ACCEPT", { steps: path.length });
+          return true;
+        }
+
+        // γρήγορα κλαδέματα
+        if (idx > word.length) continue;
+        if (stack.length + (word.length - idx) > word.length + MAX_RHS) {
+          if (logEnabled) log("prune: stack bound", { stackLen: stack.length, idx });
+          continue;
+        }
+        if (tooManyTerminals(stack, idx)) {
+          if (logEnabled) log("prune: tooManyTerminals", { stack: stack.join(""), idx });
+          continue;
+        }
+        if (minPossibleLength(stack.join(""), cfgObj) > word.length - idx) {
+          if (logEnabled) log("prune: minPossibleLength", { stack: stack.join(""), idx });
+          continue;
+        }
+
+        const memo = keyOf(stack, idx);
+        if (visited.has(memo)) continue;
+        visited.add(memo);
+
+        const [top, ...rest] = stack;
+
+        // μεταβλητή στην κορυφή → επεκτείνουμε με ΟΛΕΣ τις παραγωγές της
+        if (cfgObj[top]) {
+          for (const prod of cfgObj[top]) {
+            const rhsSyms = (prod === EMPTY) ? [] : prod.split(""); // αριστερότερο πάνω
+            const newStack = [...rhsSyms, ...rest];
+
+            const label = `${EMPTY}, ${top} → ${prod || EMPTY}`;
+            const trans = this.syntheticTransition(label, EMPTY, top, prod || EMPTY);
+
+            queue.push({ stack: newStack, idx, path: [...path, trans] });
+            if (logEnabled) log("expand V", { top, prod, newStack: newStack.join("") });
+          }
+          continue;
+        }
+
+        // τερματικό στην κορυφή
+        if (idx < word.length && word[idx] === top) {
+          const label = `${top}, ${top} → ${EMPTY}`;
+          const trans = this.syntheticTransition(label, top, top, EMPTY);
+          queue.push({ stack: rest, idx: idx + 1, path: [...path, trans] });
+          if (logEnabled) log("consume terminal", { ch: top, nextIdx: idx + 1, rest: rest.join("") });
+        } else {
+          // αδιέξοδο — ενημέρωσε «καλύτερο μερικό»
+          if (idx > best.consumed) { best.consumed = idx; best.path = path; }
+        }
+      }
+
+      // reject — κράτα το καλύτερο μερικό για step-through
+      this.transitionPath = best.path;
+      log("REJECT", { bestConsumed: best.consumed, keptSteps: best.path.length });
+      return false;
     }
 
     /* produce an object that mimics a real edge, including id if found */

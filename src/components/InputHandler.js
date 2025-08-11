@@ -105,7 +105,6 @@ export class InputHandler {
             );
             return;
         }
-        this.showLoadingModal();
 
         document.querySelector('.test-wrapper').classList.toggle('hidden');
         this.enableButtons();
@@ -127,7 +126,6 @@ export class InputHandler {
         this.hideDoneButton(document.getElementById('btn-done'));
         this.transformInputToCfg();
 
-        this.hideLoadingModal();
         console.log('Done button was clicked. You provided the following CFG:');
         console.log(this.cfg.toStr());
         console.log(this.cfg.toObject());
@@ -215,16 +213,6 @@ export class InputHandler {
 
     hideDoneButton(doneBtnEl) {
         doneBtnEl.style.display = 'none'
-    }
-
-    showLoadingModal() {
-        const modal = document.getElementById('loading-modal');
-        modal.style.display = 'flex';
-    }
-
-    hideLoadingModal() {
-        const modal = document.getElementById('loading-modal');
-        modal.style.display = 'none';
     }
 
     displayInstructionBelowLastRule() {
