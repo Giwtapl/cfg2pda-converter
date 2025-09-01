@@ -6,7 +6,7 @@ export class Cfg {
         this.cfgObj = this.toObject();
         this.vars = Object.keys(this.cfgObj);
         this.terminals = this.getTerminals()
-        this.wordGenerator = new CfgWordGenerator(this);
+        this.wordGenerator = CfgWordGenerator;
     }
 
     getTerminals() {

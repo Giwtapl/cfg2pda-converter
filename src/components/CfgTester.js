@@ -1,6 +1,7 @@
-import { CfgWordGenerator } from "./CfgWordGenerator.js";
-import { displayMessage, isGreek, minPossibleLength } from "../utilities/tools.js";
-
+// src/components/CfgTester.js
+import { displayMessage, isGreek } from "../utilities/tools.js";
+import { EarleyParser } from "./earley/EarleyParser.js";
+import { EarleyForest } from "./earley/EarleyForest.js";
 
 export class CfgTester {
     constructor(generatedWordInputEl) {
@@ -9,198 +10,135 @@ export class CfgTester {
 
     testCfgBtnHandler = () => {
         const stepsTableEl = document.getElementById("stepsTable");
-        stepsTableEl.classList.add("hidden");
+        const tableBody = document.getElementById("parsingSteps");
+        // καθάρισε/κρύψε προηγούμενα αποτελέσματα
+        if (stepsTableEl) {
+            stepsTableEl.classList.add("hidden");
+            if (tableBody) tableBody.innerHTML = "";
+        }
 
+        // Αν υπάρχει ήδη αποδομημένη PDA προσομοίωση, κάνε reset για “καθαρό” UI
         const pdaAreaEl = document.getElementById("pda-area");
         if (pdaAreaEl && !pdaAreaEl.classList.contains("hidden") && window.pda) {
             window.pda.pdaSimulation.resetSimulation();
         }
 
-        const word = this.generatedWordInputEl.value.trim();
-        const startSymbol = "S";
-
+        // Διάβασε τη λέξη (το κενό input σημαίνει ε)
+        const word = this.generatedWordInputEl.value.trim(); // "" == ε
         const cfg = window.inputHandler.cfg;
-        const isvalidWordLength = new CfgWordGenerator(cfg).canGenerateLength(word.length);
-        if (!isvalidWordLength) {
-            if (isGreek()) {
-                displayMessage(`Η CFG που παρέχεται ΔΕΝ μπορεί να παράξει λέξη μήκους ${word.length}.`, false, "cfg");
-            } else {
-                displayMessage(`The provided CFG cannot generate any string of length ${word.length}.`, false, "cfg");
-            }
-            return;
-        }
-        const wordTerminals = [...new Set(word.split(""))].filter(ch => !/[A-Z]/.test(ch));
 
+        // Έλεγχος αλφαβήτου (τερματικά) — πιο φιλικό μήνυμα στον χρήστη
+        const wordTerminals = [...new Set(word.split(""))].filter(ch => !/[A-Z]/.test(ch));
         const cfgTerminals = cfg.getTerminals();
         const invalidChars = wordTerminals.filter(term => !cfgTerminals.includes(term));
         if (invalidChars.length > 0) {
             if (isGreek()) {
-                displayMessage(`Η λέξη '${word}' περιέχει χαρακτήρες ('${invalidChars}') που δεν ανήκουν στα τερματικά σύμβολα της CFG.`, false, "cfg");
+                displayMessage(
+                    `Η λέξη '${word || "ε"}' περιέχει χαρακτήρες ('${invalidChars}') που δεν ανήκουν στα τερματικά σύμβολα της CFG.`,
+                    false,
+                    "cfg"
+                );
             } else {
-                displayMessage(`The string '${word}' contains characters ('${invalidChars}') that are not part of the CFG's terminal' symbols'.`, false, "cfg");
-            }
-            if (stepsTableEl && !stepsTableEl.classList.contains("hidden")) {
-                stepsTableEl.classList.add("hidden");
+                displayMessage(
+                    `The string '${word || "ε"}' contains characters ('${invalidChars}') that are not part of the CFG's terminal symbols.`,
+                    false,
+                    "cfg"
+                );
             }
             return;
         }
 
-        // We'll store only the expansions that actually lead to a successful derivation.
-        // Each element is an array of the form [ruleUsed, oldString, newString].
-        const steps = [
-            ["--", "--", "S"] // A descriptive first row
-        ];
-
-        // Attempt to parse the word from the start symbol
-        const recognized = this.canGenerate(
-            window.inputHandler.cfg.cfgObj,
-            startSymbol,
-            word,
-            steps
-        );
-
-        if (recognized) {
-            // If recognised, show final expansions
-            this.displaySteps(stepsTableEl, steps, "lightgreen");
-            stepsTableEl.classList.remove("hidden");
-            if (isGreek()) {
-                displayMessage(`Η δοσμένη CFG αναγνωρίζει τη λέξη '${word}'.`, true, "cfg");
-            } else {
-                displayMessage(`The provided CFG generates the string '${word}'.`, true, "cfg");
-            }
-        } else {
-            // If not recognised, display a simple message
-            if (isGreek()) {
-                displayMessage(`Η δοσμένη CFG ΔΕΝ αναγνωρίζει τη λέξη '${word}'.`, false, "cfg");
-            } else {
-                displayMessage(`The provided CFG does NOT generate the string '${word}'.`, false, "cfg");
-            }
+        // === Earley === (χωρίς BFS/DP προ-ελέγχους)
+        const parser = new EarleyParser(cfg);
+        const debug = typeof window !== "undefined" && window.DEBUG_LOGS;
+        console.clear?.();
+        if (debug) {
+            console.log("=== Earley CFG test ===");
+            console.log("Input:", word === "" ? "ε" : word);
+            console.log("CFG:", cfg.toObject());
         }
 
-        document.getElementById("cfg-message").scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+        const res = parser.parse(word, { buildForest: true, debug });
 
-    canGenerate(cfgObj, startSymbol, word, steps) {
-        const EMPTY = window.EMPTY_STRING;              // "ε"
-
-        /* queue items:  { derived: string, trace: [[rule,before,after], …] } */
-        const queue   = [];
-        const visited = new Set();
-
-        console.clear();
-        console.log("=== CFG recogniser ===");
-        console.log("Target:", word);
-
-        queue.push({ derived: startSymbol, trace: [] });
-
-        while (queue.length) {
-            const { derived, trace } = queue.shift();
-            console.log("• pop  ->", derived);
-
-            /* ---------- success ---------- */
-            if (derived === word) {
-                console.log("%c✓ recognised", "color:green;font-weight:bold");
-                steps.push(...trace);
-                return true;
-            }
-
-            /* ---------- fast-fail tests ---------- */
-
-            // terminals already produced must not exceed the target length
-            const termCount = [...derived].filter(ch => !/[A-Z]/.test(ch)).length;
-            if (termCount > word.length) {
-                console.log("  ✗ pruned – too many terminals");
-                continue;
-            }
-
-            // even the *shortest* word reachable from ‹derived› would be too long
-            if (minPossibleLength(derived, cfgObj) > word.length) {
-                console.log("  ✗ pruned – min-length bound");
-                continue;
-            }
-
-            if (word.length && (derived.length > 2 * word.length)) {
-                console.log("  ✗ pruned – exceeds 2n bound");
-                continue;
-            }
-
-            // the produced terminals **before the first NT** must match the prefix
-            let prefixOK = true;
-            for (let i = 0; i < derived.length && i < word.length; i++) {
-                const ch = derived[i];
-                if (/[A-Z]/.test(ch)) break;            // stop at 1st NT
-                if (ch !== word[i]) { prefixOK = false; break; }
-            }
-            if (!prefixOK) {
-                console.log("  ✗ pruned – prefix mismatch");
-                continue;
-            }
-
-            /* ---------- duplicate check ---------- */
-            if (visited.has(derived)) continue;
-            visited.add(derived);
-
-            /* ---------- expand the left-most non-terminal ---------- */
-            const idx = derived.search(/[A-Z]/);
-            if (idx === -1) continue;                   // no NTs left
-
-            const nonTerm = derived[idx];
-
-            for (const prod of cfgObj[nonTerm]) {
-                const expansion = prod === EMPTY ? "" : prod;
-                const newDerived =
-                      derived.slice(0, idx) + expansion + derived.slice(idx + 1);
-
-                /* pretty row for the UI table */
-                const ruleCell        = `${nonTerm} → ${prod === EMPTY ? "ε" : prod}`;
-                const applicationCell = derived.slice(0, idx) +
-                                         `<span class="colored">${nonTerm}</span>` +
-                                         derived.slice(idx + 1);
-                const resultCell      = derived.slice(0, idx) +
-                                         `<span class="colored">${expansion || ""}</span>` +
-                                         derived.slice(idx + 1);
-
-                console.log(`  ↳ push ->`, newDerived);
-
-                queue.push({
-                    derived : newDerived,
-                    trace   : [...trace, [ruleCell, applicationCell, resultCell]]
-                });
-            }
+        if (debug) {
+            console.log("Earley result:", {
+                accepted: res.accepted,
+                furthestIndex: res.furthestIndex,
+                items: res.itemsCount
+            });
         }
 
-        console.log("%c✗ not recognised", "color:red;font-weight:bold");
-        return false;                                    // queue exhausted
-    }
+        if (!res.accepted) {
+            // Αποτυχία — ενημέρωση χρήστη, χωρίς να εμφανίσουμε πίνακα βημάτων
+            const msgEl = isGreek()
+                ? `Η δοσμένη CFG ΔΕΝ αναγνωρίζει τη λέξη '${word || "ε"}'.`
+                : `The provided CFG does NOT generate the string '${word || "ε"}'.`;
+            displayMessage(msgEl, false, "cfg");
 
+            // έξτρα πληροφορία για debugging
+            if (debug) {
+                console.log(
+                    `%cReject. Furthest consumed index: ${res.furthestIndex} (0-based).`,
+                    "color:#b00;font-weight:bold"
+                );
+            }
+
+            document.getElementById("cfg-message")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            return;
+        }
+
+        // Accepted — εξαγωγή βημάτων μιας παραγωγής με EarleyForest
+        const forest = new EarleyForest(res, { debug });
+        const steps = forest.oneDerivationSteps(word); // πίνακας με { step, rule, before, after }
+
+        // UI: εμφάνιση πίνακα βημάτων
+        this.displaySteps(stepsTableEl, steps, "#d4edda"); // ανοιχτό πράσινο
+        stepsTableEl.classList.remove("hidden");
+
+        const okMsg = isGreek()
+            ? `Η δοσμένη CFG αναγνωρίζει τη λέξη '${word || "ε"}'.`
+            : `The provided CFG generates the string '${word || "ε"}'.`;
+        displayMessage(okMsg, true, "cfg");
+
+        document.getElementById("cfg-message")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
 
     /**
-     * Displays the final steps in the steps table (only if the word is recognised).
+     * Απόδοση βημάτων παραγωγής στον πίνακα (Rule / Application / Result).
+     * Το EarleyForest.oneDerivationSteps επιστρέφει αντικείμενα:
+     *   { step, rule, before, after }
      */
     displaySteps(stepsTableEl, steps, tableBgColor) {
-        stepsTableEl.classList.remove("hidden");
+        if (!stepsTableEl) return;
         const tableBody = document.getElementById("parsingSteps");
+        if (!tableBody) return;
+
         tableBody.innerHTML = "";
-        tableBody.style.backgroundColor = tableBgColor;
+        if (tableBgColor) tableBody.style.backgroundColor = tableBgColor;
 
-        steps.forEach(([ruleUsed, oldStr, newStr]) => {
-            const row = document.createElement("tr");
+        // Προσθέτω προεξέχουσα "γραμμή έναρξης" όπως πριν (προαιρετικό)
+        tableBody.appendChild(this._mkRow("--", "--", "S"));
 
-            // Create the 3 columns
-            const ruleCell = document.createElement("td");
-            ruleCell.innerHTML = ruleUsed;
-
-            const oldCell = document.createElement("td");
-            oldCell.innerHTML = oldStr;
-
-            const newCell = document.createElement("td");
-            newCell.innerHTML = newStr;
-
-            row.appendChild(ruleCell);
-            row.appendChild(oldCell);
-            row.appendChild(newCell);
-
-            tableBody.appendChild(row);
+        steps.forEach(({ rule, before, after }) => {
+            tableBody.appendChild(this._mkRow(rule, before, after));
         });
+    }
+
+    _mkRow(ruleUsed, oldStr, newStr) {
+        const tr = document.createElement("tr");
+
+        const tdRule = document.createElement("td");
+        tdRule.innerHTML = ruleUsed;
+
+        const tdOld = document.createElement("td");
+        tdOld.innerHTML = oldStr;
+
+        const tdNew = document.createElement("td");
+        tdNew.innerHTML = newStr;
+
+        tr.appendChild(tdRule);
+        tr.appendChild(tdOld);
+        tr.appendChild(tdNew);
+        return tr;
     }
 }
