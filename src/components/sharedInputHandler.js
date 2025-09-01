@@ -30,11 +30,9 @@ export class SharedInputHandler {
         hint.style.fontSize = '14px';
 
         if (isGreek()) {
-            hint.innerHTML = `💡 <strong>Hint:</strong> Για να δοκιμάσετε την κενή λέξη <strong>ε</strong>, αφήστε το πεδίο κενό και πατήστε «<strong>Δοκιμή CFG</strong>» ή «<strong>Δοκιμή PDA</strong>».
-            <br>🔢 <strong>Σημείωση:</strong> Το μέγιστο υποστηριζόμενο μήκος για τις παραγόμενες λέξεις είναι <strong>${window.MAX_LENGTH}</strong>.`;
+            hint.innerHTML = `💡 <strong>Hint:</strong> Για να δοκιμάσετε την κενή λέξη <strong>ε</strong>, αφήστε το πεδίο κενό και πατήστε «<strong>Δοκιμή CFG</strong>» ή «<strong>Δοκιμή PDA</strong>».`;
         } else {
-            hint.innerHTML = `💡 <strong>Hint:</strong> To test the empty string <strong>ε</strong>, leave the input field blank and click “<strong>Test CFG</strong>” or “<strong>Test PDA</strong>”.
-            <br>🔢 <strong>Note:</strong> The maximum supported length for generated strings is <strong>${window.MAX_LENGTH}</strong>.`;
+            hint.innerHTML = `💡 <strong>Hint:</strong> To test the empty string <strong>ε</strong>, leave the input field blank and click “<strong>Test CFG</strong>” or “<strong>Test PDA</strong>”.`;
         }
 
         // Place the hint just above the test buttons

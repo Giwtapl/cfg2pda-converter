@@ -35,12 +35,12 @@ export class WordGenerationModal {
       this.bsModal.hide();
       window.showLoadingModal(); // Show loading modal
       const length = parseInt(document.getElementById('wordLength').value, 10);
-      if (isNaN(length) || length < 1 || length > window.MAX_LENGTH) {
+      if (isNaN(length) || length < 1) {
         window.hideLoadingModal(); // Hide loading modal
         alert(
           isGreek()
-          ? `Παρακαλώ εισάγετε έγκυρο μήκος. Πρέπει να είναι από 1 μέχρι ${window.MAX_LENGTH}.`
-          : `Please enter a valid length. It should be from 1 to ${window.MAX_LENGTH}.`
+          ? `Παρακαλώ εισάγετε έγκυρο μήκος. Πρέπει να είναι > 0.`
+          : `Please enter a valid length. It should be > 0.`
         );
         return;
       }
