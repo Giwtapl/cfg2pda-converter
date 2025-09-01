@@ -43,7 +43,7 @@ export class PdaSimulation {
     /* ---- Events ---- */
     this.testPdaButton.addEventListener("click", () => {
       this.stackContainer.classList.remove("hidden");
-      this.wordContainer.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      this.wordContainer.scrollIntoView({ behavior: "smooth", block: "start" });
       this.startPdaTest();
     });
     this.nextStepButton.addEventListener("click", () => this.nextPdaStep());
