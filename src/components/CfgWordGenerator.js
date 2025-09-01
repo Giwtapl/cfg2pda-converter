@@ -1,236 +1,171 @@
-/**
- * CfgWordGenerator.js – BFS + Dynamic‑Programming word generator for CFGs
- * ----------------------------------------------------------------------
- * - Αποφεύγει τα stack‑overflows γιατί ΔΕΝ κάνει βαθιά αναδρομή
- * - Κάνει **προέλεγχο εφικτότητας** μήκους με δυναμικό προγραμματισμό· έτσι,
- *   για γραμματικές που παράγουν π.χ. μόνο άρτιες λέξεις, επιστρέφει αμέσως `null`
- *   όταν ζητηθεί περιττό μήκος, αντί να «κρεμάει».
- * - Επιστρέφει κάθε φορά **καινούργια** λέξη (Set `generatedWords`)
- *
- * Χρήση:
- *   const gen = new CfgWordGenerator(cfgInstance);
- *   const w = gen.generateWord(6);
- *
- * ----------------------------------------------------------------------*/
+// components/CfgWordGenerator.js
+// Synchronous, Earley-guided generator (no BFS/DP).
+// API kept simple for the app:
+//   CfgWordGenerator.generateWord(n) -> string | null
+//   CfgWordGenerator.generateStringOfLength(n) -> string | null
+//   CfgWordGenerator.setLogger(fn)
+//   CfgWordGenerator.getLastLogs()
+//
+// IMPORTANT: To avoid touching other files, we read the active CFG from
+// window.inputHandler.cfg internally if none is provided.
 
-export class CfgWordGenerator {
+import { EarleyParser } from './earley/EarleyParser.js';
 
-  MAX_NODES = 500_000; // max nodes to explore in BFS
+// ---------- tiny logger (optional) ----------
+let externalLogger = null;
+let lastLogs = [];
+function log(...a) {
+  const msg = a.map(String).join(' ');
+  lastLogs.push(msg);
+  if (externalLogger) {
+    try { externalLogger(...a); } catch {}
+  } else if (typeof window !== 'undefined' && window.DEBUG_LOGS) {
+    console.log('[Gen]', ...a);
+  }
+}
+function resetLogs() { lastLogs = []; }
 
-  constructor(cfg) {
-    this.cfg = cfg;                 // wrapper που κρατά rules[] & cfgObj
-    this.cfgObj = cfg.cfgObj;       // { NonTerminal: [productions...] }
-    this.EMPTY = window.EMPTY_STRING;
-    this.generatedWords = new Set();
+// ---------- helpers ----------
+function getActiveCfg(explicitCfg) {
+  // Prefer an explicit cfg if provided; otherwise use the app's global
+  if (explicitCfg) return explicitCfg;
+  if (typeof window !== 'undefined' && window?.inputHandler?.cfg) {
+    return window.inputHandler.cfg;
+  }
+  throw new Error('CfgWordGenerator: no CFG available.');
+}
+
+function terminalsOf(cfg) {
+  // Επαναχρησιμοποιούμε το API της κλάσης Cfg
+  if (typeof cfg.getTerminals === 'function') return cfg.getTerminals();
+  // fallback (δεν αναμένεται να χρειαστεί μέσα στην εφαρμογή)
+  const t = new Set();
+  for (const [lhs, rhss] of Object.entries(cfg?.cfgObj || {})) {
+    for (const rhs of rhss) {
+      for (const ch of rhs === window.EMPTY_STRING ? '' : rhs) {
+        if (!/[A-Zε]/.test(ch)) t.add(ch);
+      }
+    }
+  }
+  return Array.from(t);
+}
+
+// Επιστρέφει true αν το prefix μπορεί να επεκταθεί (ή να γίνει πλήρως αποδεκτό)
+// δηλ. ο Earley δεν «κολλάει» πριν από το μήκος του prefix.
+function earleyProgress(cfg, prefix) {
+  const parser = new EarleyParser(cfg);
+  const res = parser.parse(prefix, { buildForest: false, debug: false });
+  return res.furthestIndex >= prefix.length;
+}
+
+// Γρήγορος έλεγχος για πλήρη αποδοχή.
+function earleyAccepts(cfg, s) {
+  const parser = new EarleyParser(cfg);
+  const res = parser.parse(s, { buildForest: false, debug: false });
+  return !!res.accepted && res.furthestIndex === s.length;
+}
+
+// ---------- core generator (sync, backtracking) ----------
+function generateOfLengthSync(n, cfg, opts = {}) {
+  const MAX_ATTEMPTS = opts.maxAttempts ?? 5000;
+  const PER_POS_TRIALS = opts.perPositionTrials ?? 32;
+  const random = opts.random ?? Math.random;
+
+  resetLogs();
+
+  if (n === 0) {
+    // Η εφαρμογή ζητά μήκος >=1 μέσω UI, αλλά υποστηρίζουμε και n=0 για πληρότητα.
+    const ok = earleyAccepts(cfg, '');
+    log(ok ? 'ε is generated.' : 'ε is NOT generated.');
+    return ok ? '' : null;
   }
 
-  /* -------------------------------------------------------------
-   |  Βοηθητικά                                                       |
-   ------------------------------------------------------------- */
-  static isTerminal(word) {
-    return !/[A-Z]/.test(word);
-  }
-
-  // Ελάχιστο δυνατό τελικό μήκος μιας μερικής λέξης (μετράει τα
-  // terminals + μη‑τερματικά που **δεν** μπορούν να βγάλουν ε).
-  minPossibleLength(word) {
-    let min = 0;
-    for (const ch of word) {
-      if (/[A-Z]/.test(ch)) {
-        if (!(this.cfgObj[ch]?.includes(this.EMPTY))) min += 1;
-      } else {
-        min += 1;
-      }
-    }
-    return min;
-  }
-
-  /* -------------------------------------------------------------
-   |  Προέλεγχος: μπορεί η CFG να δώσει λέξη μήκους targetLength;   |
-   |  Δυναμικός προγραμματισμός μόνο στα ΜΗΚΗ — O(|V|·L²).         |
-   |  Προστέθηκαν console logs.                                    |
-   ------------------------------------------------------------- */
-  canGenerateLength(targetLength, debug = false) {
-    const logEnabled = debug || (typeof window !== "undefined" && window.DEBUG_LOGS);
-    const log = (...args) => { if (logEnabled) console.log("[canGenerateLength]", ...args); };
-
-    log("start", { targetLength });
-
-    const V = Object.keys(this.cfgObj);
-    const lenSets = Object.fromEntries(V.map(N => [N, new Set()]));
-
-    let changed = true;
-    let rounds = 0;
-    let adds = 0;
-
-    while (changed) {
-      changed = false;
-      rounds++;
-
-      for (const [lhs, rhss] of Object.entries(this.cfgObj)) {
-        for (const rhs of rhss) {
-          // 1) ε-παραγωγή
-          if (rhs === this.EMPTY) {
-            if (!lenSets[lhs].has(0)) {
-              lenSets[lhs].add(0);
-              changed = true;
-              adds++;
-              log("ε-production discovered", `${lhs} → ε`);
-            }
-            continue;
-          }
-
-          // 2) terminals / variables split
-          let termLen = 0;
-          const vars = [];
-          for (const ch of rhs) {
-            if (/[A-Z]/.test(ch)) vars.push(ch);
-            else termLen += 1;
-          }
-
-          const remaining = targetLength - termLen;
-          if (remaining < 0) continue; // ήδη ξεπερνά το target
-
-          // 3) Συνδυασμός μηκών για τις μεταβλητές (μέχρι remaining)
-          let sums = [0]; // cartesian sum accumulator
-          for (const v of vars) {
-            const next = [];
-            for (const base of sums) {
-              for (const lv of lenSets[v]) {
-                const tot = base + lv;
-                if (tot <= remaining) next.push(tot);
-              }
-            }
-            if (!next.length) { sums = []; break; }
-            sums = Array.from(new Set(next));
-          }
-
-          // 4) Σπρώχνουμε νέα μήκη για το lhs
-          for (const add of sums) {
-            const tot = termLen + add;
-            if (!lenSets[lhs].has(tot)) {
-              lenSets[lhs].add(tot);
-              changed = true;
-              adds++;
-              if (adds % 50 === 0) log(`progress: +${adds} lengths discovered so far`);
-            }
-          }
-        }
-      }
-
-      log("round finished", { round: rounds });
-    }
-
-    const S = this.cfg.rules[0].varLetter;
-    const ok = lenSets[S].has(targetLength);
-    log("done", { ok, lengthsForS: Array.from(lenSets[S]).sort((a,b)=>a-b) });
-
-    return ok;
-  }
-
-  /* -------------------------------------------------------------
-   |  Κύρια ρουτίνα BFS για παραγωγή λέξης σταθερού μήκους          |
-   |  Προστέθηκαν console logs.                                    |
-   ------------------------------------------------------------- */
-  generateWord(targetLength, maxNodes = this.MAX_NODES, debug = false) {
-    const logEnabled = debug || (typeof window !== "undefined" && window.DEBUG_LOGS);
-    const log = (...args) => { if (logEnabled) console.log("[generateWord]", ...args); };
-
-    log("start", { targetLength, maxNodes });
-
-    // Γρήγορος αποκλεισμός με DP
-    if (!this.canGenerateLength(targetLength, debug)) {
-      log("impossible length according to DP — abort");
-      return null;
-    }
-
-    const startSym = this.cfg.rules[0].varLetter;
-    const queue = [startSym];
-    const visited = new Set(queue);
-    let nodes = 0;
-
-    while (queue.length) {
-      const current = queue.shift();
-      nodes++;
-      if (nodes % 1000 === 0) log("progress", { nodes, queue: queue.length, current });
-
-      const minLen = this.minPossibleLength(current);
-      if (minLen > targetLength) {
-        if (logEnabled) log("prune: minPossibleLength", { current, minLen });
-        continue;
-      }
-
-      if (CfgWordGenerator.isTerminal(current)) {
-        if (current.length === targetLength) {
-          if (this.generatedWords.has(current)) {
-            log("duplicate word (skipping)", current);
-            continue;
-          }
-          this.generatedWords.add(current);
-          log("FOUND", current, "after nodes", nodes);
-          return current;
-        }
-        continue; // τερματική αλλά λάθος μήκος
-      }
-
-      // Επέκταση ΠΡΩΤΟΥ μη τερματικού
-      for (let i = 0; i < current.length; i++) {
-        const symbol = current[i];
-        const prods = this.cfgObj[symbol];
-        if (!prods) continue;
-
-        for (const prod of prods) {
-          const repl = (prod === this.EMPTY) ? "" : prod;
-          const next = current.slice(0, i) + repl + current.slice(i + 1);
-
-          // μικρό όριο για να μη φουσκώνει άσκοπα
-          if (!visited.has(next) && next.length <= targetLength * 2 + 2) {
-            visited.add(next);
-            queue.push(next);
-            if (logEnabled && queue.length % 2000 === 0) {
-              log("enqueue", { from: current, symbol, prod, next, queue: queue.length });
-            }
-          }
-        }
-        break; // μόνο το αριστερότερο μη τερματικό
-      }
-
-      if (nodes > maxNodes) {
-        log("safety-valve hit — abort", { nodes, maxNodes });
-        break;
-      }
-    }
-
-    // Δεν βρέθηκε νέα — αν υπάρχουν ήδη παραγόμενες του ίδιου μήκους, επέστρεψε μία
-    const sameLen = Array.from(this.generatedWords).filter(w => w.length === targetLength);
-    if (sameLen.length) {
-      const pick = sameLen[Math.floor(Math.random() * sameLen.length)];
-      log("no new word; returning an already generated of same length", pick);
-      return pick;
-    }
-
-    log("no word found");
+  const terms = terminalsOf(cfg);
+  if (terms.length === 0) {
+    log('No terminal symbols found in CFG.');
     return null;
   }
 
-  // generateWord(targetLength, maxNodes = 50_000) {
-  //   let w = START;                    // “S”
-  //   while (/[A-Z]/.test(w)) {         // όσο υπάρχουν μεταβλητές
-  //     const i = w.search(/[A-Z]/);    // αριστερότερη V
-  //     const V = w[i];
-  //     const restLen = L - (w.length   // τερματικά που έχουμε ήδη
-  //                         - [...w].filter(c => /[A-Z]/.test(c)).length);
-  //     // Φιλτράρουμε μόνο τις παραγωγές που *μπορούν* να φτάσουν το length
-  //     const ok = CFG[V].filter(p => {
-  //       const terminals = [...p].filter(c => !/[A-Z]/.test(c)).length;
-  //       const need      = restLen - terminals;
-  //       return splitIsPossible(p, need, lenSets);   // O(|p|·L)
-  //     });
-  //     const prod = ok[Math.floor(Math.random()*ok.length)]; // ή πάντα ok[0]
-  //     w = w.slice(0,i) + (prod===ε?"":prod) + w.slice(i+1);
-  //   }
-  //   return w;      // πάντα Ο(L²) χρόνος / O(L) μνήμη
-  // }
+  // Σταθερό shuffle iterator
+  function* shuffled(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    yield* a;
+  }
 
-  reset() { this.generatedWords.clear(); }
+  let attempts = 0;
+  const stack = []; // for debugging choices: {pos, choice}
+
+  function dfs(prefix) {
+    if (++attempts > MAX_ATTEMPTS) return null;
+
+    if (prefix.length === n) {
+      if (earleyAccepts(cfg, prefix)) {
+        log(`✅ Found string: "${prefix}"`);
+        return prefix;
+      }
+      log(`reject full "${prefix}"`);
+      return null;
+    }
+
+    // Δοκίμασε επόμενους τερματικούς με pruning από Earley (στο prefix+ch)
+    let triedHere = 0;
+    for (const ch of shuffled(terms)) {
+      if (++triedHere > PER_POS_TRIALS) break;
+      const candidate = prefix + ch;
+
+      // prune: ο Earley πρέπει να «προχωρά» τουλάχιστον μέχρι το νέο μήκος
+      if (!earleyProgress(cfg, candidate)) {
+        log(`prune "${candidate}"`);
+        continue;
+      }
+
+      stack.push({ pos: prefix.length, choice: ch });
+      const deeper = dfs(candidate);
+      if (deeper != null) return deeper;
+      stack.pop();
+    }
+
+    return null;
+  }
+
+  const ans = dfs('');
+  if (ans == null) {
+    log(`❌ Exhausted attempts (${attempts}) without finding a string of length ${n}.`);
+  }
+  return ans;
 }
+
+// ---------- public API (object export) ----------
+export const CfgWordGenerator = {
+  /**
+   * Generate a string of exact length n generated by the current CFG.
+   * Returns: string | null
+   *
+   * NOTE: No need to pass cfg; the generator reads window.inputHandler.cfg internally
+   * to stay compatible with the rest of the app (modal.js, etc.).
+   */
+  generateWord(n, cfg = null, opts = {}) {
+    const activeCfg = getActiveCfg(cfg);
+    return generateOfLengthSync(n, activeCfg, opts);
+  },
+
+  // Back-compat alias used in some places
+  generateStringOfLength(n, cfg = null, opts = {}) {
+    return this.generateWord(n, cfg, opts);
+  },
+
+  setLogger(fn) {
+    externalLogger = typeof fn === 'function' ? fn : null;
+  },
+
+  getLastLogs() {
+    return [...lastLogs];
+  }
+};
+
+// default export for default imports
+export default CfgWordGenerator;

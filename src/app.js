@@ -4,8 +4,6 @@ import MobileDetection from './utilities/mobile.js';
 const urlParams = new URLSearchParams(window.location.search);
 window.DEBUG_LOGS = urlParams.get('log') === 'true';
 
-window.MAX_LENGTH = 20; // max word length to generate
-
 window.isMobile = MobileDetection;
 window.EMPTY_STRING = 'ε';
 window.SPECIAL_CHAR = '$';

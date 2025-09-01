@@ -1,415 +1,347 @@
-import { CfgWordGenerator } from "./CfgWordGenerator.js";
-import { isGreek, displayMessage, minPossibleLength } from "../utilities/tools.js";
+// src/components/PdaSimulation.js
+//
+// Earley‑based PDA simulation (no BFS, no DP).
+// - Παίρνουμε από EarleyForest ένα μονοπάτι expand/scan/accept
+// - Το χαρτογραφούμε σε πραγματικά PDA edges (Qloop self-loop κ.λπ.)
+// - Προσθέτουμε guard (Qo→Qloop με S$) και τελική (Qloop→Qaccept με $)
+// - Προβάλλουμε βήμα‑βήμα με Next, με στοίβα και pointer στη λέξη.
+//
+// Απαιτεί: EarleyParser.js, EarleyForest.js, tools.js
 
+import { isGreek, displayMessage } from "../utilities/tools.js";
+import { EarleyParser } from "./earley/EarleyParser.js";
+import { EarleyForest } from "./earley/EarleyForest.js";
 
 export class PdaSimulation {
-    constructor(pdaTransitions) {
-        /* ---------------- Simulation State ---------------- */
-        this.currentState = "Qo";
-        this.stack = [];
-        this.inputWord = "";
-        this.currentInputIndex = 0;
-        this.isAccepted = false;
-        this.isRejected = false;
+  constructor(pdaTransitions) {
+    /* ---- PDA graph edges (from pda.js) ---- */
+    this.pdaTransitions = pdaTransitions;
 
-        /* ---- Visual tracking ---- */
-        this.previousState = null;
-        this.previousTransition = null;
-        this.previousLabel = null;
+    /* ---- Simulation state ---- */
+    this.currentState = "Qo";
+    this.stack = [];
+    this.inputWord = "";
+    this.currentInputIndex = 0;
+    this.isAccepted = false;
+    this.isRejected = false;
 
-        this.transitionPath = [];   // will contain either full path (accept) or best‑partial (reject)
-        this.transitionIndex = 0;
+    this.transitionPath = [];   // array of {fromState,toState,input,stackTop,stackPush,transitionId}
+    this.transitionIndex = 0;
 
-        /* ---------------- PDA definition ---------------- */
-        this.pdaTransitions = pdaTransitions; // real graph edges (for ids)
+    /* ---- Visual tracking ---- */
+    this.previousState = null;
+    this.previousTransition = null;
+    this.previousLabel = null;
 
-        /* ---------------- DOM ---------------- */
-        this.stackContainer = document.getElementById("stack-container");
-        this.wordContainer  = document.getElementById("word-container");
-        this.nextStepButton = document.getElementById("next-step");
-        this.testPdaButton  = document.getElementById("btn-testpda");
-        this.restartTestButton = document.getElementById("restart-test-button");
+    /* ---- DOM ---- */
+    this.stackContainer = document.getElementById("stack-container");
+    this.wordContainer  = document.getElementById("word-container");
+    this.nextStepButton = document.getElementById("next-step");
+    this.testPdaButton  = document.getElementById("btn-testpda");
+    this.restartTestButton = document.getElementById("restart-test-button");
 
-        /* ---------------- Events ---------------- */
-        this.testPdaButton.addEventListener("click", () => {
-            this.stackContainer.classList.remove("hidden");
-            this.wordContainer.scrollIntoView({ behavior: "smooth", block: "nearest" });
-            this.startPdaTest();
-        });
-        this.nextStepButton.addEventListener("click", () => this.nextPdaStep());
-        this.restartTestButton.addEventListener("click", () => this.startPdaTest());
+    /* ---- Events ---- */
+    this.testPdaButton.addEventListener("click", () => {
+      this.stackContainer.classList.remove("hidden");
+      this.wordContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+      this.startPdaTest();
+    });
+    this.nextStepButton.addEventListener("click", () => this.nextPdaStep());
+    this.restartTestButton.addEventListener("click", () => this.startPdaTest());
+  }
+
+  /* =====================================================
+   *  START / RESET
+   * ===================================================*/
+  startPdaTest() {
+    this.resetSimulation();
+
+    const cfg = window.inputHandler.cfg;
+    this.inputWord = document.getElementById("sharedWordInput").value.trim();
+
+    // Έλεγχος αλφαβήτου (τερματικά πρέπει να ανήκουν στη CFG)
+    const wordTerminals = [...new Set(this.inputWord.split(""))].filter(ch => !/[A-Z]/.test(ch));
+    const cfgTerminals  = cfg.getTerminals();
+    const invalidChars  = wordTerminals.filter(t => !cfgTerminals.includes(t));
+    if (invalidChars.length > 0) {
+      if (isGreek()) {
+        displayMessage(`Η λέξη '${this.inputWord || "ε"}' περιέχει μη έγκυρα σύμβολα ('${invalidChars}').`, false, "pda");
+      } else {
+        displayMessage(`The string '${this.inputWord || "ε"}' contains invalid symbols ('${invalidChars}').`, false, "pda");
+      }
+      return;
     }
 
-    /* =====================================================
-     *  START / RESET
-     * ===================================================*/
-    startPdaTest() {
-        this.resetSimulation();
-        this.inputWord = document.getElementById("sharedWordInput").value.trim();
+    // === Earley ===
+    const parser = new EarleyParser(cfg);
+    const debug  = typeof window !== "undefined" && window.DEBUG_LOGS;
+    if (debug) {
+      console.log("=== Earley PDA test ===");
+      console.log("Input:", this.inputWord === "" ? "ε" : this.inputWord);
+      console.log("CFG:", cfg.toObject());
+    }
+    const res = parser.parse(this.inputWord, { buildForest: true, debug });
 
-        const cfg = window.inputHandler.cfg;
-        const isvalidWordLength = new CfgWordGenerator(cfg).canGenerateLength(this.inputWord.length);
-        if (!isvalidWordLength) {
-            if (isGreek()) {
-                displayMessage(`Η CFG που παρέχεται ΔΕΝ μπορεί να παράξει λέξη μήκους ${this.inputWord.length}.`, false, "pda");
-            } else {
-                displayMessage(`The provided PDA cannot recognise any string of length ${this.inputWord.length}.`, false, "pda");
-            }
-            return;
-        }
+    if (!res.accepted) {
+      // Rejected: θα δείξουμε σαφές μήνυμα (χωρίς “Next”).
+      const at = res.furthestIndex ?? 0;
+      const msg = isGreek()
+        ? `Η λέξη '${this.inputWord || "ε"}' ΔΕΝ αναγνωρίζεται από το αντίστοιχο nPDA. (Μέγιστο ταιριασμένο prefix: ${at} σύμβολ${at===1?"ο":"α"})`
+        : `The string '${this.inputWord || "ε"}' is NOT recognised by the nPDA. (Furthest matched prefix: ${at} symbol${at===1?"":"s"})`;
+      displayMessage(msg, false, "pda");
 
-        const wordTerminals = [...new Set(this.inputWord.split(""))].filter(ch => !/[A-Z]/.test(ch));
-
-        const cfgTerminals = cfg.getTerminals();
-        const invalidChars = wordTerminals.filter(term => !cfgTerminals.includes(term));
-        if (invalidChars.length > 0) {
-            if (isGreek()) {
-                displayMessage(`Η λέξη '${this.inputWord}' περιέχει χαρακτήρες ('${invalidChars}') που δεν ανήκουν στα τερματικά σύμβολα της CFG.`, false, "pda");
-            } else {
-                displayMessage(`The string '${this.inputWord}' contains characters ('${invalidChars}') that are not part of the CFG's terminal symbols.`, false, "pda");
-            }
-            return;
-        }
-
-        const cfgObj = cfg.cfgObj;
-        const accepted = this.buildTransitionPath(cfgObj, window.STARTING_VAR, this.inputWord);
-
-        if (accepted) {
-            this.isAccepted = true;
-            displayMessage(
-                isGreek()
-                    ? `Η δοσμένη λέξη αναγνωρίζεται από αυτό το Αυτόματο Στοίβας (PDA). Ακολουθήστε τα βήματα για να δείτε τις μεταβάσεις.`
-                    : `The provided string is recognised by this PDA. Follow the steps to see the transitions.`,
-                true,
-                "pda"
-            );
-            this.stackContainer.classList.add("accepted");
-        } else {
-            this.isRejected = true;
-            displayMessage(
-                isGreek()
-                    ? `Η δοσμένη λέξη ΔΕΝ αναγνωρίζεται από αυτό το Αυτόματο Στοίβας (PDA). Πατήστε "Next" για να δείτε τη διαδρομή πριν "κολλήσει".`
-                    : `The provided string is NOT recognised by this PDA. Click "Next" to see the path before it got stuck.`,
-                false,
-                "pda"
-            );
-            this.stackContainer.classList.add("rejected");
-        }
-
-        this.decoratePathWithGuard(window.STARTING_VAR);
-
-        /* initial visuals */
-        this.displayWord();
-        this.displayStack();
-        this.highlightState(this.currentState);
-        this.nextStepButton.style.display = "block";
-        this.restartTestButton.style.display = "block";
+      // Ενημέρωση visuals
+      this.displayWord();
+      this.displayStack();             // κενή στοίβα
+      this.highlightState("Qloop");    // θα μπούμε στο Qloop με το πρώτο βήμα, αλλά δεν δείχνουμε μονοπάτι
+      this.nextStepButton.style.display = "none";
+      this.restartTestButton.style.display = "block";
+      this.isRejected = true;
+      return;
     }
 
-    resetSimulation() {
-        this.currentState = "Qo";
-        this.stack = [];
-        this.currentInputIndex = 0;
-        this.transitionPath = [];
-        this.transitionIndex = 0;
-        this.isAccepted = false;
-        this.isRejected = false;
-        this.resetAllHighlighting();
-        this.clearMessage();
-        this.stackContainer.classList.remove("accepted", "rejected");
-    }
+    // Accepted: ανασύνθεση διαδρομής από EarleyForest
+    const forest = new EarleyForest(res, { debug });
+    const earleyPath = forest.toPdaTransitions(this.inputWord);
+    // earleyPath: [{kind:'expand'|'scan'|'accept', input, pop, push, pos, note}, ...]
 
-    /* -------------------------------------------------------------
-     |  Φτιάχνει transition path (BFS πάνω σε {stack, idx})           |
-     |  Προστέθηκαν console logs.                                    |
-     ------------------------------------------------------------- */
-    buildTransitionPath(cfgObj, startSymbol, word, debug = false) {
-      const EMPTY = window.EMPTY_STRING;
-      const logEnabled = debug || (typeof window !== "undefined" && window.DEBUG_LOGS);
-      const log = (...args) => { if (logEnabled) console.log("[PDA build]", ...args); };
+    // Map σε πραγματικά edges για σωστό highlighting
+    this.transitionPath = this._mapEarleyPathToGraph(earleyPath, window.STARTING_VAR);
 
-      log("start", { startSymbol, word });
+    // Μηνύματα & visuals
+    displayMessage(
+      isGreek()
+        ? `Η δοσμένη λέξη αναγνωρίζεται από το nPDA. Πατήστε “Next” για να δείτε τα βήματα.`
+        : `The string is recognised by the nPDA. Click “Next” to step through the transitions.`,
+      true,
+      "pda"
+    );
 
-      const MAX_RHS = Math.max(
-        ...Object.values(cfgObj).flat().map(p => (p === EMPTY ? 0 : p.length))
-      );
+    this.displayWord();
+    this.displayStack();
+    this.highlightState(this.currentState);
+    this.nextStepButton.style.display = "block";
+    this.restartTestButton.style.display = "block";
+    this.isAccepted = true;
+  }
 
-      // queue items: { stack: string[], idx: number, path: [] }
-      const queue   = [];
-      const visited = new Set();
-      const best    = { consumed: 0, path: [] }; // για το reject
+  resetSimulation() {
+    this.currentState = "Qo";
+    this.stack = [];
+    this.currentInputIndex = 0;
+    this.transitionPath = [];
+    this.transitionIndex = 0;
+    this.isAccepted = false;
+    this.isRejected = false;
+    this.resetAllHighlighting();
+    this.clearMessage();
+    this.stackContainer.classList.remove("accepted", "rejected");
+  }
 
-      const keyOf = (stack, idx) => stack.join("") + "|" + idx;
+  /* =====================================================
+   *  EARLEY → PDA GRAPH MAPPING
+   * ===================================================*/
+  _mapEarleyPathToGraph(earleyPath, startSym) {
+    const EMPTY = window.EMPTY_STRING;
+    const GUARD = window.SPECIAL_CHAR;
 
-      // «υπερβολικοί» τερματικοί στη στοίβα σε σχέση με το υπόλοιπο input
-      const tooManyTerminals = (stack, idx) => {
-        const termsOnStack = stack.filter(ch => !/[A-Z]/.test(ch)).length;
-        return termsOnStack > (word.length - idx);
-      };
+    const out = [];
 
-      queue.push({ stack: [startSymbol], idx: 0, path: [] });
+    // 1) Guard: Qo --ε, ε→S$--> Qloop  (ώστε S να βρεθεί πάνω από $)
+    const qoToLoop = this.pdaTransitions.find(e => e.fromState === "Qo" && e.toState === "Qloop");
+    out.push({
+      fromState   : "Qo",
+      toState     : "Qloop",
+      input       : EMPTY,
+      stackTop    : EMPTY,
+      stackPush   : `${startSym}${GUARD}`,
+      transitionId: qoToLoop ? qoToLoop.transitionId : null
+    });
 
-      while (queue.length) {
-        const { stack, idx, path } = queue.shift();
-
-        if (visited.size % 200 === 0) {
-          log("state", { idx, stack: stack.join(""), pathLen: path.length, q: queue.length, visited: visited.size });
-        }
-
-        // accept
-        if (stack.length === 0 && idx === word.length) {
-          this.transitionPath = path;
-          log("ACCEPT", { steps: path.length });
-          return true;
-        }
-
-        // γρήγορα κλαδέματα
-        if (idx > word.length) continue;
-        if (stack.length + (word.length - idx) > word.length + MAX_RHS) {
-          if (logEnabled) log("prune: stack bound", { stackLen: stack.length, idx });
-          continue;
-        }
-        if (tooManyTerminals(stack, idx)) {
-          if (logEnabled) log("prune: tooManyTerminals", { stack: stack.join(""), idx });
-          continue;
-        }
-        if (minPossibleLength(stack.join(""), cfgObj) > word.length - idx) {
-          if (logEnabled) log("prune: minPossibleLength", { stack: stack.join(""), idx });
-          continue;
-        }
-
-        const memo = keyOf(stack, idx);
-        if (visited.has(memo)) continue;
-        visited.add(memo);
-
-        const [top, ...rest] = stack;
-
-        // μεταβλητή στην κορυφή → επεκτείνουμε με ΟΛΕΣ τις παραγωγές της
-        if (cfgObj[top]) {
-          for (const prod of cfgObj[top]) {
-            const rhsSyms = (prod === EMPTY) ? [] : prod.split(""); // αριστερότερο πάνω
-            const newStack = [...rhsSyms, ...rest];
-
-            const label = `${EMPTY}, ${top} → ${prod || EMPTY}`;
-            const trans = this.syntheticTransition(label, EMPTY, top, prod || EMPTY);
-
-            queue.push({ stack: newStack, idx, path: [...path, trans] });
-            if (logEnabled) log("expand V", { top, prod, newStack: newStack.join("") });
-          }
-          continue;
-        }
-
-        // τερματικό στην κορυφή
-        if (idx < word.length && word[idx] === top) {
-          const label = `${top}, ${top} → ${EMPTY}`;
-          const trans = this.syntheticTransition(label, top, top, EMPTY);
-          queue.push({ stack: rest, idx: idx + 1, path: [...path, trans] });
-          if (logEnabled) log("consume terminal", { ch: top, nextIdx: idx + 1, rest: rest.join("") });
-        } else {
-          // αδιέξοδο — ενημέρωσε «καλύτερο μερικό»
-          if (idx > best.consumed) { best.consumed = idx; best.path = path; }
-        }
+    // 2) Για κάθε βήμα Earley, βρες το αντίστοιχο Qloop self‑loop edge
+    for (const step of earleyPath) {
+      if (step.kind === "accept") {
+        // θα προστεθεί ως (3) παρακάτω
+        continue;
       }
 
-      // reject — κράτα το καλύτερο μερικό για step-through
-      this.transitionPath = best.path;
-      log("REJECT", { bestConsumed: best.consumed, keptSteps: best.path.length });
-      return false;
+      const input = step.kind === "scan" ? step.input : EMPTY; // scan:'a' , expand:'ε'
+      const pop   = step.pop;                                  // terminal ή nonterminal
+      const push  = step.kind === "expand" ? (step.push || EMPTY) : EMPTY; // expand: RHS, scan: ε
+
+      const edge = this.pdaTransitions.find(e =>
+        e.fromState === "Qloop" && e.toState === "Qloop" &&
+        e.input === (input || EMPTY) &&
+        e.stackTop === (pop   || EMPTY) &&
+        e.stackPush === (push || EMPTY)
+      );
+
+      out.push({
+        fromState   : "Qloop",
+        toState     : "Qloop",
+        input       : input || EMPTY,
+        stackTop    : pop   || EMPTY,
+        stackPush   : push  || EMPTY,
+        transitionId: edge ? edge.transitionId : null
+      });
     }
 
-    /* produce an object that mimics a real edge, including id if found */
-    syntheticTransition(label, input, stackTop, stackPush) {
-        const realEdge = this.pdaTransitions.find(e => `${e.input}, ${e.stackTop} → ${e.stackPush}` === label);
-        return {
-            fromState: "Qloop",
-            toState: "Qloop",
-            input,
-            stackTop,
-            stackPush,
-            transitionId: realEdge ? realEdge.transitionId : null
-        };
+    // 3) Τελική κατανάλωση guard: Qloop --ε,$→ε--> Qaccept
+    const loopToAcc = this.pdaTransitions.find(e => e.fromState === "Qloop" && e.toState === "Qaccept");
+    out.push({
+      fromState   : "Qloop",
+      toState     : "Qaccept",
+      input       : EMPTY,
+      stackTop    : GUARD,
+      stackPush   : EMPTY,
+      transitionId: loopToAcc ? loopToAcc.transitionId : null
+    });
+
+    return out;
+  }
+
+  /* =====================================================
+   *  STEP‑BY‑STEP EXECUTION
+   * ===================================================*/
+  nextPdaStep() {
+    // reset previous highlighting
+    this.resetHighlighting();
+
+    const t = this.transitionPath[this.transitionIndex];
+    if (!t) return;
+
+    // Visualise edge/label
+    this.highlightTransition(t);
+
+    // Stack ops
+    if (t.stackTop !== window.EMPTY_STRING) this.stack.pop();
+    if (t.stackPush !== window.EMPTY_STRING) {
+      const syms = t.stackPush.split("").reverse(); // push reverse so last becomes top
+      this.stack.push(...syms);
     }
 
-    decoratePathWithGuard(startSym) {
-        const EMPTY  = window.EMPTY_STRING;
-        const GUARD  = window.SPECIAL_CHAR;      // ‘$’
-        const first  = this.pdaTransitions.find(e => e.fromState === "Qo"
-                                               &&  e.toState   === "Qloop");
+    // Input pointer
+    if (t.input !== window.EMPTY_STRING) this.currentInputIndex++;
 
-        /* 1️⃣  Qo ─ε, ε → S$──► Qloop  (S επάνω, $ στον πάτο) */
-        const initStep = {
-            fromState   : "Qo",
-            toState     : "Qloop",
-            input       : EMPTY,
-            stackTop    : EMPTY,
-            stackPush   : `${startSym}${GUARD}`,   // προσοχή: S$ ώστε η S να μείνει ΠΑΝΩ
-            transitionId: first ? first.transitionId : null
-        };
+    // Update state
+    this.currentState = t.toState;
 
-        this.transitionPath = [initStep, ...this.transitionPath]
+    // Visuals
+    this.displayStack();
+    this.updateWordVisualization();
+    this.highlightState(t.toState);
 
-        if (this.isAccepted) {
-            const last = this.pdaTransitions.find(
-                e => e.fromState === "Qloop" &&  e.toState   === "Qaccept"
-            );
+    this.transitionIndex++;
 
-            /* 2️⃣  Qloop ─ε, $ → ε──► Qaccept */
-            const finalStep = {
-                fromState   : "Qloop",
-                toState     : "Qaccept",
-                input       : EMPTY,
-                stackTop    : GUARD,
-                stackPush   : EMPTY,
-                transitionId: last ? last.transitionId : null
-            };
-
-            this.transitionPath = [...this.transitionPath, finalStep];
-        }
+    if (this.transitionIndex >= this.transitionPath.length) {
+      this.nextStepButton.style.display = "none";
+      // Καθάρισε προτρεπτικές φράσεις από το μήνυμα
+      const msgEl = document.getElementById("pda-message");
+      if (msgEl) {
+        const spanEl = msgEl.firstElementChild;
+        const rx = isGreek()
+          ? /(\s?(Ακολουθήστε|Πατήστε)[^.]*\.)/gi
+          : /(\s?(Follow|Click)[^.]*\.)/gi;
+        spanEl.textContent = spanEl.textContent.replace(rx, "");
+      }
+      if (this.isRejected) {
+        this.highlightState(this.currentState, "red");   // κόκκινο στο Qloop
+      } else if (this.isAccepted) {
+        this.highlightState("Qaccept", "green");         // πράσινο στο Qaccept
+      }
     }
+  }
 
-    /* =====================================================
-     *  STEP‑BY‑STEP EXECUTION
-     * ===================================================*/
-    nextPdaStep() {
-        // reset previous highlighting
-        this.resetHighlighting();
+  /* =====================================================
+   *  VISUAL HELPERS
+   * ===================================================*/
+  highlightTransition(t, color = "#2861ff") {
+    if (!t?.transitionId) return;
+    const labelTxt = this.labelText(t);
+    d3.select(`#${t.transitionId}`).selectAll("path, polygon").style("stroke", color);
+    d3.select(`#${t.transitionId}`).selectAll("text").style("fill", function () {
+      return d3.select(this).text() === labelTxt ? color : "black";
+    });
+    this.previousTransition = t.transitionId;
+    this.previousLabel = labelTxt;
+  }
 
-        const t = this.transitionPath[this.transitionIndex];
-        // visualise edge/label
-        this.highlightTransition(t);
+  labelText(t) {
+    const EMPTY = window.EMPTY_STRING;
+    const i = t.input    === EMPTY ? "ε" : t.input;
+    const s = t.stackTop === EMPTY ? "ε" : t.stackTop;
+    const p = t.stackPush=== EMPTY ? "ε" : t.stackPush;
+    return `${i}, ${s} → ${p}`;
+  }
 
-        // stack ops
-        if (t.stackTop !== window.EMPTY_STRING) this.stack.pop();
-        if (t.stackPush !== window.EMPTY_STRING) {
-            const syms = t.stackPush.split("").reverse();
-            this.stack.push(...syms);
-        }
+  highlightState(stateId, color = "#2861ff") {
+    d3.select(`#${stateId}`).select("ellipse").style("fill", color);
+    d3.select(`#${stateId}`).selectAll("text, tspan").style("fill", "white");
+    this.previousState = stateId;
+  }
 
-        // input pointer
-        if (t.input !== window.EMPTY_STRING) this.currentInputIndex++;
-
-        /* update current state **before** visuals */
-        this.currentState = t.toState;
-
-        // visuals
-        this.displayStack();
-        this.updateWordVisualization();
-        this.highlightState(t.toState);
-
-        this.transitionIndex++;
-
-        if (this.transitionIndex >= this.transitionPath.length) {
-            this.nextStepButton.style.display = "none";     // εξαφανίζουμε το Next
-            // Remove any trailing instructions like "Follow the steps..." or "Click 'Next'..." from the message
-            this.displayedMessage = document.getElementById("pda-message");
-            if (this.displayedMessage) {
-                const spanEl = this.displayedMessage.firstElementChild;
-                // Remove sentences starting with "Follow" or "Click" (case-insensitive)
-                const regexp = isGreek()
-                    ? /(\s?(Ακολουθήστε|Πατήστε)[^.]*\.)/gi
-                    : /(\s?(Follow|Click)[^.]*\.)/gi;
-                spanEl.textContent = spanEl.textContent
-                    .replace(regexp, "");
-            }
-            if (this.isRejected) {
-                this.highlightState(this.currentState, "red"); // Qloop κόκκινο
-            } else if (this.isAccepted) {
-                this.highlightState("Qaccept", "green");        // Qaccept πράσινο
-            }
-            // προεραιτικά:  this.displayMessage("Word accepted!", true);
-        }
+  resetHighlighting() {
+    if (this.previousState) {
+      d3.select(`#${this.previousState}`).select("ellipse").style("fill", "white");
+      d3.select(`#${this.previousState}`).selectAll("text, tspan").style("fill", "black");
     }
-
-    /* =====================================================
-     *  VISUAL HELPERS
-     * ===================================================*/
-    highlightTransition(t, color = "#2861ff") {
-        if (!t?.transitionId) return;
-        const labelTxt = this.labelText(t);
-        d3.select(`#${t.transitionId}`).selectAll("path, polygon").style("stroke", color);
-        d3.select(`#${t.transitionId}`).selectAll("text").style("fill", function () {
-            return d3.select(this).text() === labelTxt ? color : "black";
-        });
-        this.previousTransition = t.transitionId;
-        this.previousLabel = labelTxt;
+    if (this.previousTransition) {
+      d3.select(`#${this.previousTransition}`).selectAll("path, polygon").style("stroke", "black");
     }
-
-    labelText(t) {
-        const EMPTY = window.EMPTY_STRING;
-        const i = t.input === EMPTY ? "ε" : t.input;
-        const sTop = t.stackTop === EMPTY ? "ε" : t.stackTop;
-        const sPush = t.stackPush === EMPTY ? "ε" : t.stackPush;
-        return `${i}, ${sTop} → ${sPush}`;
+    if (this.previousTransition && this.previousLabel) {
+      d3.select(`#${this.previousTransition}`)
+        .selectAll("text")
+        .filter((d, i, nodes) => d3.select(nodes[i]).text() === this.previousLabel)
+        .style("fill", "black");
     }
+  }
 
-    highlightState(stateId, color = "#2861ff") {
-        d3.select(`#${stateId}`).select("ellipse").style("fill", color);
-        d3.select(`#${stateId}`).selectAll("text, tspan").style("fill", "white");
-        this.previousState = stateId;
-    }
+  resetAllHighlighting() {
+    d3.selectAll(".node")
+      .select("ellipse")
+      .style("fill", "white")
+      .style("stroke", "black");
+    d3.selectAll(".node").selectAll("text, tspan").style("fill", "black");
+    d3.selectAll(".edge").selectAll("path, polygon").style("stroke", "black");
+    d3.selectAll(".edge").selectAll("text").style("fill", "black");
+  }
 
-    resetHighlighting() {
-        if (this.previousState) {
-            d3.select(`#${this.previousState}`).select("ellipse").style("fill", "white");
-            d3.select(`#${this.previousState}`).selectAll("text, tspan").style("fill", "black");
-        }
-        if (this.previousTransition) {
-            d3.select(`#${this.previousTransition}`).selectAll("path, polygon").style("stroke", "black");
-        }
-        if (this.previousTransition && this.previousLabel) {
-            d3.select(`#${this.previousTransition}`)
-                .selectAll("text")
-                .filter((d, i, nodes) => d3.select(nodes[i]).text() === this.previousLabel)
-                .style("fill", "black");
-        }
-    }
+  /* --- Stack and Word visuals --- */
+  displayStack() {
+    this.stackContainer.innerHTML = "";
+    const lbl = document.createElement("p");
+    lbl.classList.add("stack-label");
+    lbl.textContent = isGreek() ? "Στοίβα:" : "Stack:";
+    this.stackContainer.appendChild(lbl);
+    this.stack.forEach(s => {
+      const div = document.createElement("div");
+      div.classList.add("stack-element", "fs-1");
+      div.textContent = s;
+      this.stackContainer.appendChild(div);
+    });
+  }
 
-    resetAllHighlighting() {
-        d3.selectAll(".node")
-            .select("ellipse")
-            .style("fill", "white")
-            .style("stroke", "black");
-        d3.selectAll(".node").selectAll("text, tspan").style("fill", "black");
-        d3.selectAll(".edge").selectAll("path, polygon").style("stroke", "black");
-        d3.selectAll(".edge").selectAll("text").style("fill", "black");
+  displayWord() {
+    this.wordContainer.innerHTML = "";
+    for (let i = 0; i < this.inputWord.length; i++) {
+      const span = document.createElement("span");
+      span.classList.add("word-letter");
+      if (i === this.currentInputIndex) span.classList.add("current-letter");
+      span.textContent = this.inputWord[i];
+      this.wordContainer.appendChild(span);
     }
+  }
 
-    /* --- Stack and Word visuals --- */
-    displayStack() {
-        this.stackContainer.innerHTML = "";
-        const lbl = document.createElement("p");
-        lbl.classList.add("stack-label");
-        lbl.textContent = isGreek() ? "Στοίβα:" : "Stack:";
-        this.stackContainer.appendChild(lbl);
-        this.stack.forEach(s => {
-            const div = document.createElement("div");
-            div.classList.add("stack-element", "fs-1");
-            div.textContent = s;
-            this.stackContainer.appendChild(div);
-        });
-    }
+  updateWordVisualization() {
+    const letters = document.querySelectorAll(".word-letter");
+    letters.forEach((ltr, idx) => {
+      if (idx === this.currentInputIndex) ltr.classList.add("current-letter");
+      else ltr.classList.remove("current-letter");
+    });
+  }
 
-    displayWord() {
-        this.wordContainer.innerHTML = "";
-        for (let i = 0; i < this.inputWord.length; i++) {
-            const span = document.createElement("span");
-            span.classList.add("word-letter");
-            if (i === this.currentInputIndex) span.classList.add("current-letter");
-            span.textContent = this.inputWord[i];
-            this.wordContainer.appendChild(span);
-        }
-    }
-
-    updateWordVisualization() {
-        const letters = document.querySelectorAll(".word-letter");
-        letters.forEach((ltr, idx) => {
-            if (idx === this.currentInputIndex) ltr.classList.add("current-letter");
-            else ltr.classList.remove("current-letter");
-        });
-    }
-
-    clearMessage() {
-        const m = document.getElementById("pda-message");
-        if (m) m.remove();
-    }
+  clearMessage() {
+    const m = document.getElementById("pda-message");
+    if (m) m.remove();
+  }
 }
