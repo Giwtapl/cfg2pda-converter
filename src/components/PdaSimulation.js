@@ -86,8 +86,8 @@ export class PdaSimulation {
       // Rejected: θα δείξουμε σαφές μήνυμα (χωρίς “Next”).
       const at = res.furthestIndex ?? 0;
       const msg = isGreek()
-        ? `Η λέξη '${this.inputWord || "ε"}' ΔΕΝ αναγνωρίζεται από το αντίστοιχο nPDA. (Μέγιστο ταιριασμένο prefix: ${at} σύμβολ${at===1?"ο":"α"})`
-        : `The string '${this.inputWord || "ε"}' is NOT recognised by the nPDA. (Furthest matched prefix: ${at} symbol${at===1?"":"s"})`;
+        ? `Η λέξη '${this.inputWord || "ε"}' ΔΕΝ αναγνωρίζεται από το αντίστοιχο nPDA.` // (Μέγιστο ταιριασμένο prefix: ${at} σύμβολ${at===1?"ο":"α"})
+        : `The string '${this.inputWord || "ε"}' is NOT recognised by the nPDA.`; // (Furthest matched prefix: ${at} symbol${at===1?"":"s"})
       displayMessage(msg, false, "pda");
 
       // Ενημέρωση visuals
