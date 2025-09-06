@@ -476,12 +476,12 @@ table#stepsTable {
     display: none;
 }
 
-#sharedWordInput {
-  overflow-x: auto;    /* horizontal scrollbar when needed */
-  overflow-y: hidden;  /* no vertical growth */
-  white-space: pre;    /* keep text in one line */
-  resize: none;        /* prevent user from resizing */
-}
+// #sharedWordInput {
+//   overflow-x: auto;    /* horizontal scrollbar when needed */
+//   overflow-y: hidden;  /* no vertical growth */
+//   white-space: pre;    /* keep text in one line */
+//   resize: none;        /* prevent user from resizing */
+// }
 
 /* Utility classes */
 .mb-rem1 {
