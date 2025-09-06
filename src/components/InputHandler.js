@@ -76,6 +76,7 @@ export class InputHandler {
         deletedText.split('').forEach(char => {
             if (isUpperCase(char)) {
                 const rule = this.getRuleByVarLetter(char);
+                if (!rule) return; // δεν υπάρχει κανένας κανόνας για αυτή τη μεταβλητή
                 rule.removeReferer(productionElId);
                 if (currentRuleVarLetter !== char && rule.refererProductions.length === 0) {
                     this.removeRule(rule.index);

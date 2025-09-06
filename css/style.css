@@ -9833,6 +9833,16 @@ table#stepsTable {
 #shared-input-handler {
   display: none; }
 
+#sharedWordInput {
+  overflow-x: auto;
+  /* horizontal scrollbar when needed */
+  overflow-y: hidden;
+  /* no vertical growth */
+  white-space: pre;
+  /* keep text in one line */
+  resize: none;
+  /* prevent user from resizing */ }
+
 /* Utility classes */
 .mb-rem1 {
   margin-bottom: 1rem; }

@@ -153,4 +153,47 @@ export class Rule {
     updateProductionIndex() {
         this.productionIndex = this.productions.length;
     }
+
+    static reindexRules() {
+        Rule.instances.forEach((rule, newIndex) => {
+            const oldIndex = rule.index;
+            rule.index = newIndex + 1;
+            rule.id = `rule-${rule.index}`;
+
+            // Update rule DOM element id
+            const ruleDiv = document.getElementById(`rule-${oldIndex}`);
+            if (ruleDiv) {
+                ruleDiv.id = rule.id;
+            }
+
+            // Update productions container id
+            const productionsDiv = document.getElementById(`production-container-${oldIndex}`);
+            if (productionsDiv) {
+                productionsDiv.id = `production-container-${rule.index}`;
+            }
+
+            // Update plus/minus button ids
+            const plusBtn = document.getElementById(`plus-rule-${oldIndex}`);
+            if (plusBtn) {
+                plusBtn.id = `plus-rule-${rule.index}`;
+            }
+            const minusBtn = document.getElementById(`minus-rule-${oldIndex}`);
+            if (minusBtn) {
+                minusBtn.id = `minus-rule-${rule.index}`;
+            }
+
+            // Update productions
+            rule.productions.forEach((prod) => {
+                // Update the ruleIndex attribute
+                prod.ruleIndex = rule.index;
+                // Update the production element id
+                const oldId = `input-rule-${oldIndex}-prod-${prod.prodIndex}`;
+                const newId = `input-rule-${rule.index}-prod-${prod.prodIndex}`;
+                const prodEl = document.getElementById(oldId);
+                if (prodEl) {
+                    prodEl.id = newId;
+                }
+            });
+        });
+    }
 }

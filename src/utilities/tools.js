@@ -1,3 +1,5 @@
+import { Rule } from '../entities/rule.js';
+
 export const isGreek = () => document.documentElement.lang === "el";
 
 export const isUpperCase = letter => /^[A-Z]$/.test(letter);
@@ -60,6 +62,7 @@ export function inputEventHandler(event) {
             event.target.id
         );
     }
+    Rule.reindexRules();
     currentProduction.text = inputValue;
 }
 
