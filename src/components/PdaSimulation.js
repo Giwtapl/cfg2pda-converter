@@ -111,7 +111,7 @@ export class PdaSimulation {
     // Μηνύματα & visuals
     displayMessage(
       isGreek()
-        ? `Η δοσμένη λέξη αναγνωρίζεται από το nPDA. Πατήστε “Next” για να δείτε τα βήματα.`
+        ? `Η δοσμένη λέξη αναγνωρίζεται από το nPDA. Πατήστε “Επόμενο” για να δείτε τα βήματα.`
         : `The string is recognised by the nPDA. Click “Next” to step through the transitions.`,
       true,
       "pda"
